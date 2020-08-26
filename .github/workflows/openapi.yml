@@ -1,0 +1,22 @@
+name: Open API deployment
+
+on: [push, pull_request]
+
+jobs:
+  lint-api:
+    runs-on: ubuntu-latest
+    steps:
+    - id: step1
+      run: echo "Hello world"
+
+  deploy-api-spec:
+    runs-on: ubuntu-latest
+    steps:
+    - id: step1
+      run: echo "Deploy api spec"
+
+  generate-api-clients:
+    runs-on: ubuntu-latest
+    steps:
+      - id: generate-php-client
+        run: echo "Generate PHP Client"
