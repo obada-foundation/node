@@ -1,0 +1,18 @@
+openapi: 3.0.0
+
+servers:
+  - description: OBADA Staging API
+    url: https://dev.api.obada.io/
+  - description: OBADA Production API
+    url: http://api.obada.io/
+
+info:
+  version: "0.0.1"
+  title: OBADA API
+  termsOfService: 'https://www.obada.io/terms/'
+  contact:
+    name: Obada Dev Team
+    email: techops@obada.io
+    url: 'https://www.obada.io'
+
+paths:
