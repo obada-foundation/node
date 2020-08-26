@@ -10,12 +10,14 @@ jobs:
       run: echo "Hello world"
 
   deploy-api-spec:
+    needs: lint-api
     runs-on: ubuntu-latest
     steps:
     - id: step1
       run: echo "Deploy api spec"
 
   generate-api-clients:
+    needs: lint-api
     runs-on: ubuntu-latest
     steps:
       - id: generate-php-client

@@ -10,18 +10,21 @@ jobs:
         run: echo "Lint code"
 
   build-container:
+    needs: lint-code
     runs-on: ubuntu-latest
     steps:
       - id: step1
         run: echo "Build container"
 
   run-tests:
+    needs: build-container
     runs-on: ubuntu-latest
     steps:
       - id: step1
         run: echo "Running tests"
 
   publish-docker-image:
+    needs: run-tests
     runs-on: ubuntu-latest
     steps:
       - id: step1
