@@ -16,27 +16,53 @@ info:
     url: 'https://www.obada.io'
 
 tags:
-  - name: Obits API
+  - name: Obit
 
 paths:
   /obits:
     get:
       tags:
-        - Obits API
-      description: Search obits by given arguments.
+        - Obit
+      description: Search obits by given filters.
       operationId: searchObits
       parameters:
+        - name: serial_number_hash
+          in: query
+          schema:
+            type: string
+            example: "fe403a1afe16203f4b8bb3a0e72d3e17567897bc15293e4a87b663e441030aea"
+        - name: obit_status
+          in: query
+          schema:
+            type: string
+            enum:
+              - FUNCTIONAL
+              - NON_FUNCTIONAL
+              - DISPOSED
+              - STOLEN
+              - DISABLED_BY_OWNER
+        - name: manufacturer
+          in: query
+          schema:
+            type: string
+            example: "Sony"
+        - name: part_number
+          in: query
+          schema:
+            type: string
+            example: "MWCN2LL/A"
         - name: usn
           in: query
           description: Universal serial number
           schema:
             type: string
-            example: some_usn
+            example: "2zEz-xLJR"
         - name: owner_did
           in: query
           description: OBADA owner DID
           schema:
             type: string
+            example: "did:obada:owner:123456"
         - name: offset
           in: query
           description: Number of records to skip for pagination.
@@ -54,7 +80,7 @@ paths:
             default: 0
       responses:
         "200":
-          description: List of obits received by given arguments.
+          description: List of obits responded by given arguments.
           content:
             application/json:
               schema:
@@ -66,7 +92,7 @@ paths:
                       $ref: "#/components/schemas/Obit"
     post:
       tags:
-        - Obits API
+        - Obit
       description: Creates a new obit.
       operationId: createObit
       requestBody:
@@ -81,31 +107,54 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
 
   /obits/{obit_did}:
+    parameters:
+      - name: obit_did
+        in: path
+        description: The given ObitDID argument
+        required: true
+        schema:
+          type: string
+          example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
+
     get:
       tags:
-        - Obits API
+        - Obit
       description: Shows the information about single Obit by given ObitDID
       operationId: showObit
-      parameters:
-        - name: obit_did
-          in: path
-          description: The given ObitDID argument
-          required: true
-          schema:
-            type: string
-            example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
       responses:
         "200":
           $ref: "#/components/schemas/Obit"
         "404":
           $ref: "#/components/responses/NotFound"
 
-  /obits/{obit_did}/remove:
+    put:
+      tags:
+        - Obit
+      description: Updates Obit by given ObitDID with payload
+      operationId: updateObit
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
     delete:
       tags:
-        - Obits API
-      description: Changes Obit status to deleted/hidden
+        - Obit
+      description: Changes Obit status to DISABLED_BY_OWNER
       operationId: removeObit
+      responses:
+        "200":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /obits/{obit_did}/history:
+    get:
+      tags:
+        - Obit
+      description: Shows the history of changes by given Obit with ObitDID
+      operationId: showObitHistory
       parameters:
         - name: obit_did
           in: path
@@ -116,7 +165,16 @@ paths:
             example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
       responses:
         "200":
-          $ref: "#/components/responses/NoContent"
+          description: Collection of historical changes for given obit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ObitHistory"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -126,6 +184,8 @@ components:
       $ref: "definitions/Obit.yml#/Obit"
     NewObit:
       $ref: "definitions/Obit.yml#/NewObit"
+    ObitHistory:
+      $ref: "definitions/Obit.yml#/ObitHistory"
   responses:
     Created:
       description: The request was successful and the resource was created.

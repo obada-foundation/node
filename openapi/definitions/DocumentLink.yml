@@ -1,0 +1,15 @@
+DocumentLink:
+  description: Document hashlink
+  type: object
+  required:
+    - name
+    - hashlink
+  properties:
+    name:
+      type: string
+      description: Assosiative name of hashlink
+      example: "Link to device wipe report"
+    hashlink:
+      type: string
+      description: Assosiative name of hashlink
+      example: "Link to device wipe report"

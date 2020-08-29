@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - id: step1
-      run: echo "Hello world"
+      run: ls -la
 
   deploy-api-spec:
     needs: lint-api
