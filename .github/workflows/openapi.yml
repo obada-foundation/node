@@ -23,5 +23,14 @@ jobs:
       - id: checkout-code
         uses: actions/checkout@v2
 
+      - id: checkout-php-client
+        uses: actions/checkout@v2
+        with:
+          repository: obada-protocol/php-client-library
+          path: php-client-library
+
+      - id: generate-php-client
+        run: ls -la
+
       - id: generate-php-client
         run: make deploy-php-client
