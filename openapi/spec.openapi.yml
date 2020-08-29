@@ -1,7 +1,7 @@
 openapi: 3.0.0
 
 servers:
-  - description: OBADA Staging API
+  - description: OBADA Staging API 0.0.1
     url: https://dev.api.obada.io/
   - description: OBADA Production API
     url: http://api.obada.io/
