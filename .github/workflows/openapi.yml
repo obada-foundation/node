@@ -28,7 +28,7 @@ jobs:
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-protocol/php-client-library
-          path: php-client-library
+          path: php-api-client
 
       - id: check
         run: ls -la
