@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - uses: actions/checkout@v2
-        - run: |
-          git checkout git@github.com:obada-protocol/php-client-library
+        - run: git checkout git@github.com:obada-protocol/php-client-library
         - run: ls -la
         - run: make deploy-php-client
