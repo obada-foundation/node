@@ -30,8 +30,8 @@ jobs:
           repository: obada-protocol/php-client-library
           path: php-api-client
 
-      - id: check
-        run: ls -la
-
       - id: generate-php-client
-        run: make deploy-php-client
+        run: |
+          git config user.name OBADA TechOps Team
+          git config user.email techops@obada.io
+          make deploy-php-client
