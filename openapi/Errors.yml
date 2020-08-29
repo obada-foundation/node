@@ -1,0 +1,27 @@
+NotFound:
+  description: A typical 404 error.
+  type: object
+  properties:
+    code:
+      type: integer
+      default: 404
+    message:
+      type: string
+      default: The requested resource could not be found.
+
+UnprocessableEntity:
+  description: A typical 422 error.
+  type: object
+  properties:
+    code:
+      type: integer
+      default: 422
+    message:
+      type: string
+      default: The given data was invalid.
+    errors:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string

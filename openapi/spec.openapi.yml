@@ -15,4 +15,133 @@ info:
     email: techops@obada.io
     url: 'https://www.obada.io'
 
+tags:
+  - name: Obits API
+
 paths:
+  /obits:
+    get:
+      tags:
+        - Obits API
+      description: Search obits by given arguments.
+      operationId: searchObits
+      parameters:
+        - name: usn
+          in: query
+          description: Universal serial number
+          schema:
+            type: string
+            example: some_usn
+        - name: owner_did
+          in: query
+          description: OBADA owner DID
+          schema:
+            type: string
+        - name: offset
+          in: query
+          description: Number of records to skip for pagination.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 0
+      responses:
+        "200":
+          description: List of obits received by given arguments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Obit"
+    post:
+      tags:
+        - Obits API
+      description: Creates a new obit.
+      operationId: createObit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewObit"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /obits/{obit_did}:
+    get:
+      tags:
+        - Obits API
+      description: Shows the information about single Obit by given ObitDID
+      operationId: showObit
+      parameters:
+        - name: obit_did
+          in: path
+          description: The given ObitDID argument
+          required: true
+          schema:
+            type: string
+            example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
+      responses:
+        "200":
+          $ref: "#/components/schemas/Obit"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /obits/{obit_did}/remove:
+    delete:
+      tags:
+        - Obits API
+      description: Changes Obit status to deleted/hidden
+      operationId: removeObit
+      parameters:
+        - name: obit_did
+          in: path
+          description: The given ObitDID argument
+          required: true
+          schema:
+            type: string
+            example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
+      responses:
+        "200":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    Obit:
+      $ref: "definitions/Obit.yml#/Obit"
+    NewObit:
+      $ref: "definitions/Obit.yml#/NewObit"
+  responses:
+    Created:
+      description: The request was successful and the resource was created.
+    NoContent:
+      description: The request was successful and no content was returned.
+    BadRequest:
+      description: The request was malformed.
+    NotFound:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: "Errors.yml#/NotFound"
+    UnprocessableEntity:
+      description: The submitted entity could not be processed.
+      content:
+        application/json:
+          schema:
+            $ref: "Errors.yml#/UnprocessableEntity"

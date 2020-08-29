@@ -1,0 +1,91 @@
+NewObit:
+  description: OBADA record.
+  type: object
+  required:
+    - usn
+    - owner_did
+    - obd_did
+    - obit_status
+    - manufacturer
+    - part_number
+    - serial_number_hash
+  properties:
+    usn:
+      type: string
+      description: Universal serial number
+    owner_did:
+      type: string
+      description: Do we need it when we create the obit?
+    obd_did:
+      type: string
+      description: "TODO: discuss with Rohi what does it means"
+    obit_status:
+      type: string
+      description: "TODO: discuss with Rohi available statuses"
+    manufacturer:
+      type: string
+      description: todo
+    part_number:
+      type: string
+      description: todo
+    serial_number_hash:
+      type: string
+      description: todo
+    metadata:
+      type: string
+    doc_links:
+      type: string
+    structured_data:
+      type: string
+
+Obit:
+  description: OBADA record.
+  type: object
+  required:
+    - obit_did
+    - usn
+    - obit_did_versions
+    - owner_did
+    - obd_did
+    - obit_status
+    - manufacturer
+    - part_number
+    - serial_number_hash
+  properties:
+    obit_did:
+      type: string
+      description: OBADA decentralized identifier
+      example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
+    usn:
+      type: string
+      description: Universal serial number
+    obit_did_versions:
+      type: string
+      description: Universal serial number
+    owner_did:
+      type: string
+      description: todo
+    obd_did:
+      type: string
+      description: "TODO: discuss with Rohi what does it means"
+    obit_status:
+      type: string
+      description: "TODO: discuss with Rohi available statuses"
+    manufacturer:
+      type: string
+      description: todo
+    part_number:
+      type: string
+      description: todo
+    serial_number_hash:
+      type: string
+      description: todo
+    metadata:
+      type: string
+    doc_links:
+      type: string
+    structured_data:
+      type: string
+    root_hash:
+      type: string
+
