@@ -32,6 +32,6 @@ jobs:
 
       - id: generate-php-client
         run: |
-          git config user.name OBADA TechOps Team
-          git config user.email techops@obada.io
+          git config --global user.name OBADA TechOps Team
+          git config --global user.email techops@obada.io
           make deploy-php-client
