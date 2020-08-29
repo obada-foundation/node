@@ -1,1 +1,16 @@
 StructureDataRecord:
+  description: A record that represent key/value structure data record
+  type: object
+  required:
+    - key
+    - value
+  properties:
+    key:
+      type: string
+      description: Structure data key
+      example: model
+    value:
+      type: string
+      description: Structure data value
+      example: Dell R740
+
