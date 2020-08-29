@@ -45,5 +45,5 @@ fix-php-client-namespace:
 
 
 deploy-php-client: generate-php-client fix-php-client-namespace
-	cd php-api-client && git add . && git commit -m 'OpenApi contract update' & git push origin master
+	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
 
