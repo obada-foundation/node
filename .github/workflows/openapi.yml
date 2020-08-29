@@ -6,7 +6,7 @@ jobs:
   lint-api:
     runs-on: ubuntu-latest
     steps:
-    - id: Checkout code
+    - id: lint
       run: echo "Perform some linting there"
 
   deploy-api-spec:
@@ -20,10 +20,10 @@ jobs:
     needs: lint-api
     runs-on: ubuntu-latest
     steps:
-      - id: Checkout code
+      - id: checkout-code
         uses: actions/checkout@v2
 
-      - id: Checkout code
+      - id: check-code
         run: ls -la
 
       - id: generate-php-client
