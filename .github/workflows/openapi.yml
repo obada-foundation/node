@@ -20,16 +20,8 @@ jobs:
     needs: lint-api
     runs-on: ubuntu-latest
     steps:
-      - id: checkout-code
-        uses: actions/checkout@v2
-
-      - id: checkout-php-client
-        uses: actions/checkout@v2
-        run: |
+        - uses: actions/checkout@v2
+        - run: |
           git checkout git@github.com:obada-protocol/php-client-library
-
-      - id: check
-        run: ls -la
-
-      - id: generate-php-client
-        run: make deploy-php-client
+        - run: ls -la
+        - run: make deploy-php-client
