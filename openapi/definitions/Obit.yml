@@ -1,5 +1,5 @@
 NewObit:
-  description: New Obit request payload.
+  description: New Obit request body.
   type: object
   required:
     - obit_did
@@ -157,5 +157,11 @@ Obit:
 ObitHistory:
   description: New Obit request payload.
   type: object
+  properties:
+    obit_did:
+      type: string
+      maxLength: 256
+      description: OBADA decentralized identifier (max length Rohi?)
+      example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
 
 

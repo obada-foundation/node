@@ -47,3 +47,8 @@ fix-php-client-namespace:
 deploy-php-client: generate-php-client fix-php-client-namespace
 	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
 
+lint-openapi-spec:
+	docker run \
+      -v $$(pwd)/openapi:/openapi/ \
+      wework/speccy lint /openapi/spec.openapi.yml
+
