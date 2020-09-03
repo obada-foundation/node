@@ -2,9 +2,9 @@ openapi: 3.0.0
 
 servers:
   - description: OBADA Staging API
-    url: https://dev.api.obada.io/
+    url: https://dev.api.obada.io
   - description: OBADA Production API
-    url: http://api.obada.io/
+    url: http://api.obada.io
 
 info:
   version: "0.0.1"
@@ -27,12 +27,14 @@ paths:
       operationId: searchObits
       parameters:
         - name: serial_number_hash
+          description: Query argument that filters by serial number hash
           in: query
           schema:
             type: string
             example: "fe403a1afe16203f4b8bb3a0e72d3e17567897bc15293e4a87b663e441030aea"
         - name: obit_status
           in: query
+          description: Query argument that filters by obit status
           schema:
             type: string
             enum:
@@ -42,11 +44,13 @@ paths:
               - STOLEN
               - DISABLED_BY_OWNER
         - name: manufacturer
+          description: Query argument that filters by manufacturer
           in: query
           schema:
             type: string
             example: "Sony"
         - name: part_number
+          description: Query argument that filters by part number
           in: query
           schema:
             type: string
