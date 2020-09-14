@@ -7,9 +7,9 @@ DocumentLink:
   properties:
     name:
       type: string
-      description: Assosiative name of hashlink
+      description: Associative name of hashlink
       example: "Link to device wipe report"
     hashlink:
       type: string
-      description: Assosiative name of hashlink
+      description: Hashlink
       example: "Link to device wipe report"

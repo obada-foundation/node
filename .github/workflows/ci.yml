@@ -13,7 +13,7 @@ jobs:
     needs: lint-code
     runs-on: ubuntu-latest
     steps:
-      - id: step1
+      - id: build-container
         run: echo "Build container"
 
   run-tests:

@@ -1,3 +1,4 @@
 .idea
 src/vendor
 php-api-client
+docker-compose.yml

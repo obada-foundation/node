@@ -1,14 +1,17 @@
-SHELL := /bin/bash
-.DEFAULT_GOAL := build
+---
+- hosts: all
 
-build:
-  @echo "Installation is done"
+  tasks:
+    - name: "Copy docker-compose.yml"
+      template:
+        src: docker-compose.yml.j2
+        dest: "{{ deployment_path }}/docker-compose.yml"
+        mode: 0644
 
-deploy:
-  @echo "Deployment is done"
-
-deploy-local:
-  @echo "Local deployment is done"
-
-test:
-  @echo "Test is done"
+    - name: "Run `docker-compose up`"
+      docker_compose:
+        project_src: "{{ deployment_path }}"
+        build: no
+        files:
+          - docker-compose.yml
+        recreate: smart

@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  app:
+    image: obada-protocol/server-gateway:dev
+    container_name: gateway
+    restart: always
+    ports:
+      - 80:80
+    networks:
+      - gateway
+    volumes:
+      - ./src:/app
+    depends_on:
+      - db
+  db:
+    image: mysql:8
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: {{ db_password }}
+      MYSQL_DATABASE: gateway
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - gateway
+
+networks:
+  gateway:
+
+volumes:
+  db_data: {}

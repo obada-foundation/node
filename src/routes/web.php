@@ -16,3 +16,8 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->group(['prefix' => 'obits', 'namespace' => '\App\Http\Handlers\Obit'], function() use ($router) {
+    $router->post('/', ['as' => 'obits.create', 'uses' => Create::class]);
+    $router->get('/', ['as' => 'obits.search', 'uses' => Search::class]);
+});

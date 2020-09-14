@@ -8,9 +8,12 @@ use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
+use SecurityRobot\JsonResponseTrait;
 
 class Handler extends ExceptionHandler
 {
+    use JsonResponseTrait;
+
     /**
      * A list of the exception types that should not be reported.
      *
@@ -49,6 +52,10 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+        if ($exception instanceof ValidationException) {
+            return $this->respondValidationErrors($exception->errors());
+        }
+
+        return $this->errorInternalError();
     }
 }

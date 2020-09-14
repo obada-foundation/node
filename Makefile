@@ -1,14 +1,20 @@
-SHELL := /bin/bash
-.DEFAULT_GOAL := build
+PROJECT = obada-protocol/server-gateway
+COMMIT_BRANCH ?= dev
+CONTAINER_IMAGE = $(PROJECT):$(COMMIT_BRANCH)
+CONTAINER_RELEASE_IMAGE = $(PROJECT):master
+CONTAINER_TAG_IMAGE = $(PROJECT):$(COMMIT_TAG)
 
-build:
-	@echo "Installation is done"
+SHELL := /bin/bash
+.DEFAULT_GOAL := help
+
+run-local:
+	docker-compose -f docker-compose.yml up -d --force-recreate
 
 deploy:
 	@echo "Deployment is done"
 
 deploy-local:
-	@echo "Local deployment is done"
+	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
 test:
 	@echo "Test is done"
@@ -43,6 +49,14 @@ fix-php-client-namespace:
 	  -v $$(pwd)/php-api-client:/src \
 	  alpine:3.12 sh -c "sed -i 's|$$DEFAULT_NAMESPACE|$$NEW_NAMESPACE|g' src/README.md"
 
+build-branch:
+	docker build -t $(CONTAINER_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=dev
+
+build-release:
+	docker build -t $(CONTAINER_RELEASE_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=prod
+
+build-tag:
+	docker tag $(CONTAINER_RELEASE_IMAGE) $(CONTAINER_TAG_IMAGE)
 
 deploy-php-client: generate-php-client fix-php-client-namespace
 	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
@@ -52,3 +66,5 @@ lint-openapi-spec:
       -v $$(pwd)/openapi:/openapi/ \
       wework/speccy lint /openapi/spec.openapi.yml
 
+help:
+	@echo "Help here"
