@@ -26,6 +26,7 @@ class Create extends Handler {
 
     /**
      * @param CreateRequest $request
+     * @return \Illuminate\Http\Response
      */
     public function __invoke(CreateRequest $request) {
         $dto = ObitDto::fromRequest($request);

@@ -23,7 +23,7 @@ $app = new Laravel\Lumen\Application(
     dirname(__DIR__)
 );
 
-// $app->withFacades();
+$app->withFacades();
 
 $app->withEloquent();
 
@@ -62,6 +62,7 @@ $app->singleton(
 $app->configure('app');
 $app->configure('database');
 $app->configure('qldb');
+$app->configure('audit');
 
 /*
 |--------------------------------------------------------------------------
@@ -95,10 +96,11 @@ $app->configure('qldb');
 
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
+//$app->register(App\Providers\EventServiceProvider::class);
 $app->register(App\Providers\BlockchainServiceProvider::class);
-$app->register(App\Providers\GatewayServiceProvider::class);
+$app->register(\App\Services\Gateway\GatewayServiceProvider::class);
 $app->register(Pearl\RequestValidate\RequestServiceProvider::class);
+$app->register(OwenIt\Auditing\AuditingServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

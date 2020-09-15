@@ -22,4 +22,8 @@ class ObitDto extends DataTransferObject {
             'modifiedAt' => $request->json('modified_at'),
         ]);
     }
+
+    public function rootHash() {
+        return md5('ddd');
+    }
 }

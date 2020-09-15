@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace App\Services\Gateway\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use OwenIt\Auditing\Auditable as AuditableConcern;
 
-class Obit extends Model {
+class Obit extends Model implements Auditable {
+
+    use AuditableConcern;
 
     const FUNCTIONAL_STATUS = 'FUNCTIONAL';
 
@@ -39,8 +43,4 @@ class Obit extends Model {
     protected $guarded = [];
 
     public $timestamps = false;
-
-    public function setRootHashAttribute($value) {
-        $this['root_hash'] = md5('Hi');
-    }
 }

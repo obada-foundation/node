@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway\Contracts;
 
+use App\Services\Gateway\Models\Obit;
 use App\Services\Gateway\ObitDto;
 
 interface ServiceContract {
@@ -15,9 +16,14 @@ interface ServiceContract {
      */
     public function create(ObitDto $dto);
 
-    public function update(string $obitId);
+    /**
+     * @param string $obitId
+     * @param ObitDto $dto
+     * @return mixed
+     */
+    public function update(string $obitId, ObitDto $dto);
 
-    public function show(string $obitId);
+    public function show(string $obitId): ?Obit;
 
     public function delete(string $obitId);
 

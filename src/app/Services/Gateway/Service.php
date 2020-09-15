@@ -4,24 +4,39 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
+use App\Services\Gateway\Contracts\GatewayRepositoryContract;
+use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Contracts\ServiceContract;
 use App\Services\Gateway\Models\Obit;
 
 class Service implements ServiceContract {
 
-    public function __construct() {
+    /**
+     * @var GatewayRepositoryContract
+     */
+    protected $repository;
 
+    /**
+     * Service constructor.
+     * @param GatewayRepositoryContract $repository
+     */
+    public function __construct(GatewayRepositoryContract $repository) {
+        $this->repository = $repository;
     }
 
-    public function search() {
-        // TODO: Implement search() method.
+    /**
+     * @param array $args
+     * @return \Illuminate\Support\Collection
+     */
+    public function search(array $args = []) {
+        return $this->repository->findBy($args);
     }
 
     /**
      * @param ObitDto $dto
-     * @return mixed|void
+     * @return Obit
      */
-    public function create(ObitDto $dto) {
+    public function create(ObitDto $dto): Obit {
         $obit = new Obit;
         $obit->obit_did           = $dto->obitDID;
         $obit->usn                = $dto->usn;
@@ -31,19 +46,26 @@ class Service implements ServiceContract {
         $obit->part_number        = '';
         $obit->serial_number_hash = '';
         $obit->modified_at        = $dto->modifiedAt;
+        $obit->root_hash          = $dto->rootHash();
         $obit->save();
 
-        dd($obit);
+        event(new RecordCreated($obit));
+
+        return $obit;
     }
 
-    public function update(string $obitId)
+    public function update(string $obitId, ObitDto $dto)
     {
         // TODO: Implement update() method.
     }
 
-    public function show(string $obitId)
+    /**
+     * @param string $obitId
+     * @return Obit
+     */
+    public function show(string $obitId): ?Obit
     {
-        // TODO: Implement show() method.
+        return $this->repository->find($obitId);
     }
 
     public function delete(string $obitId)

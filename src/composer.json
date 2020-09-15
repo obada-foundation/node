@@ -9,6 +9,7 @@
         "aws/aws-sdk-php": "^3.152",
         "ksbomj/json-response": "^0.0.2",
         "laravel/lumen-framework": "^7.0",
+        "owen-it/laravel-auditing": "^11.0",
         "pearl/lumen-request-validate": "^1.5",
         "spatie/data-transfer-object": "^2.5"
     },
