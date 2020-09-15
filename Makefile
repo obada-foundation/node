@@ -1,4 +1,4 @@
-PROJECT = obada-protocol/server-gateway
+PROJECT = obada/server-gateway
 COMMIT_BRANCH ?= dev
 CONTAINER_IMAGE = $(PROJECT):$(COMMIT_BRANCH)
 CONTAINER_RELEASE_IMAGE = $(PROJECT):master
