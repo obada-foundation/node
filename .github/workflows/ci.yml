@@ -13,8 +13,11 @@ jobs:
     needs: lint-code
     runs-on: ubuntu-latest
     steps:
+      - id: checkout-code
+        uses: actions/checkout@v2
+
       - id: build-container
-        run: echo "Build container"
+        run: make build-branch
 
   run-tests:
     needs: build-container
