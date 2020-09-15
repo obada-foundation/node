@@ -19,16 +19,11 @@ jobs:
       - id: build-container
         run: make build-branch
 
-  run-tests:
-    needs: build-container
-    runs-on: ubuntu-latest
-    steps:
-      - id: step1
-        run: echo "Running tests"
+      - id: build-container
+        run: make deploy-local
 
-  publish-docker-image:
-    needs: run-tests
-    runs-on: ubuntu-latest
-    steps:
-      - id: step1
-        run: echo "Publish docker image"
+      - id: run-tests
+        run: make test
+
+      - id: publish-docker-image
+        run: make publish-branch-image

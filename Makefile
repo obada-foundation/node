@@ -17,7 +17,7 @@ deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
 test:
-	@echo "Test is done"
+	docker exec -t
 
 deploy-api-clients: deploy-php-client
 	@echo "Deployment of client libraries was done"
@@ -51,6 +51,9 @@ fix-php-client-namespace:
 
 build-branch:
 	docker build -t $(CONTAINER_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=dev
+
+publish-branch-image:
+	docker push $(CONTAINER_IMAGE)
 
 build-release:
 	docker build -t $(CONTAINER_RELEASE_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=prod
