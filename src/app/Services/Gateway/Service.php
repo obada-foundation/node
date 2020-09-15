@@ -8,13 +8,11 @@ use App\Services\Gateway\Contracts\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Contracts\ServiceContract;
 use App\Services\Gateway\Models\Obit;
+use Exception;
 
 class Service implements ServiceContract {
 
-    /**
-     * @var GatewayRepositoryContract
-     */
-    protected $repository;
+    protected GatewayRepositoryContract $repository;
 
     /**
      * Service constructor.
@@ -26,7 +24,7 @@ class Service implements ServiceContract {
 
     /**
      * @param array $args
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
     public function search(array $args = []) {
         return $this->repository->findBy($args);
@@ -60,21 +58,32 @@ class Service implements ServiceContract {
     }
 
     /**
-     * @param string $obitId
+     * @param string $obitDID
      * @return Obit
      */
-    public function show(string $obitId): ?Obit
+    public function show(string $obitDID): ?Obit
     {
-        return $this->repository->find($obitId);
+        return $this->repository->find($obitDID);
     }
 
     public function delete(string $obitId)
     {
-        // TODO: Implement delete() method.
+        $obit = $this->update($obitId);
     }
 
-    public function history(string $obitId)
+    /**
+     * @param string $obitDID
+     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @throws Exception
+     */
+    public function history(string $obitDID)
     {
-        // TODO: Implement history() method.
+        $obit = $this->repository->find($obitDID);
+
+        if (! $obit) {
+            throw new Exception("Can't fetch the history because obit \"{$obitDID}\" not exists.");
+        }
+
+        return $obit->audits();
     }
 }

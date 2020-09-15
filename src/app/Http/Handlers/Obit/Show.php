@@ -47,12 +47,7 @@ class Show extends Handler {
             'modified_at'        => (string) $obit->modified_at,
             'root_hash'          => (string) $obit->root_hash,
             'qldb_root_hash'     => (string) $obit->qldb_root_hash,
-            'is_synchronized'    => (boolean) $obit->is_synchronized,
-            'history'            => (array) $obit->audits->map(fn ($audit) => [
-                'audit_event' => $audit->audit_event,
-                'old'         => $audit->old,
-                'new'         => $audit->new
-            ])
+            'is_synchronized'    => (boolean) $obit->is_synchronized
         ]);
     }
 }

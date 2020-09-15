@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Gateway\Contracts;
 
 use App\Services\Gateway\Models\Obit;
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface GatewayRepositoryContract {
     /**
      * @param array $args
-     * @return Collection
+     * @return LengthAwarePaginator
      */
-    public function findBy(array $args = []): Collection;
+    public function findBy(array $args = []): LengthAwarePaginator;
 
     /**
      * @param string $obitDID

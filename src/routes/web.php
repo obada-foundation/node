@@ -21,4 +21,5 @@ $router->group(['prefix' => 'obits', 'namespace' => '\App\Http\Handlers\Obit'], 
     $router->post('/', ['as' => 'obits.create', 'uses' => Create::class]);
     $router->get('/', ['as' => 'obits.search', 'uses' => Search::class]);
     $router->get('/{obitDID}', ['as' => 'obits.show', 'uses' => Show::class]);
+    $router->get('/{obitDID}/history', ['as' => 'obits.history', 'uses' => History::class]);
 });
