@@ -19,7 +19,7 @@ jobs:
       - id: build-container
         run: make build-branch
 
-      - id: build-container
+      - id: deploy-local
         run: make deploy-local
 
       - id: run-tests
