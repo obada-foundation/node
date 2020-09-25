@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"context"
-	"github.com/obada-protocol/server-gateway/services/qldb/foundation/web"
-	"github.com/obada-protocol/server-gateway/services/qldb/business/data/obit"
 	"net/http"
+
+	"github.com/obada-protocol/server-gateway/services/qldb/business/data/obit"
+	"github.com/obada-protocol/server-gateway/services/qldb/foundation/web"
 
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/api/trace"
@@ -28,7 +29,7 @@ func(og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return errors.Wrap(err, "decoding new obit")
 	}
 
-	obit, err := og.obit.Create(ctx, v.TraceID, no, v.Now)
+	obit, err := og.obit.Create(ctx, v.TraceID, no)
 	if err != nil {
 		return errors.Wrapf(err, "creating new obit: %+v", no)
 	}
@@ -75,7 +76,7 @@ func(og obitGroup) update(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return errors.Wrap(err, "decoding new obit")
 	}
 
-	obit, err := og.obit.Create(ctx, v.TraceID, no, v.Now)
+	obit, err := og.obit.Create(ctx, v.TraceID, no)
 	if err != nil {
 		return errors.Wrapf(err, "creating new obit: %+v", no)
 	}
@@ -92,15 +93,10 @@ func(og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return web.NewShutdownError("web value missing from context")
 	}
 
-	var no obit.NewObit
-	if err := web.Decode(r, &no); err != nil {
-		return errors.Wrap(err, "decoding new obit")
-	}
-
-	obit, err := og.obit.Create(ctx, v.TraceID, no, v.Now)
+	obits, err := og.obit.FindBy(ctx, v.TraceID)
 	if err != nil {
-		return errors.Wrapf(err, "creating new obit: %+v", no)
+		return err
 	}
 
-	return web.Respond(ctx, w, obit, http.StatusCreated)
+	return web.Respond(ctx, w, obits, http.StatusCreated)
 }

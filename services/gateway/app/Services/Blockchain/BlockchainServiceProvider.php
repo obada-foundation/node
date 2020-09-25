@@ -14,18 +14,6 @@ use Illuminate\Support\ServiceProvider;
 class BlockchainServiceProvider extends ServiceProvider {
 
     public function register() {
-        $this->app->singleton(QLDBClient::class, function() {
-            $qldb = new QLDBClient(config('qldb.connection'));
-
-            return $qldb;
-        });
-
-        $this->app->singleton(QLDBSessionClient::class, function() {
-            $session = new QLDBSessionClient(config('qldb.connection'));
-
-            return $session;
-        });
-
         $this->app->bind(ServiceContract::class, Service::class);
     }
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/api/trace"
 	"log"
-	"time"
 )
 
 var (
@@ -39,11 +38,25 @@ func New(log *log.Logger, qldb *qldbdriver.QLDBDriver) Service {
 
 // Create adds a Obit to the QLDB. It returns the created Obit with
 // fields like ID and DateCreated populated.
-func (s Service) Create(ctx context.Context, traceID string, no NewObit, now time.Time) (Obit, error) {
+func (s Service) Create(ctx context.Context, traceID string, no NewObit) (Obit, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.create")
 	defer span.End()
 
+	const q = "INSERT INTO Obits ?"
+
+	s.log.Printf("%s : %s : query : %s", traceID, "obit.Create",
+		database.Log(q, no),
+	)
+
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		return txn.Execute(q, no)
+	})
+
 	var o Obit
+
+	if err != nil {
+		return o, errors.Wrap(err, "creating obit")
+	}
 
 	return o, nil
 }
@@ -93,6 +106,19 @@ func (s Service) FindById(ctx context.Context, traceID string, obitDID string) (
 	obit = ob.(Obit)
 
 	return obit, nil
+}
+
+func (s Service) FindBy(ctx context.Context, traceID string) ([]Obit, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.search")
+	defer span.End()
+
+	const q = "SELECT * FROM Obits"
+
+	s.log.Printf("%s : %s : query : %s", traceID, "obit.FindById",
+		database.Log(q),
+	)
+
+	return nil, nil
 }
 
 func (s Service) Update(ctx context.Context, traceID string, obitId string) (*Obit, error) {
