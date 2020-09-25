@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	log := log.New(os.Stdout, "QLDB :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	log := log.New(os.Stdout, "QLDB-API :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 
 	if err := run(log); err != nil {
 		log.Println(err)
@@ -54,10 +54,10 @@ func run(log *log.Logger) error {
 			Probability float64 `conf:"default:0.05"`
 		}
 		QLDB struct {
-			Region   string `conf:default:us-east-1`
-			Database string `conf:default:obada`
-			Key      string `conf`
-			Secret   string `conf`
+			Region   string `conf:"default:us-east-1,env:REGION"`
+			Database string `conf:"default:obada,env:DATABASE"`
+			Key      string `conf:"env:KEY,noprint"`
+			Secret   string `conf:"env:SECRET,noprint"`
 		}
 	}
 	cfg.Version.SVN = build

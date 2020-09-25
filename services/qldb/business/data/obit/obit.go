@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/amzn/ion-go/ion"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
+	"github.com/obada-protocol/server-gateway/services/qldb/foundation/database"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/api/trace"
 	"log"
@@ -23,14 +24,14 @@ var (
 )
 
 // Obit manages the set of API's for obit access.
-type Obit struct {
+type Service struct {
 	qldb *qldbdriver.QLDBDriver
 	log *log.Logger
 }
 
 // New constructs a Obit for api access.
-func New(log *log.Logger, qldb *qldbdriver.QLDBDriver) Obit {
-	return Obit{
+func New(log *log.Logger, qldb *qldbdriver.QLDBDriver) Service {
+	return Service{
 		qldb: qldb,
 		log: log,
 	}
@@ -38,22 +39,28 @@ func New(log *log.Logger, qldb *qldbdriver.QLDBDriver) Obit {
 
 // Create adds a Obit to the QLDB. It returns the created Obit with
 // fields like ID and DateCreated populated.
-func (o Obit) Create(ctx context.Context, traceID string, no NewObit, now time.Time) (Info, error) {
+func (s Service) Create(ctx context.Context, traceID string, no NewObit, now time.Time) (Obit, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.create")
 	defer span.End()
 
-	var i Info
+	var o Obit
 
-	return i, nil
+	return o, nil
 }
 
 
-func (o Obit) FindById(ctx context.Context, traceID string, obitDID string) (Obit, error) {
+func (s Service) FindById(ctx context.Context, traceID string, obitDID string) (Obit, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.show")
 	defer span.End()
 
-	ob, err := o.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		result, err := txn.Execute("SELECT * FROM Obits WHERE ObitDID = ?", obitDID)
+	const q = "SELECT * FROM Obits WHERE ObitDID = ?"
+
+	s.log.Printf("%s : %s : query : %s", traceID, "obit.FindById",
+		database.Log(q, obitDID),
+	)
+
+	ob, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		result, err := txn.Execute(q, obitDID)
 		if err != nil {
 			return nil, err
 		}
@@ -74,24 +81,23 @@ func (o Obit) FindById(ctx context.Context, traceID string, obitDID string) (Obi
 	})
 
 	var obit Obit
-	obit = ob.(Obit)
 
 	if err != nil {
-		return obit, err
+		if err.Error() == "no more values" {
+			return obit, ErrNotFound
+		}
+
+		return obit, errors.Wrap(err, "selecting single obit")
 	}
+
+	obit = ob.(Obit)
 
 	return obit, nil
 }
 
-func (o Obit) Update(ctx context.Context, traceID string, obitId string) (*Obit, error) {
+func (s Service) Update(ctx context.Context, traceID string, obitId string) (*Obit, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.update")
 	defer span.End()
 
 	return nil, nil
 }
-
-/**
-func (o Obit) Search(ctx context.Context, traceID string) ([]Obit, error) {
-	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.search")
-	defer span.End()
-}**/

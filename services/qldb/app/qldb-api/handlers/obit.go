@@ -11,7 +11,7 @@ import (
 )
 
 type obitGroup struct {
-	obit obit.Obit
+	obit obit.Service
 }
 
 func(og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -46,19 +46,19 @@ func(og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 
 	params := web.Params(r)
-	obit, err := og.obit.FindById(ctx, v.TraceID, params["obitDID"])
+	o, err := og.obit.FindById(ctx, v.TraceID, params["obitDID"])
 	if err != nil {
 		switch err {
-		//case obit.ErrInvalidID:
-		//	return web.NewRequestError(err, http.StatusBadRequest)
-		//case obit.ErrNotFound:
-		//	return web.NewRequestError(err, http.StatusNotFound)
+		case obit.ErrInvalidID:
+			return web.NewRequestError(err, http.StatusBadRequest)
+		case obit.ErrNotFound:
+			return web.NewRequestError(err, http.StatusNotFound)
 		default:
 			return errors.Wrapf(err, "ID: %s", params["id"])
 		}
 	}
 
-	return web.Respond(ctx, w, obit, http.StatusOK)
+	return web.Respond(ctx, w, o, http.StatusOK)
 }
 
 func(og obitGroup) update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
