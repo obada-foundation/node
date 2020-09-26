@@ -1,8 +1,12 @@
-PROJECT = obada/server-gateway
+GATEWAY_PROJECT = obada/server-gateway
+QLDB_PROJECT = obada/qldb
 COMMIT_BRANCH ?= dev
-CONTAINER_IMAGE = $(PROJECT):$(COMMIT_BRANCH)
-CONTAINER_RELEASE_IMAGE = $(PROJECT):master
-CONTAINER_TAG_IMAGE = $(PROJECT):$(COMMIT_TAG)
+GATEWAY_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_BRANCH)
+GATEWAY_RELEASE_IMAGE = $(GATEWAY_PROJECT):master
+GATEWAY_TAG_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_TAG)
+QLDB_IMAGE = $(QLDB_PROJECT):$(COMMIT_BRANCH)
+QLDB_RELEASE_IMAGE = $(QLDB_PROJECT):master
+QLDB_TAG_IMAGE = $(QLDB_PROJECT):$(COMMIT_TAG)
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
@@ -49,17 +53,29 @@ fix-php-client-namespace:
 	  -v $$(pwd)/php-api-client:/src \
 	  alpine:3.12 sh -c "sed -i 's|$$DEFAULT_NAMESPACE|$$NEW_NAMESPACE|g' src/README.md"
 
-build-branch:
-	docker build -t $(CONTAINER_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=dev
+build-gateway-branch:
+	docker build -t $(GATEWAY_IMAGE) -f docker/gateway/Dockerfile . --build-arg APP_ENV=dev
 
-publish-branch-image:
-	docker push $(CONTAINER_IMAGE)
+build-qldb-branch:
+	docker build -t $(QLDB_IMAGE) -f docker/qldb/Dockerfile .
 
-build-release:
-	docker build -t $(CONTAINER_RELEASE_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=prod
+publish-branch-image-gateway:
+	docker push $(GATEWAY_IMAGE)
 
-build-tag:
-	docker tag $(CONTAINER_RELEASE_IMAGE) $(CONTAINER_TAG_IMAGE)
+publish-branch-image-qldb:
+	docker push $(QLDB_IMAGE)
+
+build-gateway-release:
+	docker build -t $(GATEWAY_RELEASE_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=prod
+
+build-qldb-release:
+	docker build -t $(QLDB_RELEASE_IMAGE) -f docker/qldb/Dockerfile .
+
+build-gateway-tag:
+	docker tag $(GATEWAY_RELEASE_IMAGE) $(GATEWAY_TAG_IMAGE)
+
+build-qldb-tag:
+	docker tag $(QLDB_RELEASE_IMAGE) $(QLDB_TAG_IMAGE)
 
 deploy-php-client: generate-php-client fix-php-client-namespace
 	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master

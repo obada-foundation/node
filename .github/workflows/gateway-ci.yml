@@ -1,4 +1,4 @@
-name: Continues Integration
+name: Continues Integration for Gateway API
 
 on: [push, pull_request]
 
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
 
       - id: build-container
-        run: make build-branch
+        run: make build-gateway-branch
 
       - id: deploy-local
         run: make deploy-local
@@ -26,4 +26,4 @@ jobs:
         run: make test
 
       - id: publish-docker-image
-        run: make publish-branch-image
+        run: make publish-branch-image-gateway
