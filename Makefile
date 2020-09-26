@@ -14,8 +14,11 @@ SHELL := /bin/bash
 run-local:
 	docker-compose -f docker-compose.yml up -d --force-recreate
 
-deploy:
-	@echo "Deployment is done"
+deploy-production:
+	ansible-playbook deployment/playbook.yml --limit api.obada.io
+
+deploy-staging:
+	ansible-playbook deployment/playbook.yml --limit dev.api.obada.io
 
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
