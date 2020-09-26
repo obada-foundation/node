@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Services\Blockchain;
 
 use App\Services\Blockchain\QLDB\Driver;
+use App\Services\Blockchain\Events\RecordCreated;
+use Throwable;
+use Illuminate\Support\Facades\Log;
 
 class Service implements ServiceContract {
 
@@ -22,8 +25,19 @@ class Service implements ServiceContract {
      * @param array $obit
      */
     public function create(array $obit) {
-        $r = $this->driver->create($obit);
+        try {
+            $qldbObit = $this->driver->create($obit);
+        } catch (Throwable $t) {
+            Log::error(
+                "Cannot submit obit: {$obit['obit_did']} to QLDB",
+                [
+                    'obit'      => $obit,
+                    'exception' => $t->getTraceAsString()
+                ]
+            );
+        }
 
+        event(new RecordCreated($qldbObit));
     }
 
     /**

@@ -28,4 +28,6 @@ interface ServiceContract {
     public function delete(string $obitId);
 
     public function history(string $obitId);
+
+    public function commit(string $obitDID);
 }

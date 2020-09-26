@@ -12,6 +12,10 @@ class Obit extends Model implements Auditable {
 
     use AuditableConcern;
 
+    const SYNCHRONIZED = 1;
+
+    const NOT_SYNCHRONIZED = 0;
+
     const FUNCTIONAL_STATUS = 'FUNCTIONAL';
 
     const NON_FUNCTIONAL_STATUS = 'NON_FUNCTIONAL';

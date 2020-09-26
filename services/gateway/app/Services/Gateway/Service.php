@@ -8,6 +8,8 @@ use App\Services\Gateway\Repositories\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Models\Obit;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class Service implements ServiceContract {
 
@@ -60,6 +62,7 @@ class Service implements ServiceContract {
         $obit->parent_id          = optional(Obit::orderBy('id', 'DESC')->first())->id;
         $obit->obit_did           = $dto->obitDID;
         $obit->usn                = $dto->usn;
+        $obit->obit_status        = $dto->obitStatus;
         $obit->owner_did          = '';
         $obit->obd_did            = '';
         $obit->manufacturer       = $dto->manufacturer;
@@ -103,5 +106,26 @@ class Service implements ServiceContract {
         }
 
         return $obit->audits();
+    }
+
+    /**
+     * @param string $obitDID
+     * @throws Throwable
+     */
+    public function commit(string $obitDID) {
+        dd($obitDID);
+        $obit = $this->repository->find($obitDID);
+
+        if (! $obit) {
+            throw new Exception("Cannot commit. Given obit: \"{$obitDID}\" not exists.");
+        }
+
+        try {
+            $obit->update(['is_synchronized' => Obit::SYNCHRONIZED]);
+        } catch (Throwable $t) {
+            Log::error("Cannot commit gateway obit record", [$t]);
+
+            throw $t;
+        }
     }
 }

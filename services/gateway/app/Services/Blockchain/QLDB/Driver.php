@@ -4,14 +4,50 @@ declare(strict_types=1);
 
 namespace App\Services\Blockchain\QLDB;
 
-use App\Services\Blockchain\Ion;
-use Aws\QLDBSession\QLDBSessionClient;
+use GuzzleHttp\Client;
+use Throwable;
+use Illuminate\Support\Facades\Log;
 
 class Driver  {
 
-    protected string $sessionToken;
+    protected Client $client;
 
-    public function create(array $obit) {
+    public function __construct() {
+        $this->client = new Client(['base_uri' => 'http://qldb:3000/v1/']);
+    }
 
+    /**
+     * @param array $obit
+     * @return array
+     * @throws Throwable
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function create(array $obit): array {
+        try {
+            $response = $this->client->post(
+                'obits',
+                ['json' => [
+                    'obit_did'           => $obit['obit_did'],
+                    'usn'                => $obit['usn'],
+                    'obit_did_versions'  => '',
+                    'owner_did'          => '',
+                    'obd_did'            => '',
+                    'serial_number_hash' => $obit['serial_number_hash'],
+                    'part_number'        => $obit['part_number'],
+                    'manufacturer'       => $obit['manufacturer'],
+                    'root_hash'          => $obit['root_hash'],
+                    'obit_status'        => $obit['obit_status'],
+                    'modified_at'        => $obit['modified_at'],
+                    'metadata'           => [],
+                    'doc_links'          => [],
+                    'structured_data'    => []
+                ]]
+            );
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (Throwable $t) {
+            Log::error($t->getMessage(), [$t]);
+            throw $t;
+        }
     }
 }

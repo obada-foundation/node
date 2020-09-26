@@ -24,6 +24,8 @@ class ObitDto extends DataTransferObject {
 
     public string $partNumber = "";
 
+    public string $obitStatus = "";
+
     public ?ObitId $obit;
 
     /**
@@ -50,6 +52,7 @@ class ObitDto extends DataTransferObject {
             'serialNumberHash' => $request->json('serial_number_hash'),
             'manufacturer'     => $request->json('manufacturer'),
             'partNumber'       => $request->json('part_number'),
+            'obitStatus'       => $request->json('obit_status'),
         ]);
     }
 

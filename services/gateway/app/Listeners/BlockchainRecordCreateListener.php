@@ -2,12 +2,12 @@
 
 namespace App\Listeners;
 
-use App\Services\Gateway\Events\RecordCreated;
+use App\Services\Blockchain\Events\RecordCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Services\Blockchain\ServiceContract;
+use App\Services\Gateway\ServiceContract;
 
-class GatewayRecordCreateListener
+class BlockchainRecordCreateListener
 {
     protected ServiceContract $service;
 
@@ -15,16 +15,14 @@ class GatewayRecordCreateListener
      * GatewayRecordCreateListener constructor.
      * @param ServiceContract $service
      */
-    public function __construct(ServiceContract $service)
-    {
+    public function __construct(ServiceContract $service) {
         $this->service = $service;
     }
 
     /**
      * @param RecordCreated $event
      */
-    public function handle(RecordCreated $event)
-    {
-        $this->service->create($event->obit->toArray());
+    public function handle(RecordCreated $event) {
+        $this->service->commit($event->obit['obit_did']);
     }
 }
