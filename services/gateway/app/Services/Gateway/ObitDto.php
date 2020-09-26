@@ -67,7 +67,7 @@ class ObitDto extends DataTransferObject {
         $rules = [
             'obit_did'           => ['required', new ObitIntegrity($this->obit)],
             'manufacturer'       => 'required',
-            'usn'                => 'required',
+            'usn'                => 'required|in:' . $this->obit->toUsn(),
             'modified_at'        => 'required',
             'serial_number_hash' => 'required',
             'part_number'        => 'required',
@@ -75,9 +75,5 @@ class ObitDto extends DataTransferObject {
         ];
 
         Validator::make($data, $rules)->validate();
-    }
-
-    public function rootHash() {
-        return md5('ddd');
     }
 }

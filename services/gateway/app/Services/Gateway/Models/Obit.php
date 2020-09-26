@@ -43,4 +43,8 @@ class Obit extends Model implements Auditable {
     protected $guarded = [];
 
     public $timestamps = false;
+
+    public function parent() {
+        return $this->hasOne(Obit::class, 'parent_id', 'id');
+    }
 }

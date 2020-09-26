@@ -31,6 +31,8 @@ services:
   app:
     image: obada/server-gateway:dev
     container_name: gateway
+    volumes:
+      - ./etc/.env:/app/.env
     restart: always
     networks:
       - backend

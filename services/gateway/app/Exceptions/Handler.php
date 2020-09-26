@@ -50,15 +50,10 @@ class Handler extends ExceptionHandler
      *
      * @throws \Throwable
      */
-    public function render($request, Throwable $exception)
-    {
+    public function render($request, Throwable $exception) {
         if ($exception instanceof ValidationException) {
             return $this->respondValidationErrors($exception->errors());
         }
-
-        dd($exception->getMessage());
-
-        dd($exception->getTraceAsString());
 
         return $this->errorInternalError();
     }

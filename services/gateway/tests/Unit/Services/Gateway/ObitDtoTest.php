@@ -81,7 +81,7 @@ class ObitDtoTest extends TestCase {
             $this->assertInstanceOf(ValidationException::class, $t);
             $this->assertEquals(
                 $t->errors(),
-                ['obit_did' => ['Integrity of obit id is broken.']]
+                ['usn' => ['The selected usn is invalid.'], 'obit_did' => ['Integrity of obit id is broken.']]
             );
         }
     }

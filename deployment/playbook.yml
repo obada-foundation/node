@@ -17,7 +17,13 @@
     - name: "Copy nginx service file"
       template:
         src: etc/nginx/service.conf.j2
-        dest: "{{ deployment_path }}/etc/nginx/service.conf"
+        dest: "{{ config_path }}/nginx/service.conf"
+        mode: 0644
+
+    - name: "Copy Laravel environment file"
+      template:
+        src: env.j2
+        dest: "{{ config_path }}/.env"
         mode: 0644
 
     - name: "Copy docker-compose.yml"
@@ -30,6 +36,14 @@
       docker_compose:
         project_src: "{{ deployment_path }}"
         build: no
+        pull: yes
         files:
           - docker-compose.yml
         recreate: smart
+
+    - name: "Execute database migrations"
+      shell: |
+        docker exec gateway sh -l -c "php artisan migrate -n --force "
+      register: migrations
+
+    - debug: msg="{{ migrations.stdout }}"

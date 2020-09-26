@@ -5,7 +5,7 @@ namespace App\Listeners;
 use App\Services\Gateway\Events\RecordCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Services\Blockchain\Contracts\ServiceContract;
+use App\Services\Blockchain\ServiceContract;
 
 class GatewayRecordCreateListener
 {

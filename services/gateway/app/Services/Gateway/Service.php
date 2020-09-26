@@ -22,6 +22,28 @@ class Service implements ServiceContract {
     }
 
     /**
+     * @param ObitDto $dto
+     * @return string
+     */
+    public function buildRootHash(ObitDto $dto): string {
+        $lastObit = Obit::orderBy('id', 'DESC')->first();
+
+        $parentRootHash = $lastObit ? $lastObit->root_hash : null;
+
+        $hashedData = hash('sha256', sprintf(
+            '%s%s%s%s%s%s',
+            $dto->obitDID,
+            $dto->usn,
+            $dto->manufacturer,
+            $dto->partNumber,
+            $dto->serialNumberHash,
+            $dto->modifiedAt
+        ));
+
+        return hash('sha256', $parentRootHash . $hashedData);
+    }
+
+    /**
      * @param array $args
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
@@ -35,6 +57,7 @@ class Service implements ServiceContract {
      */
     public function create(ObitDto $dto): Obit {
         $obit = new Obit;
+        $obit->parent_id          = optional(Obit::orderBy('id', 'DESC')->first())->id;
         $obit->obit_did           = $dto->obitDID;
         $obit->usn                = $dto->usn;
         $obit->owner_did          = '';
@@ -43,7 +66,7 @@ class Service implements ServiceContract {
         $obit->part_number        = $dto->partNumber;
         $obit->serial_number_hash = $dto->serialNumberHash;
         $obit->modified_at        = $dto->modifiedAt;
-        $obit->root_hash          = $dto->rootHash();
+        $obit->root_hash          = $this->buildRootHash($dto);
         $obit->save();
 
         event(new RecordCreated($obit));

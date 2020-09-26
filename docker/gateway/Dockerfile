@@ -34,6 +34,8 @@ COPY docker/gateway/etc/supervisord.conf /etc/supervisord.conf
 
 COPY --from=composer /var/www/ /app
 
+RUN chown -R www-data:www-data /app
+
 STOPSIGNAL SIGQUIT
 
 CMD ["/usr/bin/supervisord"]
