@@ -1,32 +1,81 @@
 version: "3.7"
 
 services:
+  nginx:
+    image: umputun/nginx-le:latest
+    hostname: nginx
+    restart: always
+    container_name: nginx
+
+    logging:
+      driver: json-file
+      options:
+          max-size: "10m"
+          max-file: "5"
+
+    volumes:
+        - ./etc/ssl:/etc/nginx/ssl
+        - ./etc/nginx/service.conf:/etc/nginx/service.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - frontend
+
+    environment:
+      - TZ=America/Chicago
+      - LETSENCRYPT=true
+      - LE_EMAIL=ksbomj@gmail.com
+      - LE_FQDN=dev.api.obada.io
+
   app:
-    image: obada-protocol/server-gateway:dev
+    image: obada/server-gateway:dev
     container_name: gateway
     restart: always
-    ports:
-      - 80:80
     networks:
-      - gateway
-    volumes:
-      - ./src:/app
-    depends_on:
-      - db
+      - backend
+      - frontend
+
+  zipkin:
+    image: openzipkin/zipkin:2.21
+    container_name: zipkin
+    networks:
+      - backend
+    ports:
+      - 127.0.0.1:9411:9411
+
+  qldb:
+    image: obada/qldb:dev
+    container_name: qldb
+    restart: always
+    environment:
+      - QLDB_KEY={{ qldb_key }}
+      - QLDB_SECRET={{ qldb_secret }}
+      - QLDB_REGION={{ qldb_region }}
+      - QLDB_DATABASE={{ qldb_database }}
+    ports:
+      - 127.0.0.1:3000:3000
+      - 127.0.0.1:4000:4000
+    networks:
+      - backend
+
   db:
     image: mysql:8
     container_name: db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: {{ db_password }}
-      MYSQL_DATABASE: gateway
+      - MYSQL_ROOT_PASSWORD={{ db_password }}
+      - MYSQL_DATABASE=gateway
+    ports:
+      - 127.0.0.1:3306:3303
     volumes:
       - db_data:/var/lib/mysql
     networks:
-      - gateway
+      - backend
 
 networks:
-  gateway:
+  backend:
+  frontend:
 
 volumes:
   db_data: {}

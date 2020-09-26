@@ -1,7 +1,25 @@
 ---
 - hosts: all
 
+  vars:
+    deployment_path: .
+    config_path: "{{ deployment_path }}/etc"
+
   tasks:
+    - name: Create config directories
+      file:
+        path: "{{ config_path }}/{{ item }}"
+        state: directory
+      tags:
+        - docker-compose
+      loop: [ "nginx" ]
+
+    - name: "Copy nginx service file"
+      template:
+        src: etc/nginx/service.conf.j2
+        dest: "{{ deployment_path }}/etc/nginx/service.conf"
+        mode: 0644
+
     - name: "Copy docker-compose.yml"
       template:
         src: docker-compose.yml.j2
