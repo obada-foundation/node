@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Obit;
 
+use App\Services\Gateway\Models\Obit;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use Laravel\Lumen\Testing\WithoutEvents;
 use Tests\TestCase;
-use Illuminate\Support\Facades\Artisan;
 
 class ShowTest extends TestCase {
 
@@ -36,11 +36,9 @@ class ShowTest extends TestCase {
      * @test
      */
     public function it_returns_a_genesis_record() {
-        Artisan::call('db:seed', ['--class' => 'GenesisSeeder']);
+        $obit = factory(Obit::class)->create();
 
-        $genesisDID = 'did:obada:' . sha1('genesis');
-
-        $this->get(route('obits.show', ['obitDID' => $genesisDID]));
+        $this->get(route('obits.show', ['obitDID' => $obit->obit_did]));
 
         $this->seeStatusCode(200)
             ->seeJsonStructure([
@@ -62,7 +60,7 @@ class ShowTest extends TestCase {
                 'usn'
             ])
             ->seeJson([
-                'obit_did' => $genesisDID
+                'obit_did' => $obit->obit_did
             ]);
     }
 }

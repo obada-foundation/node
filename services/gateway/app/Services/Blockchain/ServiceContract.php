@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Blockchain\Contracts;
+namespace App\Services\Blockchain;
 
 interface ServiceContract {
     public function create(array $obit);

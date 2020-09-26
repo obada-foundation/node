@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Handlers\Obit;
 
 use App\Http\Handlers\Handler;
-use App\Services\Gateway\Contracts\ServiceContract;
+use App\Services\Gateway\ServiceContract;
 use App\Http\Requests\Obit\CreateRequest;
 use App\Services\Gateway\ObitDto;
 

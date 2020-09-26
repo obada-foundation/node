@@ -14,9 +14,13 @@ class CreateRequest extends RequestAbstract {
 
     public function rules() {
         return [
-            'obit_did'    => 'required',
-            'usn'         => 'required',
-            'modified_at' => 'required|date'
+            'obit_did'           => 'required',
+            'owner_did'          => 'required',
+            'manufacturer'       => 'required',
+            'serial_number_hash' => 'required',
+            'part_number'        => 'required',
+            'usn'                => 'required',
+            'modified_at'        => 'required|date'
         ];
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Obit;
 
+use App\Services\Gateway\Models\Obit;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Lumen\Testing\DatabaseTransactions;
 use Laravel\Lumen\Testing\WithoutEvents;
@@ -17,9 +18,7 @@ class SearchTest extends TestCase {
      * @test
      */
     public function it_returns_correct_response_output() {
-        Artisan::call('db:seed', ['--class' => 'GenesisSeeder']);
-
-        $genesisDID = 'did:obada:' . sha1('genesis');
+        $obit = factory(Obit::class)->create();
 
         $this->get(route('obits.search'));
 
@@ -44,7 +43,7 @@ class SearchTest extends TestCase {
             ]
         ])
         ->seeJsonContains([
-            'obit_did' => $genesisDID,
+            'obit_did' => $obit->obit_did,
         ]);
     }
 }

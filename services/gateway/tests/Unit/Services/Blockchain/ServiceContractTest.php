@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Services\Blockchain\Contracts;
+namespace Tests\Unit\Services\Blockchain;
 
-use App\Services\Blockchain\Contracts\ServiceContract;
+use App\Services\Blockchain\ServiceContract;
 use Tests\TestCase;
 
 class ServiceContractTest extends TestCase {

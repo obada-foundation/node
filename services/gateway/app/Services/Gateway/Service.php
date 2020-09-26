@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
-use App\Services\Gateway\Contracts\GatewayRepositoryContract;
+use App\Services\Gateway\Repositories\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
-use App\Services\Gateway\Contracts\ServiceContract;
 use App\Services\Gateway\Models\Obit;
 use Exception;
 
@@ -40,9 +39,9 @@ class Service implements ServiceContract {
         $obit->usn                = $dto->usn;
         $obit->owner_did          = '';
         $obit->obd_did            = '';
-        $obit->manufacturer       = '';
-        $obit->part_number        = '';
-        $obit->serial_number_hash = '';
+        $obit->manufacturer       = $dto->manufacturer;
+        $obit->part_number        = $dto->partNumber;
+        $obit->serial_number_hash = $dto->serialNumberHash;
         $obit->modified_at        = $dto->modifiedAt;
         $obit->root_hash          = $dto->rootHash();
         $obit->save();
@@ -52,8 +51,7 @@ class Service implements ServiceContract {
         return $obit;
     }
 
-    public function update(string $obitId, ObitDto $dto)
-    {
+    public function update(string $obitId, ObitDto $dto) {
         // TODO: Implement update() method.
     }
 
@@ -61,13 +59,11 @@ class Service implements ServiceContract {
      * @param string $obitDID
      * @return Obit
      */
-    public function show(string $obitDID): ?Obit
-    {
+    public function show(string $obitDID): ?Obit {
         return $this->repository->find($obitDID);
     }
 
-    public function delete(string $obitId)
-    {
+    public function delete(string $obitId) {
         $obit = $this->update($obitId);
     }
 
@@ -76,8 +72,7 @@ class Service implements ServiceContract {
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      * @throws Exception
      */
-    public function history(string $obitDID)
-    {
+    public function history(string $obitDID) {
         $obit = $this->repository->find($obitDID);
 
         if (! $obit) {

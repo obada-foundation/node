@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Gateway\Contracts;
+namespace App\Services\Gateway\Repositories;
 
 use App\Services\Gateway\Models\Obit;
 use Illuminate\Pagination\LengthAwarePaginator;

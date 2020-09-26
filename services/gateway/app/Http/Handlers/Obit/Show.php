@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Handlers\Obit;
 
 use App\Http\Handlers\Handler;
-use App\Services\Gateway\Contracts\ServiceContract;
+use App\Services\Gateway\ServiceContract;
 
 class Show extends Handler {
 

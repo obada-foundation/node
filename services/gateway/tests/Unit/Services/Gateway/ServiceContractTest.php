@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Services\Gateway\Contracts;
+namespace Tests\Unit\Services\Gateway;
 
-use App\Services\Gateway\Contracts\ServiceContract;
+use App\Services\Gateway\ServiceContract;
 use Tests\TestCase;
 
 class ServiceContractTest extends TestCase {

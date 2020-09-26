@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Blockchain;
 
-use App\Services\Blockchain\Contracts\ServiceContract;
 use App\Services\Blockchain\QLDB\Driver;
 
 class Service implements ServiceContract {

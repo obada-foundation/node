@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\Gateway\Contracts;
+namespace App\Services\Gateway;
 
 use App\Services\Gateway\Models\Obit;
 use App\Services\Gateway\ObitDto;
