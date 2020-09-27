@@ -78,8 +78,22 @@ class Service implements ServiceContract {
         return $obit;
     }
 
-    public function update(string $obitId, ObitDto $dto) {
-        // TODO: Implement update() method.
+    /**
+     * @param string $obitId
+     * @param UpdateObitDto $dto
+     * @return mixed|void
+     */
+    public function update(string $obitId, UpdateObitDto $dto) {
+        $obit = $this->repository->find($obitId);
+
+        $update = collect($dto->toArray())
+            ->filter(fn ($v) => $v != null)
+            ->flip()
+            ->map(fn ($v) => strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $v)))
+            ->flip()
+            ->toArray();
+
+        $obit->update($update);
     }
 
     /**
@@ -91,7 +105,9 @@ class Service implements ServiceContract {
     }
 
     public function delete(string $obitId) {
-        $obit = $this->update($obitId);
+        $obit = $this->repository->find($obitId);
+        $obit->obit_status = Obit::DISABLED_BY_OWNER_STATUS;
+        $obit->save();
     }
 
     /**

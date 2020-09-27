@@ -15,7 +15,14 @@ class Delete extends Handler {
         $this->service = $service;
     }
 
-    public function __invoke($obitId) {
+    /**
+     * @return \Illuminate\Http\Response
+     */
+    public function __invoke() {
+        $did = request()->route()[2]['obitDID'];
 
+        $this->service->delete($did);
+
+        return $this->successRequestWithNoData();
     }
 }

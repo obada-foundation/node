@@ -19,10 +19,10 @@ interface ServiceContract {
 
     /**
      * @param string $obitId
-     * @param ObitDto $dto
+     * @param UpdateObitDto $dto
      * @return mixed
      */
-    public function update(string $obitId, ObitDto $dto);
+    public function update(string $obitId, UpdateObitDto $dto);
 
     public function show(string $obitId): ?Obit;
 
