@@ -8,6 +8,7 @@ use App\Services\Gateway\Repositories\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Models\Obit;
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -95,17 +96,17 @@ class Service implements ServiceContract {
 
     /**
      * @param string $obitDID
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany
+     * @return Collection
      * @throws Exception
      */
-    public function history(string $obitDID) {
+    public function history(string $obitDID): Collection {
         $obit = $this->repository->find($obitDID);
 
         if (! $obit) {
             throw new Exception("Can't fetch the history because obit \"{$obitDID}\" not exists.");
         }
 
-        return $obit->audits();
+        return $obit->audits;
     }
 
     /**

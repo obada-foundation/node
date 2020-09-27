@@ -6,6 +6,7 @@ namespace App\Services\Gateway;
 
 use App\Services\Gateway\Models\Obit;
 use App\Services\Gateway\ObitDto;
+use Illuminate\Support\Collection;
 
 interface ServiceContract {
     public function search();
@@ -27,7 +28,11 @@ interface ServiceContract {
 
     public function delete(string $obitId);
 
-    public function history(string $obitId);
+    /**
+     * @param string $obitId
+     * @return Collection
+     */
+    public function history(string $obitId): Collection;
 
     public function commit(string $obitDID);
 }
