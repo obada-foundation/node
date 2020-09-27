@@ -43,12 +43,12 @@ generate-php-client: clone-php-client
 
 generate-javascript-client:
 	docker run --rm \
-    		-v $$(pwd)/openapi:/local -v $$(pwd)/javascript-api-client:/src openapitools/openapi-generator-cli generate \
-    		-i /local/spec.openapi.yml \
-    		-g javascript \
-    		--skip-validate-spec \
-    		-o /src \
-    		-c /local/clients/javascript/config.yml
+		-v $$(pwd)/openapi:/local -v $$(pwd)/javascript-api-client:/src openapitools/openapi-generator-cli generate \
+		-i /local/spec.openapi.yml \
+		-g javascript \
+		--skip-validate-spec \
+		-o /src \
+		-c /local/clients/javascript/config.yml
 
 build-gateway-branch:
 	docker build -t $(GATEWAY_IMAGE) -f docker/gateway/Dockerfile . --build-arg APP_ENV=dev

@@ -23,6 +23,6 @@ class BlockchainRecordCreateListener
      * @param RecordCreated $event
      */
     public function handle(RecordCreated $event) {
-        $this->service->commit($event->obit['obit_did']);
+        //$this->service->commit($event->obit['obit_did']);
     }
 }

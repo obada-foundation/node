@@ -14,7 +14,17 @@ class GatewayRepository implements GatewayRepositoryContract {
      * @return Collection
      */
     public function findBy(array $args = []): LengthAwarePaginator {
-        return Obit::paginate(50);
+        $query = Obit::query();
+
+        if (isset($args['query']) && $q = $args['query']) {
+            $query->where('obit_did', $q)
+                ->orWhere('usn', $q)
+                ->orWhere('manufacturer', $q)
+                ->orWhere('part_number', $q)
+                ->orWhere('serial_number_hash', $q);;
+        }
+
+        return $query->paginate(50);
     }
 
     /**

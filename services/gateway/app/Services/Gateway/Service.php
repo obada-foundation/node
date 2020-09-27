@@ -113,7 +113,6 @@ class Service implements ServiceContract {
      * @throws Throwable
      */
     public function commit(string $obitDID) {
-        dd($obitDID);
         $obit = $this->repository->find($obitDID);
 
         if (! $obit) {

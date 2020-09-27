@@ -9,13 +9,13 @@ use App\Services\Gateway\ServiceContract;
 
 class Delete extends Handler {
 
-    protected $service;
+    protected ServiceContract $service;
 
     public function __construct(ServiceContract $service) {
         $this->service = $service;
     }
 
-    public function __invoke() {
+    public function __invoke($obitId) {
 
     }
 }

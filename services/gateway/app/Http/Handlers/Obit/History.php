@@ -9,13 +9,17 @@ use App\Services\Gateway\ServiceContract;
 
 class History extends Handler {
 
-    protected $service;
+    protected ServiceContract $service;
 
     public function __construct(ServiceContract $service) {
         $this->service = $service;
     }
 
-    public function __invoke() {
-
+    /**
+     * @param $obitId
+     * @return mixed
+     */
+    public function __invoke($obitId) {
+        return $this->service->history($obitId);
     }
 }
