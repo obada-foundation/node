@@ -38,23 +38,17 @@ generate-php-client: clone-php-client
 		-i /local/spec.openapi.yml \
 		-g php \
 		--skip-validate-spec \
-		-o /src
+		-o /src \
+		-c /local/clients/php/config.yml
 
-export DEFAULT_NAMESPACE='OpenAPI'
-export NEW_NAMESPACE='Obada'
-fix-php-client-namespace:
+generate-javascript-client:
 	docker run --rm \
-	  -v $$(pwd)/php-api-client:/src \
-	  alpine:3.12 sh -c "grep -rl "$$DEFAULT_NAMESPACE" /src/docs | xargs sed -i 's|$$DEFAULT_NAMESPACE|$$NEW_NAMESPACE|g'" & \
-	docker run --rm \
-	  -v $$(pwd)/php-api-client:/src \
-	  alpine:3.12 sh -c "grep -rl "$$DEFAULT_NAMESPACE" /src/lib | xargs sed -i 's|$$DEFAULT_NAMESPACE|$$NEW_NAMESPACE|g'" & \
-    docker run --rm \
-	  -v $$(pwd)/php-api-client:/src \
-	  alpine:3.12 sh -c "grep -rl "$$DEFAULT_NAMESPACE" /src/test | xargs sed -i 's|$$DEFAULT_NAMESPACE|$$NEW_NAMESPACE|g'" & \
-	docker run --rm \
-	  -v $$(pwd)/php-api-client:/src \
-	  alpine:3.12 sh -c "sed -i 's|$$DEFAULT_NAMESPACE|$$NEW_NAMESPACE|g' src/README.md"
+    		-v $$(pwd)/openapi:/local -v $$(pwd)/javascript-api-client:/src openapitools/openapi-generator-cli generate \
+    		-i /local/spec.openapi.yml \
+    		-g javascript \
+    		--skip-validate-spec \
+    		-o /src \
+    		-c /local/clients/javascript/config.yml
 
 build-gateway-branch:
 	docker build -t $(GATEWAY_IMAGE) -f docker/gateway/Dockerfile . --build-arg APP_ENV=dev
@@ -80,7 +74,7 @@ build-gateway-tag:
 build-qldb-tag:
 	docker tag $(QLDB_RELEASE_IMAGE) $(QLDB_TAG_IMAGE)
 
-deploy-php-client: generate-php-client fix-php-client-namespace
+deploy-php-client: generate-php-client
 	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
 
 lint-openapi-spec:
