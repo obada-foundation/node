@@ -16,8 +16,7 @@ class History extends Handler {
     }
 
     /**
-     * @param $obitId
-     * @return mixed
+     * @return \Illuminate\Support\Collection
      */
     public function __invoke() {
         $did = request()->route()[2]['obitDID'];
@@ -26,6 +25,10 @@ class History extends Handler {
             ->map(fn ($record) => $this->transformHistoryRecord($record));
     }
 
+    /**
+     * @param $historyRecord
+     * @return array
+     */
     public function transformHistoryRecord($historyRecord) {
         $oldValues = [];
         $newValues = [];
