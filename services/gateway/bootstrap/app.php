@@ -102,6 +102,7 @@ $app->register(App\Services\Blockchain\BlockchainServiceProvider::class);
 $app->register(\App\Services\Gateway\GatewayServiceProvider::class);
 $app->register(Pearl\RequestValidate\RequestServiceProvider::class);
 $app->register(OwenIt\Auditing\AuditingServiceProvider::class);
+$app->register(Sentry\Laravel\ServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

@@ -30,17 +30,51 @@ class Driver  {
                     'obit_did'           => $obit['obit_did'],
                     'usn'                => $obit['usn'],
                     'obit_did_versions'  => '',
-                    'owner_did'          => '',
-                    'obd_did'            => '',
+                    'owner_did'          => $obit['owner_did'],
+                    'obd_did'            => $obit['obd_did'],
                     'serial_number_hash' => $obit['serial_number_hash'],
                     'part_number'        => $obit['part_number'],
                     'manufacturer'       => $obit['manufacturer'],
                     'root_hash'          => $obit['root_hash'],
                     'obit_status'        => $obit['obit_status'],
                     'modified_at'        => $obit['modified_at'],
-                    'metadata'           => [],
-                    'doc_links'          => [],
-                    'structured_data'    => []
+                    'metadata'           => $obit['metadata'],
+                    'doc_links'          => $obit['doc_links'],
+                    'structured_data'    => $obit['structured_data']
+                ]]
+            );
+
+            return json_decode($response->getBody()->getContents(), true);
+        } catch (Throwable $t) {
+            Log::error($t->getMessage(), [$t]);
+            throw $t;
+        }
+    }
+
+    /**
+     * @param string $obitId
+     * @param array $obit
+     * @return array
+     * @throws Throwable
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function update(string $obitId, array $obit): array {
+        try {
+            $response = $this->client->put(
+                'obits/' . $obitId,
+                ['json' => [
+                    'obit_did_versions'  => '',
+                    'owner_did'          => $obit['owner_did'],
+                    'obd_did'            => $obit['obd_did'],
+                    'serial_number_hash' => $obit['serial_number_hash'],
+                    'part_number'        => $obit['part_number'],
+                    'manufacturer'       => $obit['manufacturer'],
+                    'root_hash'          => $obit['root_hash'],
+                    'obit_status'        => $obit['obit_status'],
+                    'modified_at'        => $obit['modified_at'],
+                    'metadata'           => $obit['metadata'],
+                    'doc_links'          => $obit['doc_links'],
+                    'structured_data'    => $obit['structured_data']
                 ]]
             );
 

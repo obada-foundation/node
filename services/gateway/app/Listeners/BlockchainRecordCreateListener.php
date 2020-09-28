@@ -7,8 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Services\Gateway\ServiceContract;
 
-class BlockchainRecordCreateListener
-{
+class BlockchainRecordCreateListener implements ShouldQueue {
     protected ServiceContract $service;
 
     /**

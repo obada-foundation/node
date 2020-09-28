@@ -7,8 +7,7 @@ namespace App\Services\Gateway\Events;
 use App\Services\Gateway\Models\Obit;
 use App\Events\Event;
 
-class RecordCreated extends Event
-{
+class RecordCreated extends Event {
     public Obit $obit;
 
     /**

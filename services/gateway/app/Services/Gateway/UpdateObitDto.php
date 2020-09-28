@@ -58,9 +58,9 @@ class UpdateObitDto extends DataTransferObject {
             'obitStatus'       => $request->json('obit_status'),
             'ownerDID'         => $request->json('owner_did'),
             'obdDID'           => $request->json('obd_did'),
-            'metadata'         => $request->json('metadata', []),
-            'docLinks'         => $request->json('doc_links', []),
-            'structuredData'   => $request->json('structured_data', []),
+            'metadata'         => $request->json('metadata'),
+            'docLinks'         => $request->json('doc_links'),
+            'structuredData'   => $request->json('structured_data'),
         ]);
     }
 

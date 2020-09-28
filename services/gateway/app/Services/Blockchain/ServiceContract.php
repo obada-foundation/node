@@ -9,7 +9,7 @@ interface ServiceContract {
 
     public function show(string $obitId);
 
-    public function update(string $obitId);
+    public function update(string $obitId, array $obit);
 
     public function delete(string $obitId);
 

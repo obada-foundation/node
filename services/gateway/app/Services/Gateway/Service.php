@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
+use App\Services\Gateway\Events\RecordUpdated;
 use App\Services\Gateway\Repositories\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Models\Obit;
@@ -90,13 +91,27 @@ class Service implements ServiceContract {
         $obit = $this->repository->find($obitId);
 
         $update = collect($dto->toArray())
-            ->filter(fn ($v) => $v != null)
+            ->filter(fn ($v, $k) => $v != null && !is_array($v))
             ->flip()
             ->map(fn ($v) => strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $v)))
             ->flip()
             ->toArray();
 
+        if ($dto->metadata) {
+            $update['metadata'] = $dto->metadata;
+        }
+
+        if ($dto->docLinks) {
+            $update['doc_links'] = $dto->docLinks;
+        }
+
+        if ($dto->structuredData) {
+            $update['structured_data'] = $dto->structuredData;
+        }
+
         $obit->update($update);
+
+        event(new RecordUpdated(Obit::find($obitId)));
     }
 
     /**

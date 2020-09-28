@@ -35,6 +35,8 @@ class Service implements ServiceContract {
                     'exception' => $t->getTraceAsString()
                 ]
             );
+
+            throw $t;
         }
 
         event(new RecordCreated($qldbObit));
@@ -59,10 +61,22 @@ class Service implements ServiceContract {
 
     /**
      * @param string $obitId
-     * @return mixed
+     * @param array $obit
      */
-    public function update(string $obitId) {
+    public function update(string $obitId, array $obit) {
+        try {
+            $qldbObit = $this->driver->update($obitId, $obit);
+        } catch (Throwable $t) {
+            Log::error(
+                "Cannot update obit: {$obitId} to QLDB",
+                [
+                    'obit'      => $obit,
+                    'exception' => $t->getTraceAsString()
+                ]
+            );
 
+            throw $t;
+        }
     }
 
     /**
