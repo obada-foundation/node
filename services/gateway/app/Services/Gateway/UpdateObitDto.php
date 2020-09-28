@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Gateway;
 
 use App\Obada\ObitId;
+use App\Services\Gateway\Models\Obit;
 use Illuminate\Support\Facades\Validator;
 use Spatie\DataTransferObject\DataTransferObject;
 use Laravel\Lumen\Http\Request;
@@ -51,11 +52,11 @@ class UpdateObitDto extends DataTransferObject {
 
     protected function validate() {
         $data  = [
-
+            'obit_status' => $this->obitStatus
         ];
 
         $rules = [
-
+            'nullable|in:' . implode(',', Obit::STATUSES)
         ];
 
         Validator::make($data, $rules)->validate();

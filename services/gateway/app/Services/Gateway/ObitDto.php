@@ -7,6 +7,7 @@ namespace App\Services\Gateway;
 use App\Obada\ObitId;
 use App\Services\Gateway\Validation\Rules\ObitIntegrity;
 use Illuminate\Support\Facades\Validator;
+use App\Services\Gateway\Models\Obit;
 use Spatie\DataTransferObject\DataTransferObject;
 use Laravel\Lumen\Http\Request;
 
@@ -64,7 +65,8 @@ class ObitDto extends DataTransferObject {
             'modified_at'        => $this->modifiedAt,
             'serial_number_hash' => $this->serialNumberHash,
             'part_number'        => $this->partNumber,
-            'obit'               => $this->obit
+            'obit'               => $this->obit,
+            'obit_status'        => $this->obitStatus
         ];
 
         $rules = [
@@ -74,7 +76,8 @@ class ObitDto extends DataTransferObject {
             'modified_at'        => 'required',
             'serial_number_hash' => 'required',
             'part_number'        => 'required',
-            'obit'               => 'required'
+            'obit'               => 'required',
+            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES)
         ];
 
         Validator::make($data, $rules)->validate();
