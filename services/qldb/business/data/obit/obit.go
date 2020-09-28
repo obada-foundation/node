@@ -38,7 +38,7 @@ func New(log *log.Logger, qldb *qldbdriver.QLDBDriver) Service {
 
 // Create adds a Obit to the QLDB. It returns the created Obit with
 // fields like ID and DateCreated populated.
-func (s Service) Create(ctx context.Context, traceID string, no NewObit) (Obit, error) {
+func (s Service) Create(ctx context.Context, traceID string, no NewObit) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.create")
 	defer span.End()
 
@@ -52,13 +52,11 @@ func (s Service) Create(ctx context.Context, traceID string, no NewObit) (Obit, 
 		return txn.Execute(q, no)
 	})
 
-	var o Obit
-
 	if err != nil {
-		return o, errors.Wrap(err, "creating obit")
+		return errors.Wrap(err, "creating obit")
 	}
 
-	return o, nil
+	return nil
 }
 
 
@@ -121,9 +119,44 @@ func (s Service) FindBy(ctx context.Context, traceID string) ([]Obit, error) {
 	return nil, nil
 }
 
-func (s Service) Update(ctx context.Context, traceID string, obitId string) (*Obit, error) {
+func (s Service) Update(ctx context.Context, traceID string, obitId string, o Obit) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.update")
 	defer span.End()
 
-	return nil, nil
+	const q = "UPDATE Obits AS o SET o = ? WHERE ObitDID = ?"
+
+	s.log.Printf("%s : %s : query : %s", traceID, "obit.Update",
+		database.Log(q, o, obitId),
+	)
+
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		return txn.Execute(q, o, obitId)
+	})
+
+	if err != nil {
+		return errors.Wrap(err, "updating obit")
+	}
+
+	return nil
+}
+
+func (s Service) Delete(ctx context.Context, traceID string, obitId string) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.update")
+	defer span.End()
+
+	const q = "DELETE FROM Obits WHERE ObitDID = ?"
+
+	s.log.Printf("%s : %s : query : %s", traceID, "obit.Delete",
+		database.Log(q, obitId),
+	)
+
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		return txn.Execute(q, obitId)
+	})
+
+	if err != nil {
+		return errors.Wrap(err, "deleting obit")
+	}
+
+	return nil
 }

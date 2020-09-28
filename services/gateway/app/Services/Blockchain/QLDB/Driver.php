@@ -22,7 +22,7 @@ class Driver  {
      * @throws Throwable
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function create(array $obit): array {
+    public function create(array $obit) {
         try {
             $response = $this->client->post(
                 'obits',
@@ -43,8 +43,6 @@ class Driver  {
                     'structured_data'    => $obit['structured_data']
                 ]]
             );
-
-            return json_decode($response->getBody()->getContents(), true);
         } catch (Throwable $t) {
             Log::error($t->getMessage(), [$t]);
             throw $t;
@@ -58,7 +56,7 @@ class Driver  {
      * @throws Throwable
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function update(string $obitId, array $obit): array {
+    public function update(string $obitId, array $obit) {
         try {
             $response = $this->client->put(
                 'obits/' . $obitId,
@@ -77,8 +75,6 @@ class Driver  {
                     'structured_data'    => $obit['structured_data']
                 ]]
             );
-
-            return json_decode($response->getBody()->getContents(), true);
         } catch (Throwable $t) {
             Log::error($t->getMessage(), [$t]);
             throw $t;

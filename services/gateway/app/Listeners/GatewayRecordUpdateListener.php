@@ -20,8 +20,7 @@ class GatewayRecordUpdateListener implements ShouldQueue {
     /**
      * @param RecordUpdated $event
      */
-    public function handle(RecordUpdated $event)
-    {
-        $this->service->update($event->obit->toArray());
+    public function handle(RecordUpdated $event) {
+        $this->service->update($event->obit->obit_did, $event->obit->toArray());
     }
 }

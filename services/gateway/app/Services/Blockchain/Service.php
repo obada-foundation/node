@@ -26,7 +26,7 @@ class Service implements ServiceContract {
      */
     public function create(array $obit) {
         try {
-            $qldbObit = $this->driver->create($obit);
+            $this->driver->create($obit);
         } catch (Throwable $t) {
             Log::error(
                 "Cannot submit obit: {$obit['obit_did']} to QLDB",
@@ -39,7 +39,7 @@ class Service implements ServiceContract {
             throw $t;
         }
 
-        event(new RecordCreated($qldbObit));
+        event(new RecordCreated($obit));
     }
 
     /**
@@ -65,7 +65,7 @@ class Service implements ServiceContract {
      */
     public function update(string $obitId, array $obit) {
         try {
-            $qldbObit = $this->driver->update($obitId, $obit);
+            $this->driver->update($obitId, $obit);
         } catch (Throwable $t) {
             Log::error(
                 "Cannot update obit: {$obitId} to QLDB",

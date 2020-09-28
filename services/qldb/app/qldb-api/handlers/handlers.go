@@ -31,6 +31,7 @@ func API(build string, shutdown chan os.Signal, log *log.Logger, qldb *qldbdrive
 
 	app.Handle(http.MethodPost, "/v1/obits", og.create)
 	app.Handle(http.MethodGet, "/v1/obits/:obitDID", og.show)
+	app.Handle(http.MethodDelete, "/v1/obits/:obitDID", og.delete)
 	app.Handle(http.MethodGet, "/v1/obits", og.search)
 	app.Handle(http.MethodPut, "/v1/obits/:obitDID", og.update)
 
