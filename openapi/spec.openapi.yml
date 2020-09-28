@@ -127,7 +127,11 @@ paths:
       operationId: showObit
       responses:
         "200":
-          $ref: "#/components/schemas/Obit"
+          description: Obit in response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Obit"
         "404":
           $ref: "#/components/responses/NotFound"
 
