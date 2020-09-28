@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
-use App\Obada\ObitId;
 use App\Services\Gateway\Models\Obit;
 use Illuminate\Support\Facades\Validator;
 use Spatie\DataTransferObject\DataTransferObject;
@@ -25,6 +24,16 @@ class UpdateObitDto extends DataTransferObject {
     public ?string $partNumber;
 
     public ?string $obitStatus;
+
+    public ?string $ownerDID;
+
+    public ?string $obdDID;
+
+    public $metadata;
+
+    public $docLinks;
+
+    public $structuredData;
 
     /**
      * ObitDto constructor.
@@ -47,16 +56,28 @@ class UpdateObitDto extends DataTransferObject {
             'manufacturer'     => $request->json('manufacturer'),
             'partNumber'       => $request->json('part_number'),
             'obitStatus'       => $request->json('obit_status'),
+            'ownerDID'         => $request->json('owner_did'),
+            'obdDID'           => $request->json('obd_did'),
+            'metadata'         => $request->json('metadata', []),
+            'docLinks'         => $request->json('doc_links', []),
+            'structuredData'   => $request->json('structured_data', []),
         ]);
     }
 
     protected function validate() {
         $data  = [
-            'obit_status' => $this->obitStatus
+            'obit_status'        => $this->obitStatus,
+            'metadata'           => $this->metadata,
+            'metadata'           => $this->metadata,
+            'doc_links'          => $this->docLinks,
+            'structured_data'    => $this->structuredData
         ];
 
         $rules = [
-            'nullable|in:' . implode(',', Obit::STATUSES)
+            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES),
+            'metadata'           => 'nullable|array',
+            'doc_links'          => 'nullable|array',
+            'structured_data'    => 'nullable|array'
         ];
 
         Validator::make($data, $rules)->validate();

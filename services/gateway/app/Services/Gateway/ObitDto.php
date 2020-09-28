@@ -25,7 +25,17 @@ class ObitDto extends DataTransferObject {
 
     public string $partNumber = "";
 
-    public string $obitStatus = "";
+    public ?string $obitStatus;
+
+    public ?string $ownerDID;
+
+    public ?string $obdDID;
+
+    public $metadata;
+
+    public $docLinks;
+
+    public $structuredData;
 
     public ?ObitId $obit;
 
@@ -54,6 +64,11 @@ class ObitDto extends DataTransferObject {
             'manufacturer'     => $request->json('manufacturer'),
             'partNumber'       => $request->json('part_number'),
             'obitStatus'       => $request->json('obit_status'),
+            'ownerDID'         => $request->json('owner_did'),
+            'obdDID'           => $request->json('obd_did'),
+            'metadata'         => $request->json('metadata', []),
+            'docLinks'         => $request->json('doc_links', []),
+            'structuredData'   => $request->json('structured_data', []),
         ]);
     }
 
@@ -66,7 +81,10 @@ class ObitDto extends DataTransferObject {
             'serial_number_hash' => $this->serialNumberHash,
             'part_number'        => $this->partNumber,
             'obit'               => $this->obit,
-            'obit_status'        => $this->obitStatus
+            'obit_status'        => $this->obitStatus,
+            'metadata'           => $this->metadata,
+            'doc_links'          => $this->docLinks,
+            'structured_data'    => $this->structuredData
         ];
 
         $rules = [
@@ -77,7 +95,10 @@ class ObitDto extends DataTransferObject {
             'serial_number_hash' => 'required',
             'part_number'        => 'required',
             'obit'               => 'required',
-            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES)
+            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES),
+            'metadata'           => 'nullable|array',
+            'doc_links'          => 'nullable|array',
+            'structured_data'    => 'nullable|array'
         ];
 
         Validator::make($data, $rules)->validate();

@@ -64,8 +64,11 @@ class Service implements ServiceContract {
         $obit->obit_did           = $dto->obitDID;
         $obit->usn                = $dto->usn;
         $obit->obit_status        = $dto->obitStatus;
-        $obit->owner_did          = '';
-        $obit->obd_did            = '';
+        $obit->owner_did          = (string) $dto->ownerDID;
+        $obit->obd_did            = (string) $dto->obdDID;
+        $obit->metadata           = $dto->metadata;
+        $obit->doc_links          = $dto->docLinks;
+        $obit->structured_data    = $dto->structuredData;
         $obit->manufacturer       = $dto->manufacturer;
         $obit->part_number        = $dto->partNumber;
         $obit->serial_number_hash = $dto->serialNumberHash;
