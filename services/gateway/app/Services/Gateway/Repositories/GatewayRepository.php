@@ -24,6 +24,30 @@ class GatewayRepository implements GatewayRepositoryContract {
                 ->orWhere('serial_number_hash', $q);;
         }
 
+        if (isset($args['serial_number_hash']) && $serialNumberHash = $args['serial_number_hash']) {
+            $query->where('serial_number_hash', $serialNumberHash);;
+        }
+
+        if (isset($args['obit_status']) && $obitStatus = $args['obit_status']) {
+            $query->where('obit_status', $obitStatus);;
+        }
+
+        if (isset($args['manufacturer']) && $manufacturer = $args['manufacturer']) {
+            $query->where('manufacturer', $manufacturer);;
+        }
+
+        if (isset($args['part_number']) && $partNumber = $args['part_number']) {
+            $query->where('part_number', $partNumber);;
+        }
+
+        if (isset($args['usn']) && $usn = $args['usn']) {
+            $query->where('usn', $usn);;
+        }
+
+        if (isset($args['owner_did']) && $ownerDID = $args['owner_did']) {
+            $query->where('owner_did', $ownerDID);;
+        }
+
         return $query->paginate(50);
     }
 

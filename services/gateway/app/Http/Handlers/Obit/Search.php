@@ -26,7 +26,7 @@ class Search extends Handler {
      * @return mixed
      */
     public function __invoke() {
-        $obits = $this->service->search(['query' => request()->query('query')])->map(fn ($obit) => [
+        $obits = $this->service->search(request()->query())->map(fn ($obit) => [
             'obit_did'           => (string) $obit->obit_did,
             'usn'                => (string) $obit->usn,
             'obit_did_versions'  => (array) $obit->obit_did_versions,
