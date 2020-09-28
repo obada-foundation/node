@@ -6,7 +6,7 @@
     "type": "project",
     "require": {
         "php": "^7.4",
-        "aws/aws-sdk-php": "^3.152",
+        "aws/aws-sdk-php": "^3.155",
         "ksbomj/json-response": "^0.0.2",
         "laravel/lumen-framework": "^7.0",
         "owen-it/laravel-auditing": "^11.0",

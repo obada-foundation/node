@@ -28,6 +28,16 @@ services:
       - LE_EMAIL=ksbomj@gmail.com
       - LE_FQDN=dev.api.obada.io
 
+  queue:
+    image: obada/server-gateway:dev
+    container_name: queue
+    volumes:
+      - ./etc/.env:/app/.env
+    restart: always
+    command: php artisan queue:work
+    networks:
+      - backend
+
   app:
     image: obada/server-gateway:dev
     container_name: gateway

@@ -356,6 +356,8 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionRds(array $args = [])
  * @method \Aws\Redshift\RedshiftClient createRedshift(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionRedshift(array $args = [])
+ * @method \Aws\RedshiftDataAPIService\RedshiftDataAPIServiceClient createRedshiftDataAPIService(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionRedshiftDataAPIService(array $args = [])
  * @method \Aws\Rekognition\RekognitionClient createRekognition(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionRekognition(array $args = [])
  * @method \Aws\ResourceGroups\ResourceGroupsClient createResourceGroups(array $args = [])
@@ -376,6 +378,8 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionS3Control(array $args = [])
  * @method \Aws\SSO\SSOClient createSSO(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionSSO(array $args = [])
+ * @method \Aws\SSOAdmin\SSOAdminClient createSSOAdmin(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionSSOAdmin(array $args = [])
  * @method \Aws\SSOOIDC\SSOOIDCClient createSSOOIDC(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionSSOOIDC(array $args = [])
  * @method \Aws\SageMaker\SageMakerClient createSageMaker(array $args = [])
@@ -461,7 +465,7 @@ namespace Aws;
  */
 class Sdk
 {
-    const VERSION = '3.152.0';
+    const VERSION = '3.155.4';
 
     /** @var array Arguments for creating clients */
     private $args;

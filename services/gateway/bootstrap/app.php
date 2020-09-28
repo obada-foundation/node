@@ -63,6 +63,7 @@ $app->configure('app');
 $app->configure('database');
 $app->configure('qldb');
 $app->configure('audit');
+$app->configure('queue');
 
 /*
 |--------------------------------------------------------------------------
