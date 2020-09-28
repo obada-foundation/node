@@ -136,6 +136,11 @@ paths:
         - Obit
       description: Updates Obit by given ObitDID with payload
       operationId: updateObit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Obit"
       responses:
         "201":
           $ref: "#/components/responses/Created"
