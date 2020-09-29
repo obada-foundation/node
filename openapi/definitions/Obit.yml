@@ -1,3 +1,19 @@
+MetaDataRecord:
+  description: A record that represent key/value metadata record
+  type: object
+  required:
+    - key
+    - value
+  properties:
+    key:
+      type: string
+      description: Metadata key
+      example: model
+    value:
+      type: string
+      description: Matadata value
+      example: Dell R740
+
 NewObit:
   description: New Obit request body.
   type: object
@@ -137,7 +153,7 @@ Obit:
       type: array
       description: Get description from Rohi
       items:
-        $ref: 'MetaDataRecord.yml#/MetaDataRecord'
+        $ref: '#/MetaDataRecord'
     doc_links:
       type: array
       items:
@@ -145,7 +161,7 @@ Obit:
     structured_data:
       type: array
       items:
-        $ref: 'StructureDataRecord.yml#/StructureDataRecord'
+        $ref: 'MetaDataRecord.yml#/MetaDataRecord'
     modified_at:
       type: string
       format: date-time
