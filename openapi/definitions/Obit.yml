@@ -1,3 +1,51 @@
+DocumentLink:
+  description: Document hashlink
+  type: object
+  required:
+    - name
+    - hashlink
+  properties:
+    name:
+      type: string
+      description: Associative name of hashlink
+      example: "Link to device wipe report"
+    hashlink:
+      type: string
+      description: Hashlink
+      example: "Link to device wipe report"
+
+StructureDataRecord:
+  description: A record that represent key/value structure data record
+  type: object
+  required:
+    - key
+    - value
+  properties:
+    key:
+      type: string
+      description: Structure data key
+      example: model
+    value:
+      type: string
+      description: Structure data value
+      example: Dell R740
+
+MetaDataRecord:
+  description: A record that represent key/value metadata record
+  type: object
+  required:
+    - key
+    - value
+  properties:
+    key:
+      type: string
+      description: Metadata key
+      example: model
+    value:
+      type: string
+      description: Matadata value
+      example: Dell R740
+
 NewObit:
   description: New Obit request body.
   type: object
@@ -61,18 +109,18 @@ NewObit:
       type: array
       description: Get description from Rohi
       items:
-        $ref: 'MetaDataRecord.yml#/MetaDataRecord'
+        $ref: '#/MetaDataRecord'
     doc_links:
       description: >
         To generate this link, take an SHA-256 hash of the document, and link to it as https://www.some-website.com?h1=hash-of-document. Note this does not yet adhere to the hashlink standard.
       type: array
       items:
-        $ref: "DocumentLink.yml#/DocumentLink"
+        $ref: '#/DocumentLink'
     structured_data:
       type: array
       description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))
       items:
-        $ref: 'StructureDataRecord.yml#/StructureDataRecord'
+        $ref: '#/StructureDataRecord'
     modified_at:
       type: string
       format: date-time
@@ -137,15 +185,15 @@ Obit:
       type: array
       description: Get description from Rohi
       items:
-        $ref: 'MetaDataRecord.yml#/MetaDataRecord'
+        $ref: '#/MetaDataRecord'
     doc_links:
       type: array
       items:
-        $ref: 'DocumentLink.yml#/DocumentLink'
+        $ref: '#/DocumentLink'
     structured_data:
       type: array
       items:
-        $ref: 'StructureDataRecord.yml#/StructureDataRecord'
+        $ref: '#/StructureDataRecord'
     modified_at:
       type: string
       format: date-time
