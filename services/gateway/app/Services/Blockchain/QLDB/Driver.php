@@ -52,7 +52,6 @@ class Driver  {
     /**
      * @param string $obitId
      * @param array $obit
-     * @return array
      * @throws Throwable
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
@@ -75,6 +74,20 @@ class Driver  {
                     'structured_data'    => $obit['structured_data']
                 ]]
             );
+        } catch (Throwable $t) {
+            Log::error($t->getMessage(), [$t]);
+            throw $t;
+        }
+    }
+
+    /**
+     * @param string $obitId
+     * @throws Throwable
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function delete(string $obitId) {
+        try {
+            $this->client->delete('obits/' . $obitId);
         } catch (Throwable $t) {
             Log::error($t->getMessage(), [$t]);
             throw $t;

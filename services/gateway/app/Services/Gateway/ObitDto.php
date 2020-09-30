@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Services\Gateway;
 
 use App\Obada\ObitId;
-use App\Services\Gateway\Validation\Rules\ObitIntegrity;
+use Illuminate\Validation\ValidationException;
+use App\Services\Gateway\Validation\Rules\{DtoArrayKeys, ObitIntegrity};
 use Illuminate\Support\Facades\Validator;
 use App\Services\Gateway\Models\Obit;
 use Spatie\DataTransferObject\DataTransferObject;
@@ -81,10 +82,7 @@ class ObitDto extends DataTransferObject {
             'serial_number_hash' => $this->serialNumberHash,
             'part_number'        => $this->partNumber,
             'obit'               => $this->obit,
-            'obit_status'        => $this->obitStatus,
-            'metadata'           => $this->metadata,
-            'doc_links'          => $this->docLinks,
-            'structured_data'    => $this->structuredData
+            'obit_status'        => $this->obitStatus
         ];
 
         $rules = [
@@ -95,12 +93,54 @@ class ObitDto extends DataTransferObject {
             'serial_number_hash' => 'required',
             'part_number'        => 'required',
             'obit'               => 'required',
-            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES),
-            'metadata'           => 'nullable|array',
-            'doc_links'          => 'nullable|array',
-            'structured_data'    => 'nullable|array'
+            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES)
         ];
 
+        foreach ([ 'doc_links', 'structured_data'] as $field) {
+            if (! is_array($this->{$field})) {
+                throw ValidationException::withMessages([$field => "The $field must be an array"]);
+            }
+        }
+
+        if ($this->metadata) {
+            $data['metadata']          = $this->metadata;
+            $rules['metadata']         = 'array';
+            $rules['metadata.*.key']   = 'required|string';
+            $rules['metadata.*.value'] = 'present';
+            $rules['metadata.*']       = ['array', new DtoArrayKeys(['key', 'value'])];
+        }
+
+        if ($this->docLinks) {
+            $data['doc_links']             = $this->docLinks;
+            $rules['doc_links']            = 'array';
+            $rules['doc_links.*.name']     = 'required|string';
+            $rules['doc_links.*.hashlink'] = 'required|url';
+            $rules['doc_links.*']          = ['array', new DtoArrayKeys(['name', 'hashlink'])];
+        }
+
+        if ($this->structuredData) {
+            $data['structured_data']        = $this->structuredData;
+            $rules['structured_data']       = 'array';
+            $rules['structured_data.*.key'] = 'required|string';
+            $rules['structured_data.*']     = ['array', new DtoArrayKeys(['key', 'value'])];
+        }
+
         Validator::make($data, $rules)->validate();
+    }
+
+    /**
+     * @param string $property
+     * @return string
+     */
+    public function __get(string $property) {
+        if (property_exists(self::class, $property)) {
+            return $property;
+        }
+
+        $field = collect(explode('_', $property))
+            ->map(fn($v, $k) => $k !== 0 ? ucfirst($v) : $v)
+            ->implode('');
+
+        return $this->$field;
     }
 }

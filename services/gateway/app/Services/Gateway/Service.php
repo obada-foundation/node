@@ -97,17 +97,19 @@ class Service implements ServiceContract {
             ->flip()
             ->toArray();
 
-        if ($dto->metadata) {
+        if ($dto->metadata !== null) {
             $update['metadata'] = $dto->metadata;
         }
 
-        if ($dto->docLinks) {
+        if ($dto->docLinks !== null) {
             $update['doc_links'] = $dto->docLinks;
         }
 
-        if ($dto->structuredData) {
+        if ($dto->structuredData !== null) {
             $update['structured_data'] = $dto->structuredData;
         }
+
+        $update['is_synchronized'] = Obit::NOT_SYNCHRONIZED;
 
         $obit->update($update);
 

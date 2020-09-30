@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway\Validation\Rules;
 
-use App\Models\Order;
-use App\Obada\ObitId;
-use Exception;
 use Illuminate\Contracts\Validation\Rule;
 
-class ObitIntegrity implements Rule {
-    protected ObitId $obit;
+class DtoArrayKeys implements Rule {
+    protected array $keys;
 
-    public function __construct(ObitId $obit) {
-        $this->obit = $obit;
+    public function __construct($keys) {
+        $this->keys = $keys;
     }
     /**
      * Determine if the validation rule passes.
@@ -24,7 +21,10 @@ class ObitIntegrity implements Rule {
      * @return bool
      */
     public function passes($attribute, $value) {
-        return $value == $this->obit->toHash();
+        return collect($value)
+            ->keys()
+            ->filter(fn ($key) => !in_array($key, $this->keys))
+            ->count() == 0;
     }
 
     /**
@@ -33,7 +33,10 @@ class ObitIntegrity implements Rule {
      * @return string
      */
     public function message() {
-        return 'Integrity of obit id is broken.';
+        return sprintf(
+            'The attribute :attribute must have only keys: %s.',
+            implode(',', $this->keys)
+        );
     }
 }
 

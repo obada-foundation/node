@@ -20,9 +20,9 @@ class CreateGatewayView extends Migration
             $table->string('obit_did', 255);
             $table->string('usn', 255);
             $table->json('obit_did_versions')->nullable();
-            $table->string('owner_did', 255);
-            $table->string('obd_did', 255);
-            $table->enum('obit_status', Obit::STATUSES);
+            $table->string('owner_did', 255)->nullable();
+            $table->string('obd_did', 255)->nullable();
+            $table->enum('obit_status', Obit::STATUSES)->nullable();
             $table->string('manufacturer', 255);
             $table->string('part_number', 255);
             $table->string('serial_number_hash', 255);
@@ -31,7 +31,9 @@ class CreateGatewayView extends Migration
             $table->json('doc_links')->nullable();
             $table->dateTime('modified_at');
             $table->string('root_hash', 255);
-            $table->tinyInteger('is_synchronized')->default(0);
+            $table->tinyInteger('is_synchronized')->default(Obit::NOT_SYNCHRONIZED);
+
+            $table->unique(['obit_did', 'usn', 'serial_number_hash']);
         });
     }
 
