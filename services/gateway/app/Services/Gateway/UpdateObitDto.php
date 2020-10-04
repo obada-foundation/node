@@ -6,10 +6,9 @@ namespace App\Services\Gateway;
 
 use App\Services\Gateway\Models\Obit;
 use Illuminate\Support\Facades\Validator;
-use Spatie\DataTransferObject\DataTransferObject;
 use Laravel\Lumen\Http\Request;
 
-class UpdateObitDto extends DataTransferObject {
+class UpdateObitDto extends BaseDto {
 
     public ?string $obitDID;
 
@@ -28,12 +27,6 @@ class UpdateObitDto extends DataTransferObject {
     public ?string $ownerDID;
 
     public ?string $obdDID;
-
-    public $metadata;
-
-    public $docLinks;
-
-    public $structuredData;
 
     /**
      * ObitDto constructor.
@@ -65,19 +58,14 @@ class UpdateObitDto extends DataTransferObject {
     }
 
     protected function validate() {
+        parent::validate();
+
         $data  = [
-            'obit_status'        => $this->obitStatus,
-            'metadata'           => $this->metadata,
-            'metadata'           => $this->metadata,
-            'doc_links'          => $this->docLinks,
-            'structured_data'    => $this->structuredData
+            'obit_status' => $this->obitStatus,
         ];
 
         $rules = [
-            'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES),
-            'metadata'           => 'nullable|array',
-            'doc_links'          => 'nullable|array',
-            'structured_data'    => 'nullable|array'
+            'obit_status' => 'nullable|in:' . implode(',', Obit::STATUSES),
         ];
 
         Validator::make($data, $rules)->validate();

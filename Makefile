@@ -77,6 +77,10 @@ build-qldb-tag:
 deploy-php-client: generate-php-client
 	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
 
+bpd: build-gateway-branch publish-branch-image-gateway deploy-staging
+
+bpdg: build-qldb-branch publish-branch-image-qldb deploy-staging
+
 lint-openapi-spec:
 	docker run \
       -v $$(pwd)/openapi:/openapi/ \

@@ -9,10 +9,9 @@ use Illuminate\Validation\ValidationException;
 use App\Services\Gateway\Validation\Rules\{DtoArrayKeys, ObitIntegrity};
 use Illuminate\Support\Facades\Validator;
 use App\Services\Gateway\Models\Obit;
-use Spatie\DataTransferObject\DataTransferObject;
 use Laravel\Lumen\Http\Request;
 
-class ObitDto extends DataTransferObject {
+class ObitDto extends BaseDto {
 
     public string $obitDID = "";
 
@@ -31,12 +30,6 @@ class ObitDto extends DataTransferObject {
     public ?string $ownerDID;
 
     public ?string $obdDID;
-
-    public $metadata;
-
-    public $docLinks;
-
-    public $structuredData;
 
     public ?ObitId $obit;
 
@@ -74,6 +67,8 @@ class ObitDto extends DataTransferObject {
     }
 
     protected function validate() {
+        parent::validate();
+
         $data  = [
             'obit_did'           => $this->obitDID,
             'manufacturer'       => $this->manufacturer,
@@ -95,35 +90,6 @@ class ObitDto extends DataTransferObject {
             'obit'               => 'required',
             'obit_status'        => 'nullable|in:' . implode(',', Obit::STATUSES)
         ];
-
-        foreach ([ 'doc_links', 'structured_data'] as $field) {
-            if (! is_array($this->{$field})) {
-                throw ValidationException::withMessages([$field => "The $field must be an array"]);
-            }
-        }
-
-        if ($this->metadata) {
-            $data['metadata']          = $this->metadata;
-            $rules['metadata']         = 'array';
-            $rules['metadata.*.key']   = 'required|string';
-            $rules['metadata.*.value'] = 'present';
-            $rules['metadata.*']       = ['array', new DtoArrayKeys(['key', 'value'])];
-        }
-
-        if ($this->docLinks) {
-            $data['doc_links']             = $this->docLinks;
-            $rules['doc_links']            = 'array';
-            $rules['doc_links.*.name']     = 'required|string';
-            $rules['doc_links.*.hashlink'] = 'required|url';
-            $rules['doc_links.*']          = ['array', new DtoArrayKeys(['name', 'hashlink'])];
-        }
-
-        if ($this->structuredData) {
-            $data['structured_data']        = $this->structuredData;
-            $rules['structured_data']       = 'array';
-            $rules['structured_data.*.key'] = 'required|string';
-            $rules['structured_data.*']     = ['array', new DtoArrayKeys(['key', 'value'])];
-        }
 
         Validator::make($data, $rules)->validate();
     }

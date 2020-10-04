@@ -4,15 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway\Validation\Rules;
 
-use App\Obada\ObitId;
 use Illuminate\Contracts\Validation\Rule;
 
-class ObitIntegrity implements Rule {
-    protected ObitId $obit;
-
-    public function __construct(ObitId $obit) {
-        $this->obit = $obit;
-    }
+class HashLink implements Rule {
     /**
      * Determine if the validation rule passes.
      *
