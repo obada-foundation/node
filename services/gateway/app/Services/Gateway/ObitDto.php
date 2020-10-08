@@ -41,6 +41,18 @@ class ObitDto extends BaseDto {
 
         $this->obit = new ObitId($this->serialNumberHash, $this->manufacturer, $this->partNumber);
 
+        if ($this->metadata === null) {
+            $this->metadata = [];
+        }
+
+        if ($this->doc_links === null) {
+            $this->doc_links = [];
+        }
+
+        if ($this->structured_data === null) {
+            $this->structured_data = [];
+        }
+
         $this->validate();
     }
 

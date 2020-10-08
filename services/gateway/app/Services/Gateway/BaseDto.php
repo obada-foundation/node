@@ -24,6 +24,9 @@ class BaseDto extends DataTransferObject {
             }
         }
 
+        $data  = [];
+        $rules = [];
+
         if ($this->metadata) {
             $data['metadata']          = $this->metadata;
             $rules['metadata']         = 'array';

@@ -27,27 +27,6 @@ class ObitDtoTest extends TestCase {
      */
     public function it_doesnt_pass_validation_when_no_required_fields_were_passed() {
         try {
-            new ObitDto();
-
-            $this->assertTrue(false);
-        } catch (Throwable $t) {
-            $this->assertInstanceOf(ValidationException::class, $t);
-            $this->assertEquals($t->errors(), ['serial_number_hash' => ['The serial number hash field is required.']]);
-        }
-
-        try {
-            new ObitDto(['serialNumberHash' => 'serial']);
-
-            $this->assertTrue(false);
-        } catch (Throwable $t) {
-            $this->assertInstanceOf(ValidationException::class, $t);
-            $this->assertEquals(
-                $t->errors(),
-                ['serial_number_hash' => ['Received the invalid serial number hash. Must be the valid SHA256 hash.']]
-            );
-        }
-
-        try {
             new ObitDto(['serialNumberHash' => $this->hash, 'obitDID' => '']);
 
             $this->assertTrue(false);
@@ -74,14 +53,17 @@ class ObitDtoTest extends TestCase {
             $dto = $this->dto;
             $dto['manufacturer'] = 'man1';
 
-            new ObitDto($this->dto);
+            new ObitDto($dto);
 
             $this->assertTrue(false);
         } catch (Throwable $t) {
             $this->assertInstanceOf(ValidationException::class, $t);
             $this->assertEquals(
-                $t->errors(),
-                ['usn' => ['The selected usn is invalid.'], 'obit_did' => ['Integrity of obit id is broken.']]
+                [
+                    'usn'      => ['The selected usn is invalid.'],
+                    'obit_did' => ['Integrity of obit id is broken.']
+                ],
+                $t->errors()
             );
         }
     }
