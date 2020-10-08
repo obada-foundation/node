@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Gateway;
 
 use App\Obada\ObitId;
-use Illuminate\Validation\ValidationException;
-use App\Services\Gateway\Validation\Rules\{DtoArrayKeys, ObitIntegrity};
+use App\Services\Gateway\Validation\Rules\ObitIntegrity;
 use Illuminate\Support\Facades\Validator;
 use App\Services\Gateway\Models\Obit;
 use Laravel\Lumen\Http\Request;

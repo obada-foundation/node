@@ -79,7 +79,7 @@ services:
       - MYSQL_ROOT_PASSWORD={{ db_password }}
       - MYSQL_DATABASE=gateway
     ports:
-      - 127.0.0.1:3306:3303
+      - 127.0.0.1:3306:3306
     volumes:
       - db_data:/var/lib/mysql
     networks:

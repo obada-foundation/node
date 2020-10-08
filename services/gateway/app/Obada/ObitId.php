@@ -18,7 +18,7 @@ class ObitId {
      * @param string $partNumber
      */
     public function __construct(string $serialNumberHash, string $manufacturer, string $partNumber) {
-        $this->validate($serialNumberHash);
+        //$this->validate($serialNumberHash);
 
         $this->hash = hash('sha256', $manufacturer . $partNumber . $serialNumberHash);
     }
