@@ -1,0 +1,4 @@
+**/.env
+**/supervisord.pid
+**/supervisord.log
+**/.phpunit.result.cache

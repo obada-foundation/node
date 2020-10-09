@@ -43,7 +43,7 @@
 
     - name: "Execute database migrations"
       shell: |
-        docker exec gateway sh -l -c "php artisan migrate:fresh --seed -n --force "
+        docker exec gateway sh -l -c "php artisan migrate:fresh -n --force "
       register: migrations
 
     - debug: msg="{{ migrations.stdout }}"
