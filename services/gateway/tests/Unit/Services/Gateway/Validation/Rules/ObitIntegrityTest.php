@@ -12,7 +12,6 @@ use App\Services\Gateway\Validation\Rules\ObitIntegrity;
 use Throwable;
 
 class ObitIntegrityTest extends TestCase {
-
     /**
      * @test
      */

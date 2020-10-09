@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Gateway;
 
+use App\Services\Gateway\ObitDto;
 use App\Services\Gateway\ServiceContract;
 use Tests\TestCase;
 
@@ -21,6 +22,6 @@ class ServiceContractTest extends TestCase {
      * @test
      */
     public function it_creates_a_view_record() {
-        //$this->service->create();
+        $this->service->create($this->validObitDto());
     }
 }
