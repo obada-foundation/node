@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Services\Gateway;
 
-use App\Services\Gateway\ObitDto;
+use App\Services\Gateway\Models\Obit;
 use App\Services\Gateway\ServiceContract;
 use Tests\TestCase;
+use Laravel\Lumen\Testing\DatabaseTransactions;
 
 class ServiceContractTest extends TestCase {
+
+    use DatabaseTransactions;
 
     protected $service;
 
@@ -22,6 +25,40 @@ class ServiceContractTest extends TestCase {
      * @test
      */
     public function it_creates_a_view_record() {
-        $this->service->create($this->validObitDto());
+        Obit::truncate();
+
+        $this->withoutEvents();
+
+        $dto = $this->validObitDto();
+
+        $this->service->create($dto);
+
+        $this->seeInDatabase('gateway_view', [
+            'obit_did'           => $dto->obitDID,
+            'usn'                => $dto->usn,
+            'manufacturer'       => $dto->manufacturer,
+            'part_number'        => $dto->partNumber,
+            'serial_number_hash' => $dto->serialNumberHash,
+            'modified_at'        => $dto->modifiedAt,
+            'obit_status'        => $dto->obitStatus,
+            'owner_did'          => $dto->ownerDID,
+            'obd_did'            => $dto->obdDID,
+            'is_synchronized'    => Obit::NOT_SYNCHRONIZED
+        ]);
+
+        $o = Obit::where('obit_did', $dto->obitDID)->first();
+
+        $this->assertEquals($o->metadata, $dto->metadata);
+        $this->assertEquals($o->doc_links, $dto->docLinks);
+        $this->assertEquals($o->structured_data, $dto->structuredData);
+
+        $this->assertCount(1, Obit::all());
+    }
+
+    /**
+     * @test
+     */
+    public function it_updates_view_record() {
+
     }
 }

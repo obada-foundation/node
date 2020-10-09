@@ -8,6 +8,7 @@ use App\Http\Handlers\Handler;
 use App\Services\Gateway\UpdateObitDto;
 use App\Services\Gateway\ServiceContract;
 use App\Http\Requests\Obit\UpdateRequest;
+use Illuminate\Support\Facades\Log;
 
 class Update extends Handler {
 
@@ -22,6 +23,8 @@ class Update extends Handler {
      * @return \Illuminate\Http\Response
      */
     public function __invoke(UpdateRequest $request) {
+        Log::debug('request', [$request]);
+
         $did = request()->route()[2]['obitDID'];
 
         $dto = UpdateObitDto::fromRequest($request);

@@ -35,6 +35,18 @@ class UpdateObitDto extends BaseDto {
     public function __construct(array $parameters = []) {
         parent::__construct($parameters);
 
+        if ($this->metadata === null) {
+            $this->metadata = [];
+        }
+
+        if ($this->docLinks === null) {
+            $this->docLinks = [];
+        }
+
+        if ($this->structuredData === null) {
+            $this->structuredData = [];
+        }
+
         $this->validate();
     }
 

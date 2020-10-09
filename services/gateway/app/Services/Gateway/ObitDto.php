@@ -46,12 +46,12 @@ class ObitDto extends BaseDto {
             $this->metadata = [];
         }
 
-        if ($this->doc_links === null) {
-            $this->doc_links = [];
+        if ($this->docLinks === null) {
+            $this->docLinks = [];
         }
 
-        if ($this->structured_data === null) {
-            $this->structured_data = [];
+        if ($this->structuredData === null) {
+            $this->structuredData = [];
         }
 
         $this->validate();
@@ -104,21 +104,5 @@ class ObitDto extends BaseDto {
         ];
 
         Validator::make($data, $rules)->validate();
-    }
-
-    /**
-     * @param string $property
-     * @return string
-     */
-    public function __get(string $property) {
-        if (property_exists(self::class, $property)) {
-            return $property;
-        }
-
-        $field = collect(explode('_', $property))
-            ->map(fn($v, $k) => $k !== 0 ? ucfirst($v) : $v)
-            ->implode('');
-
-        return $this->$field;
     }
 }

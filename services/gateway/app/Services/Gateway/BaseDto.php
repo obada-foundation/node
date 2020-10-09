@@ -53,4 +53,20 @@ class BaseDto extends DataTransferObject {
 
         Validator::make($data, $rules)->validate();
     }
+
+    /**
+     * @param string $property
+     * @return string
+     */
+    public function __get(string $property) {
+        if (property_exists(self::class, $property)) {
+            return $property;
+        }
+
+        $field = collect(explode('_', $property))
+            ->map(fn($v, $k) => $k !== 0 ? ucfirst($v) : $v)
+            ->implode('');
+
+        return $this->$field;
+    }
 }

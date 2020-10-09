@@ -8,6 +8,7 @@ use App\Http\Handlers\Handler;
 use App\Services\Gateway\ServiceContract;
 use App\Http\Requests\Obit\CreateRequest;
 use App\Services\Gateway\ObitDto;
+use Illuminate\Support\Facades\Log;
 
 class Create extends Handler {
 
@@ -29,6 +30,8 @@ class Create extends Handler {
      * @return \Illuminate\Http\Response
      */
     public function __invoke(CreateRequest $request) {
+        Log::debug('request', [$request]);
+
         $dto = ObitDto::fromRequest($request);
 
         $this->service->create($dto);

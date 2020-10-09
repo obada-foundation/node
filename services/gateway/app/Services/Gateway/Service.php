@@ -35,9 +35,11 @@ class Service implements ServiceContract {
         $parentRootHash = $lastObit ? $lastObit->root_hash : null;
 
         $hashedData = hash('sha256', sprintf(
-            '%s%s%s%s%s%s',
+            '%s%s%s%s%s%s%s%s',
             $dto->obitDID,
             $dto->usn,
+            $dto->ownerDID,
+            $dto->obdDID,
             $dto->manufacturer,
             $dto->partNumber,
             $dto->serialNumberHash,
@@ -113,7 +115,7 @@ class Service implements ServiceContract {
 
         $obit->update($update);
 
-        event(new RecordUpdated(Obit::find($obitId)));
+        //event(new RecordUpdated(Obit::find($obitId)));
     }
 
     /**

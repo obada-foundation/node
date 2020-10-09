@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use App\Services\Gateway\Models\Obit;
 use Laravel\Lumen\Testing\TestCase as BaseTestCase;
 
 use App\Services\Gateway\ObitDto;
@@ -35,17 +36,16 @@ abstract class TestCase extends BaseTestCase
         $partNumber   = $faker->word;
         $obit         = new ObitId($hash, $manufacturer, $partNumber);
 
-        try {
-            return new ObitDto([
-                'serialNumberHash' => $hash,
-                'modifiedAt'       => Carbon::parse($faker->dateTime->getTimestamp())->format('Y-m-d H:i:s'),
-                'manufacturer'     => $manufacturer,
-                'usn'              => $obit->toUsn(),
-                'partNumber'       => $partNumber,
-                'obitDID'          => $obit->toHash()
-            ]);
-        } catch (\Throwable $t) {
-            dd($t->getMessage());
-        }
+        return new ObitDto([
+            'obitStatus'       => $faker->randomElement(Obit::STATUSES),
+            'serialNumberHash' => $hash,
+            'ownerDID'         => hash('sha256', $faker->word),
+            'obdDID'           => hash('sha256', $faker->word),
+            'modifiedAt'       => Carbon::parse($faker->dateTime->getTimestamp())->format('Y-m-d H:i:s'),
+            'manufacturer'     => $manufacturer,
+            'usn'              => $obit->toUsn(),
+            'partNumber'       => $partNumber,
+            'obitDID'          => $obit->toHash()
+        ]);
     }
 }
