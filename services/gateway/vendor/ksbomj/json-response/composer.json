@@ -1,0 +1,25 @@
+{
+  "name": "ksbomj/json-response",
+  "description": "Small wrapper which standardize api responses",
+  "version": "0.0.2",
+  "authors": [
+    {
+      "name": "Andrii Tarykin",
+      "email": "ksbomj@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.3",
+    "illuminate/http": "^5.0|^6.0|^7.0|^8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.0"
+  },
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "SecurityRobot\\" : "./src/",
+      "Tests\\": "tests/"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+useES6: true
+usePromises: true
+projectName: obada-api-client
+npmRepository: obada/api-client
+gitUserId: obada-protocol
+gitRepoId: javascript-api-client

@@ -1,0 +1,13 @@
+language: php
+php:
+  - 7.3
+
+stages:
+- test
+
+jobs:
+  include:
+  - stage: test
+    script:
+      - composer install
+      - ./vendor/bin/phpunit

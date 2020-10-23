@@ -2,9 +2,9 @@ openapi: 3.0.0
 
 servers:
   - description: OBADA Staging API
-    url: https://dev.api.obada.io/
+    url: https://dev.api.obada.io
   - description: OBADA Production API
-    url: http://api.obada.io/
+    url: http://api.obada.io
 
 info:
   version: "0.0.1"
@@ -15,4 +15,206 @@ info:
     email: techops@obada.io
     url: 'https://www.obada.io'
 
+tags:
+  - name: Obit
+
 paths:
+  /obits:
+    get:
+      tags:
+        - Obit
+      description: Search obits by given filters.
+      operationId: searchObits
+      parameters:
+        - name: serial_number_hash
+          description: Query argument that filters by serial number hash
+          in: query
+          schema:
+            type: string
+            example: "fe403a1afe16203f4b8bb3a0e72d3e17567897bc15293e4a87b663e441030aea"
+        - name: obit_status
+          in: query
+          description: Query argument that filters by obit status
+          schema:
+            type: string
+            enum:
+              - FUNCTIONAL
+              - NON_FUNCTIONAL
+              - DISPOSED
+              - STOLEN
+              - DISABLED_BY_OWNER
+        - name: manufacturer
+          description: Query argument that filters by manufacturer
+          in: query
+          schema:
+            type: string
+            example: "Sony"
+        - name: part_number
+          description: Query argument that filters by part number
+          in: query
+          schema:
+            type: string
+            example: "MWCN2LL/A"
+        - name: usn
+          in: query
+          description: Universal serial number
+          schema:
+            type: string
+            example: "2zEz-xLJR"
+        - name: owner_did
+          in: query
+          description: OBADA owner DID
+          schema:
+            type: string
+            example: "did:obada:owner:123456"
+        - name: offset
+          in: query
+          description: Number of records to skip for pagination.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum number of records to return.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100
+            default: 0
+      responses:
+        "200":
+          description: List of obits responded by given arguments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Obit"
+    post:
+      tags:
+        - Obit
+      description: Creates a new obit.
+      operationId: createObit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewObit"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /obits/{obit_did}:
+    parameters:
+      - name: obit_did
+        in: path
+        description: The given ObitDID argument
+        required: true
+        schema:
+          type: string
+          example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
+
+    get:
+      tags:
+        - Obit
+      description: Shows the information about single Obit by given ObitDID
+      operationId: showObit
+      responses:
+        "200":
+          description: Obit in response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Obit"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags:
+        - Obit
+      description: Updates Obit by given ObitDID with payload
+      operationId: updateObit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Obit"
+      responses:
+        "201":
+          $ref: "#/components/responses/Created"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags:
+        - Obit
+      description: Changes Obit status to DISABLED_BY_OWNER
+      operationId: removeObit
+      responses:
+        "200":
+          $ref: "#/components/responses/NoContent"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /obits/{obit_did}/history:
+    get:
+      tags:
+        - Obit
+      description: Shows the history of changes by given Obit with ObitDID
+      operationId: showObitHistory
+      parameters:
+        - name: obit_did
+          in: path
+          description: The given ObitDID argument
+          required: true
+          schema:
+            type: string
+            example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
+      responses:
+        "200":
+          description: Collection of historical changes for given obit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ObitHistory"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  schemas:
+    Obit:
+      $ref: "definitions/Obit.yml#/Obit"
+    NewObit:
+      $ref: "definitions/Obit.yml#/NewObit"
+    ObitHistory:
+      $ref: "definitions/Obit.yml#/ObitHistory"
+  responses:
+    Created:
+      description: The request was successful and the resource was created.
+    NoContent:
+      description: The request was successful and no content was returned.
+    BadRequest:
+      description: The request was malformed.
+    NotFound:
+      description: The requested resource could not be found.
+      content:
+        application/json:
+          schema:
+            $ref: "Errors.yml#/NotFound"
+    UnprocessableEntity:
+      description: The submitted entity could not be processed.
+      content:
+        application/json:
+          schema:
+            $ref: "Errors.yml#/UnprocessableEntity"

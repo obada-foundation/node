@@ -1,0 +1,27 @@
+name: Open API deployment
+
+on: [push, pull_request]
+
+jobs:
+
+  generate-api-clients:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout-code
+        uses: actions/checkout@v2
+
+      - id: checkout-php-client
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
+          repository: obada-protocol/php-client-library
+          path: php-api-client
+
+      - id: lint
+        run: make lint-openapi-spec
+
+      - id: generate-php-client
+        run: |
+          git config --global user.name "OBADA TechOps Team"
+          git config --global user.email "techops@obada.io"
+          make deploy-php-client
