@@ -65,8 +65,21 @@ class CreateTest extends TestCase {
             'serial_number_hash' => hash('sha256', 'SN123456'),
             'part_number'        => 'PN123456',
             'owner_did'          => '123456',
-            'modified_at'        => Carbon::now()
+            'modified_at'        => Carbon::now(),
+            'obit_status'        => 'FUNCTIONAL',
+            'metadata'           => ['color' => 'red'],
+            'structured_data'    => ['condition' => 'good']
         ]);
+
+        $metadata = (array) collect($obit->getMetadata()->toArray())
+            ->map(fn($record) => [(string) $record->getKey() => (string) $record->getValue()])
+            ->collapse()
+            ->toArray();
+
+        $structuredData = (array) collect($obit->getStructuredData()->toArray())
+            ->map(fn($record) => [(string) $record->getKey() => (string) $record->getValue()])
+            ->collapse()
+            ->toArray();
 
         $payload = [
             'manufacturer'       => (string) $obit->getManufacturer(),
@@ -74,7 +87,10 @@ class CreateTest extends TestCase {
             'part_number'        => (string) $obit->getPartNumber(),
             'owner_did'          => (string) $obit->getOwnerDid(),
             'modified_at'        => (string) $obit->getModifiedAt(),
-            'root_hash'          => (string) $obit->rootHash()
+            'root_hash'          => (string) $obit->rootHash(),
+            'obit_status'        => (string) $obit->getStatus(),
+            'metadata'           => $metadata,
+            'structured_data'    => $structuredData
         ];
 
         $this->json("POST", route('obits.create'), $payload);

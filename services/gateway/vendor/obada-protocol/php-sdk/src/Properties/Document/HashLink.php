@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Obada\Properties\Document;
 
 use Obada\Hash;
-use Obada\Properties\Property;
+use Obada\Properties\SimpleProperty;
 
-class HashLink extends Property {
+class HashLink extends SimpleProperty {
 
 	public function isValid(): bool {
 		return is_string($this->value) && strlen($this->value) > 0;
@@ -18,6 +18,6 @@ class HashLink extends Property {
 	}
 
 	public function toHash(): Hash {
-		// TODO: Implement toHash() method.
+		return new Hash('');
 	}
 }

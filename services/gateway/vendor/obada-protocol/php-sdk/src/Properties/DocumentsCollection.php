@@ -23,11 +23,11 @@ class DocumentsCollection implements IteratorAggregate {
 	}
 
 	/**
-	 * @param Record $metadataRecord
+	 * @param Document $document
 	 * @return $this
 	 */
-	public function add(Record $metadataRecord) {
-		$this->items[] = $metadataRecord;
+	public function add(Document $document) {
+		$this->items[] = $document;
 
 		return $this;
 	}

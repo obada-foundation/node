@@ -6,6 +6,7 @@ namespace App\Obada\Mappers\Input;
 
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Obada\Mappers\Input\InputMapper;
 use Obada\Obit;
@@ -26,6 +27,10 @@ class ObitInputMapper implements InputMapper {
             'owner_did'          => Arr::get($input, 'owner_did'),
             'obd_did'            => Arr::get($input, 'obd_did'),
             'modified_at'        => Carbon::parse(Arr::get($input, 'modified_at')),
+            'obit_status'        => Arr::get($input, 'obit_status'),
+            'metadata'           => Arr::get($input, 'metadata', []),
+            'structured_data'    => Arr::get($input, 'structured_data', []),
+            'documents'          => Arr::get($input, 'doc_links', []),
         ]);
 
         Validator::make(
