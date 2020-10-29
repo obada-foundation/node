@@ -6,16 +6,16 @@ namespace App\Http\Handlers\Obit;
 
 use App\Http\Handlers\Handler;
 use App\Services\Gateway\ServiceContract;
-use App\Http\Requests\Obit\CreateRequest;
-use App\Services\Gateway\ObitDto;
 use Illuminate\Support\Facades\Log;
+use App\Obada\Mappers\Input\ObitInputMapper;
+use Obada\Exceptions\PropertyValidationException;
 
 class Create extends Handler {
 
     /**
      * @var ServiceContract
      */
-    protected $service;
+    protected ServiceContract $service;
 
     /**
      * Create constructor.
@@ -26,15 +26,22 @@ class Create extends Handler {
     }
 
     /**
-     * @param CreateRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @throws \Symfony\Component\HttpFoundation\Exception\BadRequestException
      */
-    public function __invoke(CreateRequest $request) {
-        Log::debug('request', [$request]);
+    public function __invoke() {
+        // Move to middleware
+        Log::debug('request', [request()->all()]);
 
-        $dto = ObitDto::fromRequest($request);
+        try {
+            $obit = app()
+                ->make(ObitInputMapper::class)
+                ->map(request()->json()->all());
 
-        $this->service->create($dto);
+            $this->service->create($obit);
+        } catch (PropertyValidationException $t) {
+            return $this->respondValidationErrors([], $t->getMessage());
+        }
 
         return $this->successRequestWithNoData();
     }

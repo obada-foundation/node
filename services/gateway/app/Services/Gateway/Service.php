@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
+use Exception;
 use App\Services\Gateway\Events\RecordUpdated;
 use App\Services\Gateway\Repositories\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
-use App\Services\Gateway\Models\Obit;
-use Exception;
+use App\Services\Gateway\Models\Obit as Model;
+use Obada\Obit;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -26,30 +27,6 @@ class Service implements ServiceContract {
     }
 
     /**
-     * @param ObitDto $dto
-     * @return string
-     */
-    public function buildRootHash(ObitDto $dto): string {
-        $lastObit = Obit::orderBy('id', 'DESC')->first();
-
-        $parentRootHash = $lastObit ? $lastObit->root_hash : null;
-
-        $hashedData = hash('sha256', sprintf(
-            '%s%s%s%s%s%s%s%s',
-            $dto->obitDID,
-            $dto->usn,
-            $dto->ownerDID,
-            $dto->obdDID,
-            $dto->manufacturer,
-            $dto->partNumber,
-            $dto->serialNumberHash,
-            $dto->modifiedAt
-        ));
-
-        return hash('sha256', $parentRootHash . $hashedData);
-    }
-
-    /**
      * @param array $args
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
@@ -58,77 +35,65 @@ class Service implements ServiceContract {
     }
 
     /**
-     * @param ObitDto $dto
-     * @return Obit
+     * @param Obit $o
+     * @return Model
      */
-    public function create(ObitDto $dto): Obit {
-        $obit = new Obit;
-        $obit->parent_id          = optional(Obit::orderBy('id', 'DESC')->first())->id;
-        $obit->obit_did           = $dto->obitDID;
-        $obit->usn                = $dto->usn;
-        $obit->obit_status        = $dto->obitStatus;
-        $obit->owner_did          = (string) $dto->ownerDID;
-        $obit->obd_did            = (string) $dto->obdDID;
-        $obit->metadata           = $dto->metadata;
-        $obit->doc_links          = $dto->docLinks;
-        $obit->structured_data    = $dto->structuredData;
-        $obit->manufacturer       = $dto->manufacturer;
-        $obit->part_number        = $dto->partNumber;
-        $obit->serial_number_hash = $dto->serialNumberHash;
-        $obit->modified_at        = $dto->modifiedAt;
-        $obit->root_hash          = $this->buildRootHash($dto);
-        $obit->save();
+    public function create(Obit $o): Model {
+        $status = (string) $o->getStatus();
 
-        event(new RecordCreated($obit));
+        $obit = new Model;
+        $obit->parent_id          = optional(Model::orderBy('id', 'DESC')->first())->id;
+        $obit->obit_did           = (string) $o->getObitId()->toHash();
+        $obit->usn                = (string) $o->getObitId()->toUsn();
+        $obit->obit_status        = $status ?: null;
+        $obit->owner_did          = (string) $o->getOwnerDid();
+        $obit->obd_did            = (string) $o->getObdDid();
+        $obit->metadata           = $o->getMetadata();
+        $obit->doc_links          = $o->getDocuments();
+        $obit->structured_data    = $o->getStructuredData();
+        $obit->manufacturer       = (string) $o->getManufacturer();
+        $obit->part_number        = (string) $o->getPartNumber();
+        $obit->serial_number_hash = (string) $o->getSerialNumberHash();
+        $obit->modified_at        = (string) $o->getModifiedAt();
+        $obit->root_hash          = (string) $o->rootHash();
+        $obit->save();
 
         return $obit;
     }
 
     /**
      * @param string $obitId
-     * @param UpdateObitDto $dto
+     * @param Obit $o
      * @return mixed|void
      */
-    public function update(string $obitId, UpdateObitDto $dto) {
+    public function update(string $obitId, Obit $o) {
+        $status = (string) $o->getStatus();
+
         $obit = $this->repository->find($obitId);
 
-        $update = collect($dto->toArray())
-            ->filter(fn ($v, $k) => $v != null && !is_array($v))
-            ->flip()
-            ->map(fn ($v) => strtolower(preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $v)))
-            ->flip()
-            ->toArray();
-
-        if ($dto->metadata !== null) {
-            $update['metadata'] = $dto->metadata;
-        }
-
-        if ($dto->docLinks !== null) {
-            $update['doc_links'] = $dto->docLinks;
-        }
-
-        if ($dto->structuredData !== null) {
-            $update['structured_data'] = $dto->structuredData;
-        }
-
-        $update['is_synchronized'] = Obit::NOT_SYNCHRONIZED;
-
-        $obit->update($update);
-
-        //event(new RecordUpdated(Obit::find($obitId)));
+        $obit->obit_status     = $status ?: null;
+        $obit->owner_did       = (string) $o->getOwnerDid();
+        $obit->obd_did         = (string) $o->getObdDid();
+        $obit->metadata        = $o->getMetadata();
+        $obit->doc_links       = $o->getDocuments();
+        $obit->structured_data = $o->getStructuredData();
+        $obit->modified_at     = (string) $o->getModifiedAt();
+        $obit->root_hash       = (string) $o->rootHash();
+        $obit->is_synchronized = Model::NOT_SYNCHRONIZED;
+        $obit->save();
     }
 
     /**
      * @param string $obitDID
-     * @return Obit
+     * @return Model
      */
-    public function show(string $obitDID): ?Obit {
+    public function show(string $obitDID): ?Model {
         return $this->repository->find($obitDID);
     }
 
     public function delete(string $obitId) {
         $obit = $this->repository->find($obitId);
-        $obit->obit_status = Obit::DISABLED_BY_OWNER_STATUS;
+        $obit->obit_status = Model::DISABLED_BY_OWNER_STATUS;
         $obit->save();
     }
 
