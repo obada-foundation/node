@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.158.16",
-            "version_normalized": "3.158.16.0",
+            "version": "3.158.17",
+            "version_normalized": "3.158.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6e8fc20ff7bc21b28e80815a9818b6ca7928ae3a"
+                "reference": "086a504647f45d1166d18af2345684893ef43875"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6e8fc20ff7bc21b28e80815a9818b6ca7928ae3a",
-                "reference": "6e8fc20ff7bc21b28e80815a9818b6ca7928ae3a",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/086a504647f45d1166d18af2345684893ef43875",
+                "reference": "086a504647f45d1166d18af2345684893ef43875",
                 "shasum": ""
             },
             "require": {
@@ -48,7 +48,7 @@
                 "ext-openssl": "Allows working with CloudFront private distributions and verifying received SNS messages",
                 "ext-sockets": "To use client-side monitoring"
             },
-            "time": "2020-10-28T20:19:05+00:00",
+            "time": "2020-10-29T18:16:24+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -89,7 +89,7 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.158.16"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.158.17"
             },
             "install-path": "../aws/aws-sdk-php"
         },
@@ -973,8 +973,8 @@
         },
         {
             "name": "illuminate/auth",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/auth.git",
@@ -1031,8 +1031,8 @@
         },
         {
             "name": "illuminate/broadcasting",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/broadcasting.git",
@@ -1089,8 +1089,8 @@
         },
         {
             "name": "illuminate/bus",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/bus.git",
@@ -1144,8 +1144,8 @@
         },
         {
             "name": "illuminate/cache",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/cache.git",
@@ -1202,8 +1202,8 @@
         },
         {
             "name": "illuminate/config",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/config.git",
@@ -1253,8 +1253,8 @@
         },
         {
             "name": "illuminate/console",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/console.git",
@@ -1314,8 +1314,8 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -1368,8 +1368,8 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -1419,17 +1419,17 @@
         },
         {
             "name": "illuminate/database",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "b5a2429ae27c7c177b0e9deb80343addde3be014"
+                "reference": "321bd9819833d19ec873247e44abebd7a56b11dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/b5a2429ae27c7c177b0e9deb80343addde3be014",
-                "reference": "b5a2429ae27c7c177b0e9deb80343addde3be014",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/321bd9819833d19ec873247e44abebd7a56b11dc",
+                "reference": "321bd9819833d19ec873247e44abebd7a56b11dc",
                 "shasum": ""
             },
             "require": {
@@ -1449,7 +1449,7 @@
                 "illuminate/pagination": "Required to paginate the result set (^7.0).",
                 "symfony/finder": "Required to use Eloquent model factories (^5.0)."
             },
-            "time": "2020-10-28T21:35:31+00:00",
+            "time": "2020-10-29T15:16:59+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -1488,8 +1488,8 @@
         },
         {
             "name": "illuminate/encryption",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/encryption.git",
@@ -1542,8 +1542,8 @@
         },
         {
             "name": "illuminate/events",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/events.git",
@@ -1594,8 +1594,8 @@
         },
         {
             "name": "illuminate/filesystem",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/filesystem.git",
@@ -1656,8 +1656,8 @@
         },
         {
             "name": "illuminate/hashing",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/hashing.git",
@@ -1707,8 +1707,8 @@
         },
         {
             "name": "illuminate/http",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/http.git",
@@ -1766,8 +1766,8 @@
         },
         {
             "name": "illuminate/log",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/log.git",
@@ -1818,8 +1818,8 @@
         },
         {
             "name": "illuminate/pagination",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pagination.git",
@@ -1870,8 +1870,8 @@
         },
         {
             "name": "illuminate/pipeline",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pipeline.git",
@@ -1921,8 +1921,8 @@
         },
         {
             "name": "illuminate/queue",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/queue.git",
@@ -1988,8 +1988,8 @@
         },
         {
             "name": "illuminate/session",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/session.git",
@@ -2046,17 +2046,17 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "9de0da0f58c5d120f29711bf037a6d06ca4cee79"
+                "reference": "d67eafa7fdba279266e797eda035633e3ca029d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/9de0da0f58c5d120f29711bf037a6d06ca4cee79",
-                "reference": "9de0da0f58c5d120f29711bf037a6d06ca4cee79",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/d67eafa7fdba279266e797eda035633e3ca029d0",
+                "reference": "d67eafa7fdba279266e797eda035633e3ca029d0",
                 "shasum": ""
             },
             "require": {
@@ -2079,7 +2079,7 @@
                 "symfony/var-dumper": "Required to use the dd function (^5.0).",
                 "vlucas/phpdotenv": "Required to use the Env class and env helper (^4.0)."
             },
-            "time": "2020-10-27T19:11:02+00:00",
+            "time": "2020-10-29T15:16:59+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -2115,8 +2115,8 @@
         },
         {
             "name": "illuminate/testing",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/testing.git",
@@ -2174,8 +2174,8 @@
         },
         {
             "name": "illuminate/translation",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/translation.git",
@@ -2227,8 +2227,8 @@
         },
         {
             "name": "illuminate/validation",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/validation.git",
@@ -2287,8 +2287,8 @@
         },
         {
             "name": "illuminate/view",
-            "version": "v7.29.0",
-            "version_normalized": "7.29.0.0",
+            "version": "v7.29.2",
+            "version_normalized": "7.29.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/view.git",
@@ -3012,17 +3012,17 @@
         },
         {
             "name": "obada-protocol/php-sdk",
-            "version": "dev-main",
-            "version_normalized": "dev-main",
+            "version": "dev-develop",
+            "version_normalized": "dev-develop",
             "source": {
                 "type": "git",
                 "url": "git@github.com:obada-protocol/php-sdk.git",
-                "reference": "43540109cb4302ac51b1beb177dc9768295ae7b8"
+                "reference": "fe7456e9b0b9631f28c75b239c2a3aee0facad5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/obada-protocol/php-sdk/zipball/43540109cb4302ac51b1beb177dc9768295ae7b8",
-                "reference": "43540109cb4302ac51b1beb177dc9768295ae7b8",
+                "url": "https://api.github.com/repos/obada-protocol/php-sdk/zipball/fe7456e9b0b9631f28c75b239c2a3aee0facad5e",
+                "reference": "fe7456e9b0b9631f28c75b239c2a3aee0facad5e",
                 "shasum": ""
             },
             "require": {
@@ -3033,8 +3033,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^8.0 || ^9.0"
             },
-            "time": "2020-10-29T12:33:39+00:00",
-            "default-branch": true,
+            "time": "2020-10-29T20:24:34+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -3048,7 +3047,7 @@
                 }
             },
             "support": {
-                "source": "https://github.com/obada-protocol/php-sdk/tree/main",
+                "source": "https://github.com/obada-protocol/php-sdk/tree/develop",
                 "issues": "https://github.com/obada-protocol/php-sdk/issues"
             },
             "install-path": "../obada-protocol/php-sdk"

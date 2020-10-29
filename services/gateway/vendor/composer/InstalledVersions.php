@@ -19,19 +19,19 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'f17743cdb059a0581856dcaeda2dd7ab16c14acf',
+    'reference' => '5226b91ec2626f8430abe6a1535359a87418ad8d',
     'name' => 'laravel/lumen',
   ),
   'versions' => 
   array (
     'aws/aws-sdk-php' => 
     array (
-      'pretty_version' => '3.158.16',
-      'version' => '3.158.16.0',
+      'pretty_version' => '3.158.17',
+      'version' => '3.158.17.0',
       'aliases' => 
       array (
       ),
-      'reference' => '6e8fc20ff7bc21b28e80815a9818b6ca7928ae3a',
+      'reference' => '086a504647f45d1166d18af2345684893ef43875',
     ),
     'brick/math' => 
     array (
@@ -175,8 +175,8 @@ private static $installed = array (
     ),
     'illuminate/auth' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -184,8 +184,8 @@ private static $installed = array (
     ),
     'illuminate/broadcasting' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -193,8 +193,8 @@ private static $installed = array (
     ),
     'illuminate/bus' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -202,8 +202,8 @@ private static $installed = array (
     ),
     'illuminate/cache' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -211,8 +211,8 @@ private static $installed = array (
     ),
     'illuminate/config' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -220,8 +220,8 @@ private static $installed = array (
     ),
     'illuminate/console' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -229,8 +229,8 @@ private static $installed = array (
     ),
     'illuminate/container' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -238,8 +238,8 @@ private static $installed = array (
     ),
     'illuminate/contracts' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -247,17 +247,17 @@ private static $installed = array (
     ),
     'illuminate/database' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
-      'reference' => 'b5a2429ae27c7c177b0e9deb80343addde3be014',
+      'reference' => '321bd9819833d19ec873247e44abebd7a56b11dc',
     ),
     'illuminate/encryption' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -265,8 +265,8 @@ private static $installed = array (
     ),
     'illuminate/events' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -274,8 +274,8 @@ private static $installed = array (
     ),
     'illuminate/filesystem' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -283,8 +283,8 @@ private static $installed = array (
     ),
     'illuminate/hashing' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -292,8 +292,8 @@ private static $installed = array (
     ),
     'illuminate/http' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -301,8 +301,8 @@ private static $installed = array (
     ),
     'illuminate/log' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -310,8 +310,8 @@ private static $installed = array (
     ),
     'illuminate/pagination' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -319,8 +319,8 @@ private static $installed = array (
     ),
     'illuminate/pipeline' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -328,8 +328,8 @@ private static $installed = array (
     ),
     'illuminate/queue' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -337,8 +337,8 @@ private static $installed = array (
     ),
     'illuminate/session' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -346,17 +346,17 @@ private static $installed = array (
     ),
     'illuminate/support' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
-      'reference' => '9de0da0f58c5d120f29711bf037a6d06ca4cee79',
+      'reference' => 'd67eafa7fdba279266e797eda035633e3ca029d0',
     ),
     'illuminate/testing' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -364,8 +364,8 @@ private static $installed = array (
     ),
     'illuminate/translation' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -373,8 +373,8 @@ private static $installed = array (
     ),
     'illuminate/validation' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -382,8 +382,8 @@ private static $installed = array (
     ),
     'illuminate/view' => 
     array (
-      'pretty_version' => 'v7.29.0',
-      'version' => '7.29.0.0',
+      'pretty_version' => 'v7.29.2',
+      'version' => '7.29.2.0',
       'aliases' => 
       array (
       ),
@@ -421,7 +421,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'f17743cdb059a0581856dcaeda2dd7ab16c14acf',
+      'reference' => '5226b91ec2626f8430abe6a1535359a87418ad8d',
     ),
     'laravel/lumen-framework' => 
     array (
@@ -502,13 +502,12 @@ private static $installed = array (
     ),
     'obada-protocol/php-sdk' => 
     array (
-      'pretty_version' => 'dev-main',
-      'version' => 'dev-main',
+      'pretty_version' => 'dev-develop',
+      'version' => 'dev-develop',
       'aliases' => 
       array (
-        0 => '9999999-dev',
       ),
-      'reference' => '43540109cb4302ac51b1beb177dc9768295ae7b8',
+      'reference' => 'fe7456e9b0b9631f28c75b239c2a3aee0facad5e',
     ),
     'ocramius/package-versions' => 
     array (

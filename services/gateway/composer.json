@@ -24,7 +24,7 @@
         "sentry/sentry-laravel": "^2.0",
         "spatie/data-transfer-object": "^2.5",
         "tuupola/base58": "^2.1",
-        "obada-protocol/php-sdk": "*@dev"
+        "obada-protocol/php-sdk": "dev-develop"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",
