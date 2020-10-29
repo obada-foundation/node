@@ -2704,12 +2704,12 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:obada-protocol/php-sdk.git",
-                "reference": "fe7456e9b0b9631f28c75b239c2a3aee0facad5e"
+                "reference": "5f14b01f4c0e15db275394cdca3520c26b1f847e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/obada-protocol/php-sdk/zipball/fe7456e9b0b9631f28c75b239c2a3aee0facad5e",
-                "reference": "fe7456e9b0b9631f28c75b239c2a3aee0facad5e",
+                "url": "https://api.github.com/repos/obada-protocol/php-sdk/zipball/5f14b01f4c0e15db275394cdca3520c26b1f847e",
+                "reference": "5f14b01f4c0e15db275394cdca3520c26b1f847e",
                 "shasum": ""
             },
             "require": {
@@ -2735,7 +2735,7 @@
                 "source": "https://github.com/obada-protocol/php-sdk/tree/develop",
                 "issues": "https://github.com/obada-protocol/php-sdk/issues"
             },
-            "time": "2020-10-29T20:24:34+00:00"
+            "time": "2020-10-29T21:41:25+00:00"
         },
         {
             "name": "opis/closure",

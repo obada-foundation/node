@@ -19,7 +19,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '5226b91ec2626f8430abe6a1535359a87418ad8d',
+    'reference' => 'dde96cd63e94b351b1dd269011c7709164ef633a',
     'name' => 'laravel/lumen',
   ),
   'versions' => 
@@ -421,7 +421,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '5226b91ec2626f8430abe6a1535359a87418ad8d',
+      'reference' => 'dde96cd63e94b351b1dd269011c7709164ef633a',
     ),
     'laravel/lumen-framework' => 
     array (
@@ -507,7 +507,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'fe7456e9b0b9631f28c75b239c2a3aee0facad5e',
+      'reference' => '5f14b01f4c0e15db275394cdca3520c26b1f847e',
     ),
     'ocramius/package-versions' => 
     array (

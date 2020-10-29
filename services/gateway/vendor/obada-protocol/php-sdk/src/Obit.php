@@ -102,18 +102,18 @@ class Obit {
 		$metadata = new MetadataCollection;
 
 		if (isset($args['metadata']) && is_array($args['metadata'])) {
-			foreach ($args['metadata'] as $key => $value) {
-				$metadata->add(new Record(new Key($key), new Value($value)));
+			foreach ($args['metadata'] as $record) {
+				$metadata->add(new Record(new Key($record['key']), new Value($record['value'])));
 			}
 		}
 
 		$structuredData = new StructuredDataCollection;
 
 		if (isset($args['structured_data']) && is_array($args['structured_data'])) {
-			foreach ($args['structured_data'] as $key => $value) {
+			foreach ($args['structured_data'] as $record) {
 				$structuredData->add(new \Obada\Properties\StructuredData\Record(
-					new \Obada\Properties\StructuredData\Key($key),
-					new \Obada\Properties\StructuredData\Value($value)
+					new \Obada\Properties\StructuredData\Key($record['key']),
+					new \Obada\Properties\StructuredData\Value($record['value'])
 				));
 			}
 		}
@@ -121,10 +121,10 @@ class Obit {
 		$documents = new DocumentsCollection;
 
 		if (isset($args['documents']) && is_array($args['documents'])) {
-			foreach ($args['documents'] as $name => $hashLink) {
+			foreach ($args['documents'] as $document) {
 				$documents->add(new Document(
-					new Name($name),
-					new HashLink($hashLink)
+					new Name($document['name']),
+					new HashLink($document['hash_link'])
 				));
 			}
 		}

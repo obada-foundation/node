@@ -67,18 +67,16 @@ class CreateTest extends TestCase {
             'owner_did'          => '123456',
             'modified_at'        => Carbon::now(),
             'obit_status'        => 'FUNCTIONAL',
-            'metadata'           => ['color' => 'red'],
-            'structured_data'    => ['condition' => 'good']
+            'metadata'           => [['key' => 'color', 'value' => 'red']],
+            'structured_data'    => [['key' => 'condition', 'value' => 'good']]
         ]);
 
         $metadata = (array) collect($obit->getMetadata()->toArray())
-            ->map(fn($record) => [(string) $record->getKey() => (string) $record->getValue()])
-            ->collapse()
+            ->map(fn($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()])
             ->toArray();
 
         $structuredData = (array) collect($obit->getStructuredData()->toArray())
-            ->map(fn($record) => [(string) $record->getKey() => (string) $record->getValue()])
-            ->collapse()
+            ->map(fn($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()])
             ->toArray();
 
         $payload = [

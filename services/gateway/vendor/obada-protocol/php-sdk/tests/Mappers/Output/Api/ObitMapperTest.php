@@ -19,7 +19,7 @@ class ObitMapperTest extends TestCase {
 		$partNumber       = 'PN123456';
 		$ownerDid         = 'did:obada:owner:123456';
 		$modifiedAt       = new \DateTime('now');
-		$metadata         = ['color' => 'red'];
+		$metadata         = [['key' => 'color', 'value' => 'red']];
 
 		$obit = Obit::make([
 			'manufacturer'       => $manufacturer,
