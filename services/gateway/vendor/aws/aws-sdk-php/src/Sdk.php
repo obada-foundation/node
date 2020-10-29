@@ -376,6 +376,8 @@ namespace Aws;
  * @method \Aws\S3\S3MultiRegionClient createMultiRegionS3(array $args = [])
  * @method \Aws\S3Control\S3ControlClient createS3Control(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionS3Control(array $args = [])
+ * @method \Aws\S3Outposts\S3OutpostsClient createS3Outposts(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionS3Outposts(array $args = [])
  * @method \Aws\SSO\SSOClient createSSO(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionSSO(array $args = [])
  * @method \Aws\SSOAdmin\SSOAdminClient createSSOAdmin(array $args = [])
@@ -432,6 +434,10 @@ namespace Aws;
  * @method \Aws\MultiRegionClient createMultiRegionSynthetics(array $args = [])
  * @method \Aws\Textract\TextractClient createTextract(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionTextract(array $args = [])
+ * @method \Aws\TimestreamQuery\TimestreamQueryClient createTimestreamQuery(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionTimestreamQuery(array $args = [])
+ * @method \Aws\TimestreamWrite\TimestreamWriteClient createTimestreamWrite(array $args = [])
+ * @method \Aws\MultiRegionClient createMultiRegionTimestreamWrite(array $args = [])
  * @method \Aws\TranscribeService\TranscribeServiceClient createTranscribeService(array $args = [])
  * @method \Aws\MultiRegionClient createMultiRegionTranscribeService(array $args = [])
  * @method \Aws\Transfer\TransferClient createTransfer(array $args = [])
@@ -465,7 +471,7 @@ namespace Aws;
  */
 class Sdk
 {
-    const VERSION = '3.155.4';
+    const VERSION = '3.158.16';
 
     /** @var array Arguments for creating clients */
     private $args;
