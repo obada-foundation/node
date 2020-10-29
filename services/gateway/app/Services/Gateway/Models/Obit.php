@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Gateway\Models;
 
 use App\Services\Gateway\Events\RecordCreated;
+use App\Services\Gateway\Events\RecordUpdated;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditableConcern;
@@ -56,6 +57,7 @@ class Obit extends Model implements Auditable {
      */
     protected $dispatchesEvents = [
         'created' => RecordCreated::class,
+        'updated' => RecordUpdated::class
     ];
 
     public function parent() {

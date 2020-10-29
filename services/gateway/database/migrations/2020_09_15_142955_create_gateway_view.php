@@ -31,6 +31,7 @@ class CreateGatewayView extends Migration
             $table->json('doc_links')->nullable();
             $table->dateTime('modified_at');
             $table->string('root_hash', 255);
+            $table->string('qldb_root_hash', 255)->nullable();
             $table->tinyInteger('is_synchronized')->default(Obit::NOT_SYNCHRONIZED);
 
             $table->unique(['obit_did', 'usn', 'serial_number_hash']);

@@ -15,8 +15,7 @@ class RecordUpdated extends Event
      * RecordCreated constructor.
      * @param Obit $obit
      */
-    public function __construct(Obit $obit)
-    {
+    public function __construct(Obit $obit) {
         $this->obit = $obit;
     }
 }

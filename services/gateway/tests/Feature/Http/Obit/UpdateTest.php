@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Http\Obit;
 
+use App\Services\Gateway\Events\RecordUpdated;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Event;
 use Laravel\Lumen\Testing\DatabaseTransactions;
-use Laravel\Lumen\Testing\WithoutEvents;
 use Obada\Obit;
 use Tests\TestCase;
 
 class UpdateTest extends TestCase {
-
-    use DatabaseTransactions, WithoutEvents;
+    use DatabaseTransactions;
 
     /**
      * @test
      */
     public function it_returns_correct_response_when_update_obit() {
+        Event::fake();
+
         $model = factory(\App\Services\Gateway\Models\Obit::class)->create();
 
         $obit = Obit::make([
@@ -39,5 +41,7 @@ class UpdateTest extends TestCase {
 
         $this->json("PUT", route('obits.update', ['obitDID' => $model->obit_did]), $payload);
         $this->seeStatusCode(204);
+
+        Event::assertDispatched(RecordUpdated::class);
     }
 }
