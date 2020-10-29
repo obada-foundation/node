@@ -9,6 +9,9 @@ use App\Services\Gateway\Models\Obit as Model;
 use Illuminate\Support\Collection;
 
 interface ServiceContract {
+    /**
+     * @return mixed
+     */
     public function search();
 
     /**
@@ -24,8 +27,16 @@ interface ServiceContract {
      */
     public function update(string $obitId, Obit $obit);
 
+    /**
+     * @param string $obitId
+     * @return Model|null
+     */
     public function show(string $obitId): ?Model;
 
+    /**
+     * @param string $obitId
+     * @return mixed
+     */
     public function delete(string $obitId);
 
     /**
@@ -34,5 +45,9 @@ interface ServiceContract {
      */
     public function history(string $obitId): Collection;
 
+    /**
+     * @param string $obitDID
+     * @return mixed
+     */
     public function commit(string $obitDID);
 }

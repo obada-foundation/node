@@ -38,6 +38,12 @@ class Create extends Handler {
                 ->make(ObitInputMapper::class)
                 ->map(request()->json()->all());
 
+            $model = $this->service->show((string) $obit->getObitId()->toDid());
+
+            if ($model) {
+                return $this->respondValidationErrors([], "Obit with id {$obit->getObitId()->toHash()} is already exists.");
+            }
+
             $this->service->create($obit);
         } catch (PropertyValidationException $t) {
             return $this->respondValidationErrors([], $t->getMessage());

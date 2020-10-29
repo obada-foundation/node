@@ -43,7 +43,7 @@ class Service implements ServiceContract {
 
         $obit = new Model;
         $obit->parent_id          = optional(Model::orderBy('id', 'DESC')->first())->id;
-        $obit->obit_did           = (string) $o->getObitId()->toHash();
+        $obit->obit_did           = (string) $o->getObitId()->toDid();
         $obit->usn                = (string) $o->getObitId()->toUsn();
         $obit->obit_status        = $status ?: null;
         $obit->owner_did          = (string) $o->getOwnerDid();
@@ -124,7 +124,7 @@ class Service implements ServiceContract {
         }
 
         try {
-            $obit->update(['is_synchronized' => Obit::SYNCHRONIZED]);
+            $obit->update(['is_synchronized' => Model::SYNCHRONIZED]);
         } catch (Throwable $t) {
             Log::error("Cannot commit gateway obit record", [$t]);
 
