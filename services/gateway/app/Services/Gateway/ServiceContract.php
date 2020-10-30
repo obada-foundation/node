@@ -46,8 +46,8 @@ interface ServiceContract {
     public function history(string $obitId): Collection;
 
     /**
-     * @param string $obitDID
+     * @param array $qldbMetadata
      * @return mixed
      */
-    public function commit(string $obitDID);
+    public function commit(array $qldbMetadata);
 }

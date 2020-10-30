@@ -37,6 +37,31 @@ func(og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Re
 	return web.Respond(ctx, w, "", http.StatusCreated)
 }
 
+func(og obitGroup) metadata(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "handlers.obit.metadata")
+	defer span.End()
+
+	v, ok := ctx.Value(web.KeyValues).(*web.Values)
+	if !ok {
+		return web.NewShutdownError("web value missing from context")
+	}
+
+	params := web.Params(r)
+	m, err := og.obit.Metadata(ctx, v.TraceID, params["obitDID"])
+	if err != nil {
+		switch err {
+		case obit.ErrInvalidID:
+			return web.NewRequestError(err, http.StatusBadRequest)
+		case obit.ErrNotFound:
+			return web.NewRequestError(err, http.StatusNotFound)
+		default:
+			return errors.Wrapf(err, "ID: %s", params["obitDID"])
+		}
+	}
+
+	return web.Respond(ctx, w, m, http.StatusOK)
+}
+
 func(og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "handlers.obit.show")
 	defer span.End()
@@ -55,7 +80,7 @@ func(og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		case obit.ErrNotFound:
 			return web.NewRequestError(err, http.StatusNotFound)
 		default:
-			return errors.Wrapf(err, "ID: %s", params["id"])
+			return errors.Wrapf(err, "ID: %s", params["obitDID"])
 		}
 	}
 

@@ -9,6 +9,7 @@ use App\Services\Gateway\Events\RecordUpdated;
 use App\Services\Gateway\Repositories\GatewayRepositoryContract;
 use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Models\Obit as Model;
+use Illuminate\Events\Dispatcher;
 use Obada\Obit;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -113,18 +114,20 @@ class Service implements ServiceContract {
     }
 
     /**
-     * @param string $obitDID
+     * @param array $qldbMetadata
      * @throws Throwable
      */
-    public function commit(string $obitDID) {
-        $obit = $this->repository->find($obitDID);
+    public function commit(array $qldbMetadata) {
+        $obit = $this->repository->find($qldbMetadata['obitDID']);
 
         if (! $obit) {
-            throw new Exception("Cannot commit. Given obit: \"{$obitDID}\" not exists.");
+            throw new Exception("Cannot commit. Given obit: \"{$qldbMetadata['obitDID']}\" not exists.");
         }
 
         try {
-            $obit->update(['is_synchronized' => Model::SYNCHRONIZED]);
+            $obit->qldb_root_hash  = $qldbMetadata['qldb_hash'];
+            $obit->is_synchronized = Model::SYNCHRONIZED;
+            $obit->save();
         } catch (Throwable $t) {
             Log::error("Cannot commit gateway obit record", [$t]);
 

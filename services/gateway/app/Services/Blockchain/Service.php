@@ -27,6 +27,8 @@ class Service implements ServiceContract {
     public function create(array $obit) {
         try {
             $this->driver->create($obit);
+
+            $metadata = $this->driver->metadata($obit['obit_did']);
         } catch (Throwable $t) {
             Log::error(
                 "Cannot submit obit: {$obit['obit_did']} to QLDB",
@@ -39,15 +41,16 @@ class Service implements ServiceContract {
             throw $t;
         }
 
-        event(new RecordCreated($obit));
+        $metadata['obitDID'] = $obit['obit_did'];
+
+        event(new RecordCreated($metadata));
     }
 
     /**
      * @param string $obitId
      * @return mixed
      */
-    public function show(string $obitId)
-    {
+    public function show(string $obitId) {
         // TODO: Implement show() method.
     }
 

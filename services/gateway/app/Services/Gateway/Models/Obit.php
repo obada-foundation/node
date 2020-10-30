@@ -57,7 +57,7 @@ class Obit extends Model implements Auditable {
      */
     protected $dispatchesEvents = [
         'created' => RecordCreated::class,
-        'updated' => RecordUpdated::class
+      //  'updated' => RecordUpdated::class
     ];
 
     public function parent() {
