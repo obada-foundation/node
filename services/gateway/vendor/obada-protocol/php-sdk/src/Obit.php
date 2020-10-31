@@ -21,7 +21,6 @@ use Obada\Properties\ObitId;
 use Obada\Properties\Document\Document;
 use Obada\Properties\OwnerDid;
 use Obada\Properties\PartNumber;
-use Obada\Properties\Property;
 use Obada\Properties\SerialNumberHash;
 use Obada\Properties\Status;
 use Obada\Properties\StructuredDataCollection;
@@ -105,10 +104,10 @@ class Obit {
 
 		if (isset($args['metadata']) && is_array($args['metadata'])) {
 			foreach ($args['metadata'] as $record) {
-                $key   = (string) Arr::get($record, 'key', '');
-                $value = (string) Arr::get($record, 'value', '');
+				$key   = (string) Arr::get($record, 'key', '');
+				$value = (string) Arr::get($record, 'value', '');
 
-                $metadata->add(new Record(new Key($key), new Value($value)));
+				$metadata->add(new Record(new Key($key), new Value($value)));
 			}
 		}
 
@@ -116,8 +115,8 @@ class Obit {
 
 		if (isset($args['structured_data']) && is_array($args['structured_data'])) {
 			foreach ($args['structured_data'] as $record) {
-                $key   = (string) Arr::get($record, 'key', '');
-                $value = (string) Arr::get($record, 'value', '');
+				$key   = (string) Arr::get($record, 'key', '');
+				$value = (string) Arr::get($record, 'value', '');
 
 				$structuredData->add(new \Obada\Properties\StructuredData\Record(
 					new \Obada\Properties\StructuredData\Key($key),

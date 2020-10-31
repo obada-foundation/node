@@ -20,9 +20,9 @@ class MetadataCollection implements IteratorAggregate {
 
 	public function toArray() {
 		return array_map(
-		    fn ($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()],
-            $this->items
-        );
+			fn ($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()],
+			$this->items
+		);
 	}
 
 	/**

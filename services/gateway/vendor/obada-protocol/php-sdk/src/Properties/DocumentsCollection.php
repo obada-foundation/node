@@ -28,12 +28,12 @@ class DocumentsCollection implements IteratorAggregate {
 		return $this;
 	}
 
-    public function toArray() {
-        return array_map(
-            fn ($document) => ['name' => (string) $document->getName(), 'hash_link' => (string) $document->getHashLink()],
-            $this->items
-        );
-    }
+	public function toArray() {
+		return array_map(
+			fn ($document) => ['name' => (string) $document->getName(), 'hash_link' => (string) $document->getHashLink()],
+			$this->items
+		);
+	}
 
 	public function getIterator() {
 		return new ArrayIterator($this->items);

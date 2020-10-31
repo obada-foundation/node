@@ -18,12 +18,12 @@ class StructuredDataCollection implements IteratorAggregate {
 		$this->items = $items;
 	}
 
-    public function toArray() {
-        return array_map(
-            fn ($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()],
-            $this->items
-        );
-    }
+	public function toArray() {
+		return array_map(
+			fn ($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()],
+			$this->items
+		);
+	}
 
 	/**
 	 * @param Record $metadataRecord
