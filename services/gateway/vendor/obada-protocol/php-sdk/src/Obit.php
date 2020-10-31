@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Obada;
 
 use Exception;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 use Obada\Properties\Document\HashLink;
 use Obada\Properties\Document\Name;
 use Obada\Properties\DocumentsCollection;
@@ -103,7 +105,10 @@ class Obit {
 
 		if (isset($args['metadata']) && is_array($args['metadata'])) {
 			foreach ($args['metadata'] as $record) {
-				$metadata->add(new Record(new Key($record['key']), new Value($record['value'])));
+                $key   = (string) Arr::get($record, 'key', '');
+                $value = (string) Arr::get($record, 'value', '');
+
+                $metadata->add(new Record(new Key($key), new Value($value)));
 			}
 		}
 
@@ -111,9 +116,12 @@ class Obit {
 
 		if (isset($args['structured_data']) && is_array($args['structured_data'])) {
 			foreach ($args['structured_data'] as $record) {
+                $key   = (string) Arr::get($record, 'key', '');
+                $value = (string) Arr::get($record, 'value', '');
+
 				$structuredData->add(new \Obada\Properties\StructuredData\Record(
-					new \Obada\Properties\StructuredData\Key($record['key']),
-					new \Obada\Properties\StructuredData\Value($record['value'])
+					new \Obada\Properties\StructuredData\Key($key),
+					new \Obada\Properties\StructuredData\Value($value)
 				));
 			}
 		}

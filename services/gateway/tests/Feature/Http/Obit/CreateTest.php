@@ -71,14 +71,6 @@ class CreateTest extends TestCase {
             'structured_data'    => [['key' => 'condition', 'value' => 'good']]
         ]);
 
-        $metadata = (array) collect($obit->getMetadata()->toArray())
-            ->map(fn($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()])
-            ->toArray();
-
-        $structuredData = (array) collect($obit->getStructuredData()->toArray())
-            ->map(fn($record) => ['key' => (string) $record->getKey(), 'value' => (string) $record->getValue()])
-            ->toArray();
-
         $payload = [
             'manufacturer'       => (string) $obit->getManufacturer(),
             'serial_number_hash' => (string) $obit->getSerialNumberHash(),
@@ -87,11 +79,13 @@ class CreateTest extends TestCase {
             'modified_at'        => (string) $obit->getModifiedAt(),
             'root_hash'          => (string) $obit->rootHash(),
             'obit_status'        => (string) $obit->getStatus(),
-            'metadata'           => $metadata,
-            'structured_data'    => $structuredData
+            'metadata'           => $obit->getMetadata()->toArray(),
+            'structured_data'    => $obit->getStructuredData()->toArray()
         ];
 
         $this->json("POST", route('obits.create'), $payload);
         $this->seeStatusCode(204);
+
+        $this->assertCount(1, \App\Services\Gateway\Models\Obit::all());
     }
 }

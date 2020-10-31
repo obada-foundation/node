@@ -30,9 +30,7 @@ class ObitInputMapper implements InputMapper {
             'obit_status'        => Arr::get($input, 'obit_status'),
             'metadata'           => Arr::get($input, 'metadata', []),
             'structured_data'    => Arr::get($input, 'structured_data', []),
-            'documents'          => collect(Arr::get($input, 'doc_links', []))
-                ->map(fn ($document) => ['name' => $document['name'], 'hash_link' => $document['hashlink']])
-                ->toArray(),
+            'documents'          => Arr::get($input, 'doc_links', []),
         ]);
 
         Validator::make(

@@ -41,7 +41,6 @@ class Service implements ServiceContract {
      */
     public function create(Obit $o): Model {
         $status = (string) $o->getStatus();
-
         $obit = new Model;
         $obit->parent_id          = optional(Model::orderBy('id', 'DESC')->first())->id;
         $obit->obit_did           = (string) $o->getObitId()->toDid();
@@ -49,9 +48,9 @@ class Service implements ServiceContract {
         $obit->obit_status        = $status ?: null;
         $obit->owner_did          = (string) $o->getOwnerDid();
         $obit->obd_did            = (string) $o->getObdDid();
-        $obit->metadata           = $o->getMetadata();
-        $obit->doc_links          = $o->getDocuments();
-        $obit->structured_data    = $o->getStructuredData();
+        $obit->metadata           = $o->getMetadata()->toArray();
+        $obit->doc_links          = $o->getDocuments()->toArray();
+        $obit->structured_data    = $o->getStructuredData()->toArray();
         $obit->manufacturer       = (string) $o->getManufacturer();
         $obit->part_number        = (string) $o->getPartNumber();
         $obit->serial_number_hash = (string) $o->getSerialNumberHash();

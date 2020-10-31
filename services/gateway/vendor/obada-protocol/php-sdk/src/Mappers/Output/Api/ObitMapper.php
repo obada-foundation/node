@@ -30,7 +30,7 @@ class ObitMapper implements OutputMapper {
 
 		$documents = array_map(
 			fn (Document $d) =>
-				new DocumentLink(['name' => (string) $d->getName(), 'hash_link' => (string) $d->getHashLink()]),
+				new DocumentLink(['name' => (string) $d->getName(), 'hashlink' => (string) $d->getHashLink()]),
 			$obit->getDocuments()->toArray()
 		);
 

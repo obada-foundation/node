@@ -39,8 +39,9 @@ class ServiceContractTest extends TestCase {
         $this->service->create($obit);
 
         $this->assertCount(1, Obit::all());
+
         $this->seeInDatabase('gateway_view', [
-            'obit_did'           => (string) $obit->getObitId()->toHash(),
+            'obit_did'           => (string) $obit->getObitId()->toDid(),
             'usn'                => (string) $obit->getObitId()->toUsn(),
             'manufacturer'       => (string) $obit->getManufacturer(),
             'part_number'        => (string) $obit->getPartNumber(),
@@ -52,7 +53,7 @@ class ServiceContractTest extends TestCase {
             'is_synchronized'    => Obit::NOT_SYNCHRONIZED
         ]);
 
-        $o = Obit::where('obit_did', $obit->getObitId()->toHash())->first();
+        $o = Obit::where('obit_did', $obit->getObitId()->toDid())->first();
 
         $this->assertEquals($o->metadata, $obit->getMetadata()->toArray());
         $this->assertEquals($o->doc_links, $obit->getDocuments()->toArray());

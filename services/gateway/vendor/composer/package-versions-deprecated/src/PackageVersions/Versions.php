@@ -33,7 +33,7 @@ final class Versions
      * @internal
      */
     const VERSIONS          = array (
-  'aws/aws-sdk-php' => '3.158.17@086a504647f45d1166d18af2345684893ef43875',
+  'aws/aws-sdk-php' => '3.158.18@75aebc2f5dfd23ad7272ff1d59c521bc2a8e2802',
   'brick/math' => '0.9.1@283a40c901101e66de7061bd359252c013dcc43c',
   'clue/stream-filter' => 'v1.5.0@aeb7d8ea49c7963d3b581378955dbf5bc49aa320',
   'composer/package-versions-deprecated' => '1.11.99@c8c9aa8a14cc3d3bec86d0a8c3fa52ea79936855',
@@ -77,7 +77,7 @@ final class Versions
   'nesbot/carbon' => '2.41.5@c4a9caf97cfc53adfc219043bcecf42bc663acee',
   'nikic/fast-route' => 'v1.3.0@181d480e08d9476e61381e04a71b34dc0432e812',
   'obada-protocol/php-client-library' => 'dev-master@3a68fb026aa057ecb97dbd7414a8ef397ba26e11',
-  'obada-protocol/php-sdk' => 'dev-develop@5f14b01f4c0e15db275394cdca3520c26b1f847e',
+  'obada-protocol/php-sdk' => 'dev-develop@7ce0dc1f72b6976497c954a620121f92682ce229',
   'opis/closure' => '3.6.0@c547f8262a5fa9ff507bd06cc394067b83a75085',
   'owen-it/laravel-auditing' => 'v11.0.0@60fb60ae00a7fe38c29e224b3dc8ad94116ae00a',
   'pearl/lumen-request-validate' => '1.6@4fce780fb8e9924ddb5c285e47bb62166365d924',
@@ -163,7 +163,7 @@ final class Versions
   'sebastian/version' => '2.0.1@99732be0ddb3361e16ad77b68ba41efc8e979019',
   'theseer/tokenizer' => '1.2.0@75a63c33a8577608444246075ea0af0d052e452a',
   'webmozart/assert' => '1.9.1@bafc69caeb4d49c39fd0779086c03a3738cbb389',
-  'laravel/lumen' => 'dev-master@beb3adaf4af8252ae82eb62a89cf19b075f4e15e',
+  'laravel/lumen' => 'dev-master@092216de0d1dd52d30c362ac5f1ecb013364c822',
 );
 
     private function __construct()
