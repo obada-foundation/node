@@ -1,5 +1,5 @@
 .idea
 src/vendor
-php-api-client
+node-api-library
 javascript-api-client
 docker-compose.yml
