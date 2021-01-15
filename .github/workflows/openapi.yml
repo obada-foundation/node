@@ -15,13 +15,13 @@ jobs:
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-protocol/node-api-library
-          path: php-api-client
+          path: node-api-library
 
       - id: lint
         run: make lint-openapi-spec
 
-      - id: generate-php-client
+      - id: generate-node-api-library
         run: |
           git config --global user.name "OBADA TechOps Team"
           git config --global user.email "techops@obada.io"
-          make deploy-php-client
+          make deploy-node-api-library
