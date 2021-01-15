@@ -1,5 +1,5 @@
 DocumentLink:
-  description: Document hashlink
+  description: Document hashlink (https://tools.ietf.org/html/draft-sporny-hashlink-06)
   type: object
   required:
     - name
