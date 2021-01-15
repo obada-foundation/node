@@ -26,15 +26,15 @@ deploy-local:
 test:
 	docker exec -t
 
-deploy-api-clients: deploy-php-client
+deploy-api-clients: deploy-node-api-library
 	@echo "Deployment of client libraries was done"
 
-clone-php-client:
-	if [ ! -d "./php-api-client" ]; then git clone git@github.com:obada-protocol/php-client-library ./php-api-client; fi
+clone-node-api-library:
+	if [ ! -d "./node-api-library" ]; then git clone git@github.com:obada-protocol/node-api-library ./node-api-library; fi
 
-generate-php-client: clone-php-client
+generate-node-api-library: clone-node-api-library
 	docker run --rm \
-		-v $$(pwd)/openapi:/local -v $$(pwd)/php-api-client:/src openapitools/openapi-generator-cli generate \
+		-v $$(pwd)/openapi:/local -v $$(pwd)/node-api-library:/src openapitools/openapi-generator-cli generate \
 		-i /local/spec.openapi.yml \
 		-g php \
 		--skip-validate-spec \
@@ -74,8 +74,8 @@ build-gateway-tag:
 build-qldb-tag:
 	docker tag $(QLDB_RELEASE_IMAGE) $(QLDB_TAG_IMAGE)
 
-deploy-php-client: generate-php-client
-	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
+deploy-node-api-library: generate-node-api-library
+	cd node-api-library && git add . && git commit -m 'OpenApi contract update' && git push origin master
 
 bpd: build-gateway-branch publish-branch-image-gateway deploy-staging
 
