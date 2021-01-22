@@ -1,5 +1,5 @@
 gitUserId: obada-protocol
-gitRepoId: php-client-library
+gitRepoId: node-api-library
 variableNamingConvention: camelCase
 invokerPackage: Obada
 modelPackage: Entities
