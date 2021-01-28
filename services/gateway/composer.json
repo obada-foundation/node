@@ -4,6 +4,16 @@
     "keywords": ["framework", "laravel", "lumen"],
     "license": "MIT",
     "type": "project",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:obada-protocol/php-client-library.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:obada-protocol/php-sdk.git"
+        }
+    ],
     "require": {
         "php": "^7.4",
         "aws/aws-sdk-php": "^3.155",
@@ -13,7 +23,8 @@
         "pearl/lumen-request-validate": "^1.5",
         "sentry/sentry-laravel": "^2.0",
         "spatie/data-transfer-object": "^2.5",
-        "tuupola/base58": "^2.1"
+        "tuupola/base58": "^2.1",
+        "obada-protocol/php-sdk": "dev-develop"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

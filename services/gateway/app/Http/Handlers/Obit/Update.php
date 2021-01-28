@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Handlers\Obit;
 
 use App\Http\Handlers\Handler;
+use App\Obada\Mappers\Input\ObitInputMapper;
 use App\Services\Gateway\UpdateObitDto;
 use App\Services\Gateway\ServiceContract;
-use App\Http\Requests\Obit\UpdateRequest;
 use Illuminate\Support\Facades\Log;
+use Obada\Exceptions\PropertyValidationException;
 
 class Update extends Handler {
 
@@ -19,17 +20,22 @@ class Update extends Handler {
     }
 
     /**
-     * @param UpdateRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(UpdateRequest $request) {
-        Log::debug('request', [$request]);
+    public function __invoke() {
+        Log::debug('request', [request()->all()]);
 
         $did = request()->route()[2]['obitDID'];
 
-        $dto = UpdateObitDto::fromRequest($request);
+        try {
+            $obit = app()
+                ->make(ObitInputMapper::class)
+                ->map(request()->json()->all());
 
-        $this->service->update($did, $dto);
+            $this->service->update($did, $obit);
+        } catch (PropertyValidationException $t) {
+            return $this->respondValidationErrors([], $t->getMessage());
+        }
 
         return $this->successRequestWithNoData();
     }

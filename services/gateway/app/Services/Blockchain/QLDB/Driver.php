@@ -7,6 +7,7 @@ namespace App\Services\Blockchain\QLDB;
 use GuzzleHttp\Client;
 use Throwable;
 use Illuminate\Support\Facades\Log;
+use function GuzzleHttp\json_decode;
 
 class Driver  {
 
@@ -14,6 +15,17 @@ class Driver  {
 
     public function __construct() {
         $this->client = new Client(['base_uri' => 'http://qldb:3000/v1/']);
+    }
+
+    public function metadata($obitId) {
+        try {
+            $response = $this->client->get("obits/{$obitId}/metadata");
+        } catch (Throwable $t) {
+            Log::error($t->getMessage(), [$t]);
+            throw $t;
+        }
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**

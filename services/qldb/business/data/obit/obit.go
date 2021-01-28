@@ -59,6 +59,54 @@ func (s Service) Create(ctx context.Context, traceID string, no NewObit) error {
 	return nil
 }
 
+func (s Service) Metadata(ctx context.Context, traceID string, obitDID string) (ObitQldbMetadata, error) {
+	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.metadata")
+	defer span.End()
+
+	const q = "select * FROM _ql_committed_Obits AS o WHERE o.data.ObitDID = ?"
+
+	s.log.Printf("%s : %s : query : %s", traceID, "obit.Metadata",
+		database.Log(q, obitDID),
+	)
+
+	md, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		result, err := txn.Execute(q, obitDID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Assume the result is not empty
+		ionBinary, err := result.Next(txn)
+		if err != nil {
+			return nil, err
+		}
+
+		s.log.Print(ionBinary)
+
+		temp := new(ObitQldbMetadata)
+		err = ion.Unmarshal(ionBinary, temp)
+		if err != nil {
+			return nil, err
+		}
+
+		return *temp, nil
+	})
+
+	var metadata ObitQldbMetadata
+
+	if err != nil {
+		if err.Error() == "no more values" {
+			return metadata, ErrNotFound
+		}
+
+		return metadata, errors.Wrap(err, "selecting single obit metadata")
+	}
+	
+	metadata = md.(ObitQldbMetadata)
+
+	return metadata, nil
+}
+
 
 func (s Service) FindById(ctx context.Context, traceID string, obitDID string) (Obit, error) {
 	ctx, span := trace.SpanFromContext(ctx).Tracer().Start(ctx, "business.data.obit.show")

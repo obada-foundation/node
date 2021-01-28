@@ -4,28 +4,39 @@ declare(strict_types=1);
 
 namespace App\Services\Gateway;
 
-use App\Services\Gateway\Models\Obit;
-use App\Services\Gateway\ObitDto;
+use Obada\Obit;
+use App\Services\Gateway\Models\Obit as Model;
 use Illuminate\Support\Collection;
 
 interface ServiceContract {
+    /**
+     * @return mixed
+     */
     public function search();
 
     /**
-     * @param ObitDto $dto
+     * @param Obit $obit
      * @return mixed
      */
-    public function create(ObitDto $dto);
+    public function create(Obit $obit);
 
     /**
      * @param string $obitId
-     * @param UpdateObitDto $dto
+     * @param Obit $obit
      * @return mixed
      */
-    public function update(string $obitId, UpdateObitDto $dto);
+    public function update(string $obitId, Obit $obit);
 
-    public function show(string $obitId): ?Obit;
+    /**
+     * @param string $obitId
+     * @return Model|null
+     */
+    public function show(string $obitId): ?Model;
 
+    /**
+     * @param string $obitId
+     * @return mixed
+     */
     public function delete(string $obitId);
 
     /**
@@ -34,5 +45,9 @@ interface ServiceContract {
      */
     public function history(string $obitId): Collection;
 
-    public function commit(string $obitDID);
+    /**
+     * @param array $qldbMetadata
+     * @return mixed
+     */
+    public function commit(array $qldbMetadata);
 }

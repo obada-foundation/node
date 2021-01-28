@@ -20,7 +20,6 @@ class Show extends Handler {
     }
 
     /**
-     * @param string $obitDID
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke() {
