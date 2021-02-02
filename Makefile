@@ -1,6 +1,6 @@
 GATEWAY_PROJECT = obada/server-gateway
 QLDB_PROJECT = obada/qldb
-COMMIT_BRANCH ?= dev
+COMMIT_BRANCH ?= develop
 GATEWAY_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_BRANCH)
 GATEWAY_RELEASE_IMAGE = $(GATEWAY_PROJECT):master
 GATEWAY_TAG_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_TAG)
@@ -23,8 +23,12 @@ deploy-staging:
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
-test:
-	docker exec -t
+prepare-test:
+	docker run -d --name db -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=gateway mysql:8
+	sleep 15
+
+test: prepare-test
+	docker run --rm -t --link db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit"
 
 deploy-api-clients: deploy-node-api-library
 	@echo "Deployment of client libraries was done"
