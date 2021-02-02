@@ -74,7 +74,7 @@ deploy-node-api-library: generate-node-api-library
 	HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
 	if [ "$$HAS_CHANGES_TO_COMMIT" -gt 0 ]; then \
 	  git commit -m 'OpenApi contract update'; \
-	  git push origin main ; \
+	  git push origin master ; \
 	fi
 
 bpd: build-gateway-branch publish-branch-image-gateway deploy-staging
