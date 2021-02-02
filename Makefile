@@ -69,7 +69,13 @@ build-qldb-tag:
 	docker tag $(QLDB_RELEASE_IMAGE) $(QLDB_TAG_IMAGE)
 
 deploy-node-api-library: generate-node-api-library
-	cd node-api-library && git add . && git commit -m 'OpenApi contract update' && git push origin master
+	cd node-api-library ; \
+	git add . ; \
+	HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
+	if [ "$$HAS_CHANGES_TO_COMMIT" -gt 0 ]; then \
+	  git commit -m 'OpenApi contract update'; \
+	  git push origin main ; \
+	fi
 
 bpd: build-gateway-branch publish-branch-image-gateway deploy-staging
 
