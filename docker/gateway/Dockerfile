@@ -1,4 +1,4 @@
-FROM php:fpm as base
+FROM php:7-fpm as base
 
 RUN apt update \
 	&& apt install nginx supervisor -y \
