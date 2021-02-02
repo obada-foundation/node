@@ -54,7 +54,7 @@ return array(
     'PackageVersions\\' => array($vendorDir . '/composer/package-versions-deprecated/src/PackageVersions'),
     'OwenIt\\Auditing\\' => array($vendorDir . '/owen-it/laravel-auditing/src'),
     'Opis\\Closure\\' => array($vendorDir . '/opis/closure/src'),
-    'Obada\\' => array($vendorDir . '/obada-protocol/php-client-library/lib', $vendorDir . '/obada-protocol/php-sdk/src'),
+    'Obada\\' => array($vendorDir . '/obada-protocol/node-api-library/lib', $vendorDir . '/obada-protocol/sdk-php/src'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
     'Laravel\\Lumen\\' => array($vendorDir . '/laravel/lumen-framework/src'),
     'JmesPath\\' => array($vendorDir . '/mtdowling/jmespath.php/src'),

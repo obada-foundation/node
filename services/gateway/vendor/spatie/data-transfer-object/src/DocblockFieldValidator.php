@@ -4,27 +4,31 @@ declare(strict_types=1);
 
 namespace Spatie\DataTransferObject;
 
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
+
 class DocblockFieldValidator extends FieldValidator
 {
-    /*
-     * @var (                               Starting with `@var `, we'll capture the definition the follows
-     *
-     *      (?:                             Not explicitly capturing this group,
-     *                                        which contains repeated sets of type definitions
-     *
-     *          (?:                         Not explicitly capturing this group
-     *              [\w?|\\\\<>,\s]         Matches type definitions like `int|string|\My\Object|array<int, string>`
-     *          )+                          These definitions can be repeated
-     *
-     *          (?:                         Not explicitly capturing this group
-     *              \[]                     Matches array definitions like `int[]`
-     *          )?                          Array definitions are optional though
-     *
-     *      )+                              Repeated sets of type definitions
-     *
-     * )                                    The whole definition after `@var ` is captured in one group
-     */
-    public const DOCBLOCK_REGEX = '/@var ((?:(?:[\w?|\\\\<>,\s])+(?:\[])?)+)/';
+    public const DOCBLOCK_REGEX = <<<REGEXP
+        /
+        @var (                               # Starting with `@var `, we'll capture the definition the follows
+
+             (?:                             # Not explicitly capturing this group,
+                                             # which contains repeated sets of type definitions
+
+                 (?:                         # Not explicitly capturing this group
+                     [\w?|\\\\<>,\s]         # Matches type definitions like `int|string|\My\Object|array<int, string>`
+                 )+                          # These definitions can be repeated
+
+                 (?:                         # Not explicitly capturing this group
+                     \[]                     # Matches array definitions like `int[]`
+                 )?                          # Array definitions are optional though
+
+             )+                              # Repeated sets of type definitions
+
+        )                                    # The whole definition after `@var ` is captured in one group
+        /x
+REGEXP;
 
     public function __construct(string $definition, bool $hasDefaultValue = false)
     {
@@ -84,7 +88,8 @@ class DocblockFieldValidator extends FieldValidator
 
     private function resolveAllowedArrayTypes(string $definition): array
     {
-        return $this->normaliseTypes(...array_map(
+        // Iterators flatten the array for multiple return types from DataTransferObjectCollection::current
+        return $this->normaliseTypes(...(new RecursiveIteratorIterator(new RecursiveArrayIterator(array_map(
             function (string $type) {
                 if (! $type) {
                     return;
@@ -100,10 +105,14 @@ class DocblockFieldValidator extends FieldValidator
                     return $matches[1];
                 }
 
+                if (is_subclass_of($type, DataTransferObjectCollection::class)) {
+                    return $this->resolveAllowedArrayTypesFromCollection($type);
+                }
+
                 return null;
             },
             explode('|', $definition)
-        ));
+        )))));
     }
 
     private function resolveAllowedArrayKeyTypes(string $definition): array
@@ -119,14 +128,6 @@ class DocblockFieldValidator extends FieldValidator
                 return $matches[2] ?? null;
             },
             explode('|', $definition)
-        ));
-    }
-
-    private function normaliseTypes(?string ...$types): array
-    {
-        return array_filter(array_map(
-            fn (?string $type) => self::$typeMapping[$type] ?? $type,
-            $types
         ));
     }
 }

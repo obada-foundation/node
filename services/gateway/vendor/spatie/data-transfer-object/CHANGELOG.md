@@ -2,6 +2,18 @@
 
 All notable changes to `data-transfer-object` will be documented in this file
 
+## 2.8.0 - 2021-01-27
+
+- Allow the traversal of collections with string keys
+
+## 2.7.0 - 2021-01-21
+
+- Cast nested collections (#117)
+
+## 2.6.0 - 2020-11-26
+
+- Support PHP 8
+
 ## 2.5.0 - 2020-08-28
 
 - Group type errors (#130)
@@ -10,7 +22,7 @@ All notable changes to `data-transfer-object` will be documented in this file
 
 - Support for `array<int, string>` syntax (#136)
 
-## 2.3.0
+## 2.3.0 - 2020-08-19
 
 - Add PHPStan extension to support `checkUninitializedProperties: true` (#135)
 

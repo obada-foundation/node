@@ -7,11 +7,11 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:obada-protocol/php-client-library.git"
+            "url": "git@github.com:obada-foundation/node-api-library.git"
         },
         {
             "type": "vcs",
-            "url": "git@github.com:obada-protocol/php-sdk.git"
+            "url": "git@github.com:obada-foundation/sdk-php.git"
         }
     ],
     "require": {
@@ -24,7 +24,7 @@
         "sentry/sentry-laravel": "^2.0",
         "spatie/data-transfer-object": "^2.5",
         "tuupola/base58": "^2.1",
-        "obada-protocol/php-sdk": "dev-develop"
+        "obada-protocol/sdk-php": "0.0.1"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",
