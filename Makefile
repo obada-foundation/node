@@ -23,12 +23,19 @@ deploy-staging:
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
+
+DB_RUNNING := $(shell sh -c "docker ps -q -f name=node-db|wc -l|tr -d ' '")
 prepare-test:
-	docker run -d --name db -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=gateway mysql:8
-	sleep 15
+	if [ $(DB_RUNNING) -eq 0 ]; then \
+		docker run -d --name node-db -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=gateway mysql:8 ; \
+		sleep 15 ; \
+	fi
 
 test: prepare-test
-	docker run --rm -t --link db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit"
+	docker run --rm -t --link node-db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit $$ARGS"
+
+test-local: prepare-test
+	docker run -v $$(pwd)/services/gateway:/app --rm -t --link node-db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit $$ARGS"
 
 deploy-api-clients: deploy-node-api-library
 	@echo "Deployment of client libraries was done"
