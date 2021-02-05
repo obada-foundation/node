@@ -14,8 +14,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
-          repository: obada-protocol/php-client-library
-          path: php-api-client
+          repository: obada-foundation/node-api-library
+          path: node-api-library
 
       - id: lint
         run: make lint-openapi-spec
@@ -24,4 +24,4 @@ jobs:
         run: |
           git config --global user.name "OBADA TechOps Team"
           git config --global user.email "techops@obada.io"
-          make deploy-php-client
+          make deploy-node-api-library

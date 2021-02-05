@@ -1,6 +1,6 @@
 GATEWAY_PROJECT = obada/server-gateway
 QLDB_PROJECT = obada/qldb
-COMMIT_BRANCH ?= dev
+COMMIT_BRANCH ?= develop
 GATEWAY_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_BRANCH)
 GATEWAY_RELEASE_IMAGE = $(GATEWAY_PROJECT):master
 GATEWAY_TAG_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_TAG)
@@ -23,32 +23,33 @@ deploy-staging:
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
-test:
-	docker exec -t
 
-deploy-api-clients: deploy-php-client
+DB_RUNNING := $(shell sh -c "docker ps -q -f name=node-db|wc -l|tr -d ' '")
+prepare-test:
+	if [ $(DB_RUNNING) -eq 0 ]; then \
+		docker run -d --name node-db -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=gateway mysql:8 ; \
+		sleep 15 ; \
+	fi
+
+test: prepare-test
+	docker run --rm -t --link node-db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit $$ARGS"
+
+test-local: prepare-test
+	docker run -v $$(pwd)/services/gateway:/app --rm -t --link node-db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit $$ARGS"
+
+deploy-api-clients: deploy-node-api-library
 	@echo "Deployment of client libraries was done"
 
-clone-php-client:
-	if [ ! -d "./php-api-client" ]; then git clone git@github.com:obada-protocol/php-client-library ./php-api-client; fi
+clone-node-api-library:
+	if [ ! -d "./node-api-library" ]; then git clone git@github.com:obada-foundation/node-api-library ./node-api-library; fi
 
-generate-php-client: clone-php-client
+generate-node-api-library: clone-node-api-library
 	docker run --rm \
-		-v $$(pwd)/openapi:/local -v $$(pwd)/php-api-client:/src openapitools/openapi-generator-cli generate \
+		-v $$(pwd)/openapi:/local -v $$(pwd)/node-api-library:/src openapitools/openapi-generator-cli generate \
 		-i /local/spec.openapi.yml \
 		-g php \
-		--skip-validate-spec \
 		-o /src \
 		-c /local/clients/php/config.yml
-
-generate-javascript-client:
-	docker run --rm \
-		-v $$(pwd)/openapi:/local -v $$(pwd)/javascript-api-client:/src openapitools/openapi-generator-cli generate \
-		-i /local/spec.openapi.yml \
-		-g javascript \
-		--skip-validate-spec \
-		-o /src \
-		-c /local/clients/javascript/config.yml
 
 build-gateway-branch:
 	docker build -t $(GATEWAY_IMAGE) -f docker/gateway/Dockerfile . --build-arg APP_ENV=dev
@@ -74,8 +75,14 @@ build-gateway-tag:
 build-qldb-tag:
 	docker tag $(QLDB_RELEASE_IMAGE) $(QLDB_TAG_IMAGE)
 
-deploy-php-client: generate-php-client
-	cd php-api-client && git add . && git commit -m 'OpenApi contract update' && git push origin master
+deploy-node-api-library: generate-node-api-library
+	cd node-api-library ; \
+	git add . ; \
+	HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
+	if [ "$$HAS_CHANGES_TO_COMMIT" -gt 0 ]; then \
+	  git commit -m 'OpenApi contract update'; \
+	  git push origin master ; \
+	fi
 
 bpd: build-gateway-branch publish-branch-image-gateway deploy-staging
 

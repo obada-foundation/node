@@ -4,6 +4,10 @@ import (
 	"github.com/amzn/ion-go/ion"
 )
 
+type ObitQldbMetadata struct {
+	Hash interface{} `ion:"hash" json:"qldb_hash"`
+}
+
 type Obit struct {
 	ObitDID string `ion:"ObitDID" json:"obit_did"`
 	Usn string `ion:"Usn" json:"usn"`

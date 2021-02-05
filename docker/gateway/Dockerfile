@@ -1,4 +1,4 @@
-FROM php:fpm as base
+FROM php:7-fpm as base
 
 RUN apt update \
 	&& apt install nginx supervisor -y \
@@ -7,7 +7,7 @@ RUN apt update \
 
 WORKDIR /app
 
-FROM composer:latest AS composer
+FROM composer:1.10.19 AS composer
 
 ARG APP_ENV=prod
 

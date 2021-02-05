@@ -53,7 +53,7 @@ class Handler implements ExceptionHandler
             throw $e; // throw the original exception
         }
 
-        $logger->error($e, ['exception' => $e]);
+        $logger->error($e->getMessage(), ['exception' => $e]);
     }
 
     /**
@@ -165,7 +165,8 @@ class Handler implements ExceptionHandler
     {
         $response = new Response(
             $this->renderExceptionWithSymfony($e, config('app.debug', false)),
-            $this->isHttpException($e) ? $e->getStatusCode() : 500
+            $this->isHttpException($e) ? $e->getStatusCode() : 500,
+            $this->isHttpException($e) ? $e->getHeaders() : []
         );
 
         $response->exception = $e;

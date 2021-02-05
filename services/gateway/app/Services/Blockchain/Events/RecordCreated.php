@@ -8,13 +8,13 @@ use App\Events\Event;
 
 class RecordCreated extends Event
 {
-    public array $obit;
+    public array $metadata;
 
     /**
      * RecordCreated constructor.
-     * @param array $obit
+     * @param array $metadata
      */
-    public function __construct(array $obit) {
-        $this->obit = $obit;
+    public function __construct(array $metadata) {
+        $this->metadata = $metadata;
     }
 }

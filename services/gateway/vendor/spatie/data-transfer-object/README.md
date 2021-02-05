@@ -1,7 +1,7 @@
 # Data transfer objects with batteries included
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/spatie/data-transfer-object.svg?style=flat-square)](https://packagist.org/packages/spatie/data-transfer-object)
-[![Quality Score](https://img.shields.io/scrutinizer/g/spatie/data-transfer-object.svg?style=flat-square)](https://scrutinizer-ci.com/g/spatie/data-transfer-object)
+![Test](https://github.com/spatie/data-transfer-object/workflows/Test/badge.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/data-transfer-object.svg?style=flat-square)](https://packagist.org/packages/spatie/data-transfer-object)
 
 ## Installation
@@ -16,9 +16,7 @@ composer require spatie/data-transfer-object
 
 ## Support us
 
-Learn how to create a package like this one, by watching our premium video course:
-
-[![Laravel Package training](https://spatie.be/github/package-training.jpg)](https://laravelpackage.training)
+[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/data-transfer-object.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/data-transfer-object)
 
 We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
 
@@ -247,7 +245,7 @@ Alternatively you can also use a phpdoc for this:
 use Spatie\DataTransferObject\DataTransferObjectCollection;
 
 /**
- * @method PostData current
+ * @method \App\DataTransferObjects\PostData current
  */
 class PostCollection extends DataTransferObjectCollection
 {
@@ -450,7 +448,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed re
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+Please see [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
 
 ### Security
 
@@ -467,6 +465,7 @@ We publish all received postcards [on our company website](https://spatie.be/en/
 ## External tools
 
 - [json2dto](https://json2dto.atymic.dev): a GUI to convert JSON objects to DTO classes (with nesting support). Also provides a [CLI tool](https://github.com/atymic/json2dto#cli-tool) for local usage.
+- [Data Transfer Object Factory](https://github.com/anteris-dev/data-transfer-object-factory): generates a DTO instance or collection with fake data based on its definition. Supports type casting and doc blocks.
 
 ## Credits
 

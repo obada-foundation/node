@@ -4,16 +4,27 @@
     "keywords": ["framework", "laravel", "lumen"],
     "license": "MIT",
     "type": "project",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:obada-foundation/node-api-library.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:obada-foundation/sdk-php.git"
+        }
+    ],
     "require": {
         "php": "^7.4",
         "aws/aws-sdk-php": "^3.155",
         "ksbomj/json-response": "^0.0.2",
-        "laravel/lumen-framework": "^7.0",
+        "laravel/lumen-framework": "^8.0",
         "owen-it/laravel-auditing": "^11.0",
         "pearl/lumen-request-validate": "^1.5",
         "sentry/sentry-laravel": "^2.0",
         "spatie/data-transfer-object": "^2.5",
-        "tuupola/base58": "^2.1"
+        "tuupola/base58": "^2.1",
+        "obada-foundation/sdk-php": "0.0.1"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.9.1",

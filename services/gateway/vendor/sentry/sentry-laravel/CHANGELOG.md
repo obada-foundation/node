@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+## 2.3.1
+
+- Fix problems when enabling tracing on Laravel Lumen (#416)
+- PHP 8 Support (#431)
+
+## 2.3.0
+
+- Bump Sentry SDK to `3.1.*` (#420)
+
+## 2.2.0
+
+- Fix incorrectly stripped base controller action from transaction name (#406)
+- Move tracing request/response data hydration to the tracing middleware (#408)
+
+## 2.1.1
+
+- Fix for potential `Undefined index: controllers_base_namespace.` notice
+
+## 2.1.0
+
+- Added a option (`controllers_base_namespace`) to strip away the controller base namespace for cleaner transaction names (#393)
+- Fix incompatibility with other packages that also decorate the view engine, like Livewire (#395)
+
+## 2.0.1
+
+- Improve performance tracing by nesting `view.render` spans and adding a `app.handle` span showing how long the actual application code runs after Laravel bootstrapping (#387)
+- Improve UX of `sentry:publish` command
+
 ## 2.0.0
 
 **Breaking Change**: This version uses the [envelope endpoint](https://develop.sentry.dev/sdk/envelopes/). If you are

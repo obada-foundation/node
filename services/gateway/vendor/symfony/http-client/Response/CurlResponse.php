@@ -15,9 +15,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpClient\Chunk\FirstChunk;
 use Symfony\Component\HttpClient\Chunk\InformationalChunk;
 use Symfony\Component\HttpClient\Exception\TransportException;
+use Symfony\Component\HttpClient\Internal\Canary;
 use Symfony\Component\HttpClient\Internal\ClientState;
 use Symfony\Component\HttpClient\Internal\CurlClientState;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
@@ -25,11 +25,12 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  *
  * @internal
  */
-final class CurlResponse implements ResponseInterface
+final class CurlResponse implements ResponseInterface, StreamableInterface
 {
-    use ResponseTrait {
+    use CommonResponseTrait {
         getContent as private doGetContent;
     }
+    use TransportResponseTrait;
 
     private static $performing = false;
     private $multi;
@@ -100,6 +101,27 @@ final class CurlResponse implements ResponseInterface
             return;
         }
 
+        $execCounter = $multi->execCounter;
+        $this->info['pause_handler'] = static function (float $duration) use ($ch, $multi, $execCounter) {
+            if (0 < $duration) {
+                if ($execCounter === $multi->execCounter) {
+                    $multi->execCounter = !\is_float($execCounter) ? 1 + $execCounter : \PHP_INT_MIN;
+                    curl_multi_remove_handle($multi->handle, $ch);
+                }
+
+                $lastExpiry = end($multi->pauseExpiries);
+                $multi->pauseExpiries[(int) $ch] = $duration += microtime(true);
+                if (false !== $lastExpiry && $lastExpiry > $duration) {
+                    asort($multi->pauseExpiries);
+                }
+                curl_pause($ch, \CURLPAUSE_ALL);
+            } else {
+                unset($multi->pauseExpiries[(int) $ch]);
+                curl_pause($ch, \CURLPAUSE_CONT);
+                curl_multi_add_handle($multi->handle, $ch);
+            }
+        };
+
         $this->inflate = !isset($options['normalized_headers']['accept-encoding']);
         curl_pause($ch, \CURLPAUSE_CONT);
 
@@ -150,6 +172,31 @@ final class CurlResponse implements ResponseInterface
         // Schedule the request in a non-blocking way
         $multi->openHandles[$id] = [$ch, $options];
         curl_multi_add_handle($multi->handle, $ch);
+
+        $this->canary = new Canary(static function () use ($ch, $multi, $id) {
+            unset($multi->pauseExpiries[$id], $multi->openHandles[$id], $multi->handlesActivity[$id]);
+            curl_setopt($ch, \CURLOPT_PRIVATE, '_0');
+
+            if (self::$performing) {
+                return;
+            }
+
+            curl_multi_remove_handle($multi->handle, $ch);
+            curl_setopt_array($ch, [
+                \CURLOPT_NOPROGRESS => true,
+                \CURLOPT_PROGRESSFUNCTION => null,
+                \CURLOPT_HEADERFUNCTION => null,
+                \CURLOPT_WRITEFUNCTION => null,
+                \CURLOPT_READFUNCTION => null,
+                \CURLOPT_INFILE => null,
+            ]);
+
+            if (!$multi->openHandles) {
+                // Schedule DNS cache eviction for the next request
+                $multi->dnsCache->evictions = $multi->dnsCache->evictions ?: $multi->dnsCache->removals;
+                $multi->dnsCache->removals = $multi->dnsCache->hostnames = [];
+            }
+        });
     }
 
     /**
@@ -200,52 +247,13 @@ final class CurlResponse implements ResponseInterface
 
     public function __destruct()
     {
-        try {
-            if (null === $this->timeout) {
-                return; // Unused pushed response
-            }
+        curl_setopt($this->handle, \CURLOPT_VERBOSE, false);
 
-            $e = null;
-            $this->doDestruct();
-        } catch (HttpExceptionInterface $e) {
-            throw $e;
-        } finally {
-            if ($e ?? false) {
-                throw $e;
-            }
-
-            $this->close();
-
-            if (!$this->multi->openHandles) {
-                // Schedule DNS cache eviction for the next request
-                $this->multi->dnsCache->evictions = $this->multi->dnsCache->evictions ?: $this->multi->dnsCache->removals;
-                $this->multi->dnsCache->removals = $this->multi->dnsCache->hostnames = [];
-            }
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    private function close(): void
-    {
-        $this->inflate = null;
-        unset($this->multi->openHandles[$this->id], $this->multi->handlesActivity[$this->id]);
-        curl_setopt($this->handle, \CURLOPT_PRIVATE, '_0');
-
-        if (self::$performing) {
-            return;
+        if (null === $this->timeout) {
+            return; // Unused pushed response
         }
 
-        curl_multi_remove_handle($this->multi->handle, $this->handle);
-        curl_setopt_array($this->handle, [
-            \CURLOPT_NOPROGRESS => true,
-            \CURLOPT_PROGRESSFUNCTION => null,
-            \CURLOPT_HEADERFUNCTION => null,
-            \CURLOPT_WRITEFUNCTION => null,
-            \CURLOPT_READFUNCTION => null,
-            \CURLOPT_INFILE => null,
-        ]);
+        $this->doDestruct();
     }
 
     /**
@@ -285,6 +293,7 @@ final class CurlResponse implements ResponseInterface
 
         try {
             self::$performing = true;
+            ++$multi->execCounter;
             $active = 0;
             while (\CURLM_CALL_MULTI_PERFORM === curl_multi_exec($multi->handle, $active));
 
@@ -297,10 +306,7 @@ final class CurlResponse implements ResponseInterface
                     curl_multi_remove_handle($multi->handle, $ch);
                     $waitFor[1] = (string) ((int) $waitFor[1] - 1); // decrement the retry counter
                     curl_setopt($ch, \CURLOPT_PRIVATE, $waitFor);
-
-                    if ('1' === $waitFor[1]) {
-                        curl_setopt($ch, \CURLOPT_HTTP_VERSION, \CURL_HTTP_VERSION_1_1);
-                    }
+                    curl_setopt($ch, \CURLOPT_FORBID_REUSE, true);
 
                     if (0 === curl_multi_add_handle($multi->handle, $ch)) {
                         continue;
@@ -322,12 +328,35 @@ final class CurlResponse implements ResponseInterface
      */
     private static function select(ClientState $multi, float $timeout): int
     {
-        if (\PHP_VERSION_ID < 70123 || (70200 <= \PHP_VERSION_ID && \PHP_VERSION_ID < 70211)) {
+        if (\PHP_VERSION_ID < 70211) {
             // workaround https://bugs.php.net/76480
             $timeout = min($timeout, 0.01);
         }
 
-        return curl_multi_select($multi->handle, $timeout);
+        if ($multi->pauseExpiries) {
+            $now = microtime(true);
+
+            foreach ($multi->pauseExpiries as $id => $pauseExpiry) {
+                if ($now < $pauseExpiry) {
+                    $timeout = min($timeout, $pauseExpiry - $now);
+                    break;
+                }
+
+                unset($multi->pauseExpiries[$id]);
+                curl_pause($multi->openHandles[$id][0], \CURLPAUSE_CONT);
+                curl_multi_add_handle($multi->handle, $multi->openHandles[$id][0]);
+            }
+        }
+
+        if (0 !== $selected = curl_multi_select($multi->handle, $timeout)) {
+            return $selected;
+        }
+
+        if ($multi->pauseExpiries && 0 < $timeout -= microtime(true) - $now) {
+            usleep(1E6 * $timeout);
+        }
+
+        return 0;
     }
 
     /**

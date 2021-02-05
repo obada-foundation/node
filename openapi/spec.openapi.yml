@@ -103,7 +103,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NewObit"
+              $ref: "#/components/schemas/Obit"
       responses:
         "201":
           $ref: "#/components/responses/Created"
@@ -178,16 +178,7 @@ paths:
             example: "did:obada:fe096095-e0f0-4918-9607-6567bd5756b5"
       responses:
         "200":
-          description: Collection of historical changes for given obit
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/ObitHistory"
+          $ref: "#/components/responses/ObitHistoryResponse"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -195,11 +186,20 @@ components:
   schemas:
     Obit:
       $ref: "definitions/Obit.yml#/Obit"
-    NewObit:
-      $ref: "definitions/Obit.yml#/NewObit"
     ObitHistory:
       $ref: "definitions/Obit.yml#/ObitHistory"
   responses:
+    ObitHistoryResponse:
+      description: Collection of historical changes for given obit
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ObitHistory"
     Created:
       description: The request was successful and the resource was created.
     NoContent:
