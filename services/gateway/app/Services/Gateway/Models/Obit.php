@@ -6,13 +6,15 @@ namespace App\Services\Gateway\Models;
 
 use App\Services\Gateway\Events\RecordCreated;
 use App\Services\Gateway\Events\RecordUpdated;
+use Database\Factories\ObitFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as AuditableConcern;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Obit extends Model implements Auditable {
 
-    use AuditableConcern;
+    use AuditableConcern, HasFactory;
 
     const SYNCHRONIZED = 1;
 

@@ -27,10 +27,6 @@ class Service implements ServiceContract {
         $this->repository = $repository;
     }
 
-    /**
-     * @param array $args
-     * @return \Illuminate\Pagination\LengthAwarePaginator
-     */
     public function search(array $args = []) {
         return $this->repository->findBy($args);
     }

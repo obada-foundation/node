@@ -9,6 +9,7 @@ use App\Services\Gateway\ServiceContract;
 use Carbon\Carbon;
 use Tests\TestCase;
 use Laravel\Lumen\Testing\DatabaseTransactions;
+use App\Services\Gateway\Models\Obit as ObitModel;
 
 class ServiceContractTest extends TestCase {
 
@@ -26,6 +27,7 @@ class ServiceContractTest extends TestCase {
      * @test
      */
     public function it_creates_a_view_record() {
+        ObitModel::unsetEventDispatcher();
         $this->withoutEvents();
 
         $obit = \Obada\Obit::make([

@@ -15,7 +15,7 @@ jobs:
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-foundation/node-api-library
-          path: php-api-client
+          path: node-api-library
 
       - id: lint
         run: make lint-openapi-spec

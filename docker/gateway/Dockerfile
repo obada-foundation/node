@@ -32,7 +32,7 @@ COPY docker/gateway/etc/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY docker/gateway/etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/gateway/etc/supervisord.conf /etc/supervisord.conf
 
-COPY --from=composer:1.10.20 /var/www/ /app
+COPY --from=composer /var/www/ /app
 
 RUN chown -R www-data:www-data /app
 

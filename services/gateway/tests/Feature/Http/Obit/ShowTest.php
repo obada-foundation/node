@@ -36,7 +36,9 @@ class ShowTest extends TestCase {
      * @test
      */
     public function it_returns_a_genesis_record() {
-        $obit = factory(Obit::class)->create();
+        Obit::unsetEventDispatcher();
+
+        $obit = Obit::factory()->create();
 
         $this->get(route('obits.show', ['obitDID' => $obit->obit_did]));
 

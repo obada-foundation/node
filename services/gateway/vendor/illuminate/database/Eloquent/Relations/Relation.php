@@ -49,11 +49,18 @@ abstract class Relation
     protected static $constraints = true;
 
     /**
-     * An array to map class names to their morph names in database.
+     * An array to map class names to their morph names in the database.
      *
      * @var array
      */
     public static $morphMap = [];
+
+    /**
+     * The count of self joins.
+     *
+     * @var int
+     */
+    protected static $selfJoinCount = 0;
 
     /**
      * Create a new relation instance.
@@ -211,6 +218,17 @@ abstract class Relation
         return $query->select($columns)->whereColumn(
             $this->getQualifiedParentKeyName(), '=', $this->getExistenceCompareKey()
         );
+    }
+
+    /**
+     * Get a relationship join table hash.
+     *
+     * @param  bool  $incrementJoinCount
+     * @return string
+     */
+    public function getRelationCountHash($incrementJoinCount = true)
+    {
+        return 'laravel_reserved_'.($incrementJoinCount ? static::$selfJoinCount++ : static::$selfJoinCount);
     }
 
     /**
