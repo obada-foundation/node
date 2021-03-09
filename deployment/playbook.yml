@@ -4,8 +4,34 @@
   vars:
     deployment_path: .
     config_path: "{{ deployment_path }}/etc"
+    unattended_upgrades_origins:
+      - ${distro_id}:${distro_codename}-security
+      # Optional
+      #- ${distro_id}:${distro_codename}-updates
+    unattended_upgrades_autofix_interrupted: true
+    unattended_upgrades_remove_unused: true
+    unattended_upgrades_auto_reboot: false
+    unattended_upgrades_reboot_time: "07:00"
+
+    # Update schedule
+    unattended_upgrades_update_package_lists: 1
+    unattended_upgrades_download_packages: 1
+    unattended_upgrades_autoclean_interval: 15
+
+  handlers:
+    - name: sshd restart
+      service: name=ssh state=restarted
+
+    - name: unattended-upgrades restart
+      service: name=unattended-upgrades state=restarted
 
   tasks:
+    - import_tasks: tasks/install-packages.yml
+    - import_tasks: tasks/security-updates.yml
+    - import_tasks: tasks/install-docker.yml
+    - import_tasks: tasks/install-fail2ban.yml
+    - import_tasks: tasks/ssh-configuration.yml
+
     - name: Create config directories
       file:
         path: "{{ config_path }}/{{ item }}"

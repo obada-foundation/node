@@ -14,7 +14,7 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return ['service' => 'obada-node-api'];
 });
 
 $router->group(['prefix' => 'obits', 'namespace' => '\App\Http\Handlers\Obit'], function() use ($router) {
