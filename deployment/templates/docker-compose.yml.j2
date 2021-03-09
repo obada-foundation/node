@@ -25,8 +25,8 @@ services:
     environment:
       - TZ=America/Chicago
       - LETSENCRYPT=true
-      - LE_EMAIL=ksbomj@gmail.com
-      - LE_FQDN=dev.api.obada.io
+      - LE_EMAIL=techops@obada.io
+      - LE_FQDN={{ obada_member }}.node.obada.io
 
   queue:
     image: obada/server-gateway:dev
