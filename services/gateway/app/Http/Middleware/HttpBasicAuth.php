@@ -16,16 +16,9 @@ class HttpBasicAuth
      */
     public function handle($request, Closure $next)
     {
-        $envs = [
-            'staging',
-            'production'
-        ];
-
-        if(in_array(app()->environment(), $envs)) {
-            if ($request->getUser() != config('node.user') || $request->getPassword() != config('node.password')) {
-                $headers = array('WWW-Authenticate' => 'Basic');
-                return response('Unauthorized', 401, $headers);
-            }
+        if ($request->getUser() != config('node.user') || $request->getPassword() != config('node.password')) {
+            $headers = array('WWW-Authenticate' => 'Basic');
+            return response('Unauthorized', 401, $headers);
         }
 
         return $next($request);
