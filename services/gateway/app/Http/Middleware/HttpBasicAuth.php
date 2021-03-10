@@ -16,8 +16,7 @@ class HttpBasicAuth
     public function handle($request, Closure $next)
     {
         if ($request->getUser() != config('node.user') || $request->getPassword() != config('node.password')) {
-            $headers = array('WWW-Authenticate' => 'Basic');
-            return response('Unauthorized', 401, $headers);
+            return response('Unauthorized', 401, ['WWW-Authenticate' => 'Basic']);
         }
 
         return $next($request);
