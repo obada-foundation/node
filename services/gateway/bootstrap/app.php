@@ -60,6 +60,7 @@ $app->singleton(
 */
 
 $app->configure('app');
+$app->configure('node');
 $app->configure('database');
 $app->configure('qldb');
 $app->configure('audit');
@@ -80,9 +81,9 @@ $app->configure('queue');
 //     App\Http\Middleware\ExampleMiddleware::class
 // ]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+$app->routeMiddleware([
+     'auth.basic' => App\Http\Middleware\HttpBasicAuth::class,
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -96,7 +97,7 @@ $app->configure('queue');
 */
 
 // $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(App\Services\Blockchain\BlockchainServiceProvider::class);
 $app->register(\App\Services\Gateway\GatewayServiceProvider::class);

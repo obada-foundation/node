@@ -29,7 +29,7 @@ services:
       - LE_FQDN={{ obada_member }}.node.obada.io
 
   queue:
-    image: obada/server-gateway:dev
+    image: obada/server-gateway:develop
     container_name: queue
     volumes:
       - ./etc/.env:/app/.env
@@ -39,7 +39,7 @@ services:
       - backend
 
   app:
-    image: obada/server-gateway:dev
+    image: obada/server-gateway:develop
     container_name: gateway
     volumes:
       - ./etc/.env:/app/.env
