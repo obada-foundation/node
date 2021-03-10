@@ -6,7 +6,6 @@ use Closure;
 
 class HttpBasicAuth
 {
-
     /**
      * Handle an incoming request.
      *
@@ -23,5 +22,4 @@ class HttpBasicAuth
 
         return $next($request);
     }
-
 }
