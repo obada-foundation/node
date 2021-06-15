@@ -93,5 +93,11 @@ lint-openapi-spec:
       -v $$(pwd)/openapi:/openapi/ \
       wework/speccy lint /openapi/spec.openapi.yml
 
+run-node:
+	cd src/app/node && go run main.go
+
+vendor:
+	cd src && go mod tidy && go mod vendor
+
 help:
 	@echo "Help here"
