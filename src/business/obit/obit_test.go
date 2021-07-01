@@ -18,9 +18,7 @@ func TestObit(t *testing.T) {
 	service := NewObitService(sdk)
 
 	t.Log("Given need to check obit service functionality")
-	{
-		service.Create()
-	}
+	service.Create()
 
 	t.Cleanup(teardown)
 }

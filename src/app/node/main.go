@@ -12,6 +12,11 @@ import (
 	"time"
 
 	"github.com/ardanlabs/conf"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/qldbsession"
+	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/node/app/node/handlers"
 	obitService "github.com/obada-foundation/node/business/obit"
 	"github.com/obada-foundation/sdkgo"
@@ -59,9 +64,9 @@ func run(logger *log.Logger) error {
 	if err := conf.Parse(os.Args[1:], "OBADA-NODE", &cfg); err != nil {
 		switch err {
 		case conf.ErrHelpWanted:
-			usage, err := conf.Usage("OBADA-NODE", &cfg)
-			if err != nil {
-				return errors.Wrap(err, "generating config usage")
+			usage, er := conf.Usage("OBADA-NODE", &cfg)
+			if er != nil {
+				return errors.Wrap(er, "generating config usage")
 			}
 			fmt.Println(usage)
 			return nil
@@ -90,9 +95,33 @@ func run(logger *log.Logger) error {
 
 	go func() {
 		logger.Printf("main: Debug Listening %s", cfg.Web.DebugHost)
-		if err := http.ListenAndServe(cfg.Web.DebugHost, http.DefaultServeMux); err != nil {
-			logger.Printf("main: Debug Listener closed : %v", err)
+		if er := http.ListenAndServe(cfg.Web.DebugHost, http.DefaultServeMux); er != nil {
+			logger.Printf("main: Debug Listener closed : %v", er)
 		}
+	}()
+
+	// =========================================================================
+	// Start QLDB
+
+	awsConfig := aws.NewConfig().WithRegion(cfg.QLDB.Region)
+	awsConfig.Credentials = credentials.NewStaticCredentials(cfg.QLDB.Key, cfg.QLDB.Secret, "")
+	awsSession := session.Must(session.NewSession(awsConfig))
+	qldbSession := qldbsession.New(awsSession)
+
+	qldb, err := qldbdriver.New(
+		cfg.QLDB.Database,
+		qldbSession,
+		func(options *qldbdriver.DriverOptions) {
+			options.LoggerVerbosity = qldbdriver.LogInfo
+		})
+
+	if err != nil {
+		return errors.Wrap(err, "trying to configure QLDB")
+	}
+
+	defer func() {
+		logger.Printf("main: QLDB Stopping database connection : %s", cfg.QLDB.Database)
+		qldb.Shutdown(context.Background())
 	}()
 
 	// Initialize OBADA SDK
@@ -103,7 +132,7 @@ func run(logger *log.Logger) error {
 	}
 
 	// Initialize ObitService
-	obitService := obitService.NewObitService(sdk)
+	obit := obitService.NewObitService(sdk, logger, qldb)
 
 	logger.Println("main: Initializing API support")
 
@@ -112,7 +141,7 @@ func run(logger *log.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(build, shutdown, logger, obitService),
+		Handler:      handlers.API(build, shutdown, logger, obit),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

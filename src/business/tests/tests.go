@@ -13,7 +13,9 @@ import (
 const (
 	// Success adds unicode symbol checkmark
 	Success = "\u2713"
-	Failed  = "\u2717"
+
+	// Failed adds unicode symbol cross
+	Failed = "\u2717"
 )
 
 var (
@@ -22,6 +24,7 @@ var (
 	dbArgs  = []string{"-e", "MYSQL_ROOT_PASSWORD=secret"}
 )
 
+// NewUnit creates new unit test
 func NewUnit(t *testing.T) (*log.Logger, func()) {
 	c := startContainer(t, dbImage, dbPort, dbArgs...)
 

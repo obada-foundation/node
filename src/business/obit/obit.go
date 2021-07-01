@@ -1,24 +1,38 @@
 package obit
 
 import (
-	sdk "github.com/obada-foundation/sdkgo"
+	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
+	"github.com/obada-foundation/sdkgo"
+	"log"
 )
 
 // Service provider an API to manage obits
 type Service struct {
-	sdk *sdk.Sdk
+	logger *log.Logger
+	sdk    *sdkgo.Sdk
+	qldb   *qldbdriver.QLDBDriver
 }
 
 // NewObitService creates new version of Obit service
-func NewObitService(sdk *sdk.Sdk) *Service {
+func NewObitService(sdk *sdkgo.Sdk, logger *log.Logger, qldb *qldbdriver.QLDBDriver) *Service {
 	return &Service{
-		sdk: sdk,
+		logger: logger,
+		sdk:    sdk,
+		qldb:   qldb,
 	}
 }
 
 // Create method creates a new Obit
-func (os Service) Create() {
+func (os Service) Create(dto sdkgo.ObitDto) error {
+	obit, err := os.sdk.NewObit(dto)
 
+	if err != nil {
+		return err
+	}
+
+	os.logger.Printf("%v", obit)
+
+	return nil
 }
 
 // Update method updates a new Obit

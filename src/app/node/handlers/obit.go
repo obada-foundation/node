@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"github.com/obada-foundation/node/business/obit"
+	"github.com/obada-foundation/node/foundation/web"
+	"github.com/obada-foundation/sdkgo"
 	"net/http"
 )
 
@@ -10,7 +12,46 @@ type obitGroup struct {
 	service *obit.Service
 }
 
+type createObit struct {
+	SerialNumberHash string            `validate:"required" json:"serial_number_hash"`
+	Manufacturer     string            `validate:"required" json:"manufacturer"`
+	PartNumber       string            `validate:"required" json:"part_number"`
+	OwnerDid         string            `validate:"required" json:"owner_did"`
+	ObdDid           string            `json:"obd_did"`
+	Matadata         map[string]string `json:"matadata"`
+	StructuredData   map[string]string `json:"structured_data"`
+	Documents        map[string]string `json:"documents"`
+	ModifiedOn       int64             `json:"modified_on"`
+	AlternateIDS     []string          `json:"alternate_ids"`
+	Status           string            `json:"status"`
+}
+
 func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	var requestData createObit
+
+	err := web.Decode(r, &requestData)
+
+	if err != nil {
+		return err
+	}
+
+	var dto sdkgo.ObitDto
+	dto.SerialNumberHash = requestData.SerialNumberHash
+	dto.Manufacturer = requestData.Manufacturer
+	dto.PartNumber = requestData.PartNumber
+	dto.OwnerDid = requestData.OwnerDid
+	dto.ObdDid = requestData.ObdDid
+	dto.Matadata = requestData.Matadata
+	dto.StructuredData = requestData.StructuredData
+	dto.Documents = requestData.Documents
+	dto.ModifiedOn = requestData.ModifiedOn
+	dto.AlternateIDS = requestData.AlternateIDS
+	dto.Status = requestData.Status
+
+	if err := og.service.Create(dto); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -10,10 +10,12 @@ import (
 )
 
 // API register REST api endpoints
-func API(build string, shutdown chan os.Signal, log *log.Logger, obitService *obit.Service) http.Handler {
-	app := web.NewApp(shutdown, mid.Logger(log), mid.Errors(log), mid.Metrics(), mid.Panics(log))
+func API(build string, shutdown chan os.Signal, logger *log.Logger, obitService *obit.Service) http.Handler {
+	app := web.NewApp(shutdown, mid.Logger(logger), mid.Errors(logger), mid.Metrics(), mid.Panics(logger))
 
-	ob := obitGroup{}
+	ob := obitGroup{
+		service: obitService,
+	}
 
 	app.Handle(http.MethodGet, "/obits", ob.search)
 	app.Handle(http.MethodPost, "/obits", ob.create)
