@@ -13,6 +13,8 @@ import (
 
 	"github.com/ardanlabs/conf"
 	"github.com/obada-foundation/node/app/node/handlers"
+	obitService "github.com/obada-foundation/node/business/obit"
+	sdk "github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
 )
 
@@ -93,6 +95,16 @@ func run(log *log.Logger) error {
 		}
 	}()
 
+	// Initialize OBADA SDK
+	sdk, err := sdk.NewSdk(log, true)
+
+	if err != nil {
+		return errors.Wrap(err, "initializing OBADA SDK")
+	}
+
+	// Initialize ObitService
+	obitService := obitService.NewObitService(sdk)
+
 	log.Println("main: Initializing API support")
 
 	shutdown := make(chan os.Signal, 1)
@@ -100,7 +112,7 @@ func run(log *log.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(build, shutdown, log),
+		Handler:      handlers.API(build, shutdown, log, obitService),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

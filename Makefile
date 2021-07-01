@@ -96,6 +96,7 @@ lint-openapi-spec:
 run-node:
 	cd src/app/node && go run main.go
 
+export GOPRIVATE=github.com/obada-foundation
 vendor:
 	cd src && go mod tidy && go mod vendor
 
