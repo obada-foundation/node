@@ -11,7 +11,7 @@ import (
 // Errors handles errors coming out of the call chain. It detects normal
 // application errors which are used to respond to the client in a uniform way.
 // Unexpected errors (status >= 500) are logged.
-func Errors(log *log.Logger) web.Middleware {
+func Errors(logger *log.Logger) web.Middleware {
 
 	// This is the actual middleware function to be executed.
 	m := func(before web.Handler) web.Handler {
@@ -29,7 +29,7 @@ func Errors(log *log.Logger) web.Middleware {
 			if err := before(ctx, w, r); err != nil {
 
 				// Log the error.
-				log.Printf("%s : ERROR : %v", v.TraceID, err)
+				logger.Printf("%s : ERROR : %v", v.TraceID, err)
 
 				// Respond to the error.
 				if err := web.RespondError(ctx, w, err); err != nil {

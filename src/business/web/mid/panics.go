@@ -12,7 +12,7 @@ import (
 
 // Panics recovers from panics and converts the panic to an error so it is
 // reported in Metrics and handled in Errors.
-func Panics(log *log.Logger) web.Middleware {
+func Panics(logger *log.Logger) web.Middleware {
 
 	// This is the actual middleware function to be executed.
 	m := func(after web.Handler) web.Handler {
@@ -33,7 +33,7 @@ func Panics(log *log.Logger) web.Middleware {
 					err = errors.Errorf("panic: %v", r)
 
 					// Log the Go stack trace for this panic'd goroutine.
-					log.Printf("%s :\n%s", v.TraceID, debug.Stack())
+					logger.Printf("%s :\n%s", v.TraceID, debug.Stack())
 				}
 			}()
 

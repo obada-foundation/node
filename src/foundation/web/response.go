@@ -45,7 +45,7 @@ func Respond(ctx context.Context, w http.ResponseWriter, data interface{}, statu
 	return nil
 }
 
-// RespondError sends an error reponse back to the client.
+// RespondError sends an error response back to the client.
 func RespondError(ctx context.Context, w http.ResponseWriter, err error) error {
 
 	// If the error was of the type *Error, the handler has

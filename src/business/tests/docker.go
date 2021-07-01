@@ -8,12 +8,13 @@ import (
 	"testing"
 )
 
+// Container describes a Docker container
 type Container struct {
 	ID   string
 	Host string
 }
 
-func startContainer(t *testing.T, image string, port string, args ...string) *Container {
+func startContainer(t *testing.T, image, port string, args ...string) *Container {
 	arg := []string{"run", "-P", "-d"}
 	arg = append(arg, args...)
 	arg = append(arg, image)

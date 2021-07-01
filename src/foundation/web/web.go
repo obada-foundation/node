@@ -23,14 +23,17 @@ type Values struct {
 	StatusCode int
 }
 
+// Handler s type that describe Http handlers
 type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 
+// App web application
 type App struct {
 	mux      *httptreemux.ContextMux
 	shutdown chan os.Signal
 	mw       []Middleware
 }
 
+// NewApp creates a new application
 func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	app := App{
 		mux:      httptreemux.NewContextMux(),
@@ -41,7 +44,8 @@ func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	return &app
 }
 
-func (a *App) Handle(method string, path string, handler Handler, mw ...Middleware) {
+// Handle handles executed route in router
+func (a *App) Handle(method, path string, handler Handler, mw ...Middleware) {
 
 	// First wrap handler specific middleware around this handler.
 	handler = wrapMiddleware(mw, handler)

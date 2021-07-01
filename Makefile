@@ -11,6 +11,9 @@ QLDB_TAG_IMAGE = $(QLDB_PROJECT):$(COMMIT_TAG)
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
+lint:
+	cd src && golangci-lint --config .golangci.yml run --print-issued-lines --out-format=github-actions ./...
+
 run-local:
 	docker-compose -f docker-compose.yml up -d --force-recreate
 

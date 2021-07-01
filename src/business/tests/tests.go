@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// Success adds unicode symbol checkmark
 	Success = "\u2713"
 	Failed  = "\u2717"
 )
@@ -56,11 +57,12 @@ func NewUnit(t *testing.T) (*log.Logger, func()) {
 		stopContainer(t, c.ID)
 	}
 
-	log := log.New(os.Stdout, "TEST :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	logger := log.New(os.Stdout, "TEST :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 
-	return log, teardown
+	return logger, teardown
 }
 
+// Context creates a context for a test
 func Context() context.Context {
 	values := web.Values{
 		TraceID: uuid.New().String(),
@@ -70,10 +72,12 @@ func Context() context.Context {
 	return context.WithValue(context.Background(), web.KeyValues, &values)
 }
 
+// StringPointer returns pointer to the string
 func StringPointer(s string) *string {
 	return &s
 }
 
+// IntPointer returns pointer to the integer
 func IntPointer(i int) *int {
 	return &i
 }

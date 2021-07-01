@@ -1,4 +1,4 @@
-name: node_ci
+name: OBADA Node CI
 
 on:
   push:
@@ -19,6 +19,7 @@ jobs:
 
       - name: install golangci-lint and goveralls
         run: |
+          cd src
           curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $GITHUB_WORKSPACE v1.39.0
           go get -u github.com/mattn/goveralls
           go mod tidy
@@ -26,6 +27,7 @@ jobs:
 
       - name: test and lint
         run: |
+          cd src
           go test -race -timeout=60s -covermode=atomic -coverprofile=$GITHUB_WORKSPACE/profile.cov_tmp ./...
           cat $GITHUB_WORKSPACE/profile.cov_tmp | grep -v "_mock.go" > $GITHUB_WORKSPACE/profile.cov
           $GITHUB_WORKSPACE/golangci-lint --config ${GITHUB_WORKSPACE}/.golangci.yml run --print-issued-lines --out-format=github-actions ./...
@@ -35,7 +37,9 @@ jobs:
           TZ: "America/New_York"
 
       - name: submit coverage
-        run: $(go env GOPATH)/bin/goveralls -service="github" -coverprofile=$GITHUB_WORKSPACE/profile.cov
+        run: |
+          cd src
+          $(go env GOPATH)/bin/goveralls -service="github" -coverprofile=$GITHUB_WORKSPACE/profile.cov
         working-directory: .
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}

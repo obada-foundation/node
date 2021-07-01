@@ -11,7 +11,7 @@ import (
 
 // Logger writes some information about the request to the logs in the
 // format: TraceID : (200) GET /foo -> IP ADDR (latency)
-func Logger(log *log.Logger) web.Middleware {
+func Logger(logger *log.Logger) web.Middleware {
 
 	// This is the actual middleware function to be executed.
 	m := func(before web.Handler) web.Handler {
@@ -25,14 +25,14 @@ func Logger(log *log.Logger) web.Middleware {
 				return web.NewShutdownError("web value missing from context")
 			}
 
-			log.Printf("%s : started : %s %s -> %s",
+			logger.Printf("%s : started : %s %s -> %s",
 				"zz",
 				r.Method, r.URL.Path, r.RemoteAddr,
 			)
 
 			err := before(ctx, w, r)
 
-			log.Printf("%s : completed : %s %s -> %s (%d) (%s)",
+			logger.Printf("%s : completed : %s %s -> %s (%d) (%s)",
 				"zz",
 				r.Method, r.URL.Path, r.RemoteAddr,
 				v.StatusCode, time.Since(v.Now),

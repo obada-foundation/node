@@ -17,3 +17,15 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
+
+func (og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (og obitGroup) update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+func (og obitGroup) history(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	return nil
+}

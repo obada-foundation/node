@@ -4,12 +4,12 @@ import (
 	"github.com/obada-foundation/node/business/tests"
 	"testing"
 
-	sdk "github.com/obada-foundation/sdk-go"
+	"github.com/obada-foundation/sdkgo"
 )
 
 func TestObit(t *testing.T) {
-	log, teardown := tests.NewUnit(t)
-	sdk, err := sdk.NewSdk(log, true)
+	logger, teardown := tests.NewUnit(t)
+	sdk, err := sdkgo.NewSdk(logger, true)
 
 	if err != nil {
 		t.Fatal("Cannot construct sdk")

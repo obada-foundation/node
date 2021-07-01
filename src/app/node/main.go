@@ -14,7 +14,7 @@ import (
 	"github.com/ardanlabs/conf"
 	"github.com/obada-foundation/node/app/node/handlers"
 	obitService "github.com/obada-foundation/node/business/obit"
-	sdk "github.com/obada-foundation/sdkgo"
+	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
 )
 
@@ -22,15 +22,15 @@ import (
 var build = "develop"
 
 func main() {
-	log := log.New(os.Stdout, "OBADA-NODE :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	logger := log.New(os.Stdout, "OBADA-NODE :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 
-	if err := run(log); err != nil {
+	if err := run(logger); err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
 }
 
-func run(log *log.Logger) error {
+func run(logger *log.Logger) error {
 
 	var cfg struct {
 		conf.Version
@@ -77,26 +77,26 @@ func run(log *log.Logger) error {
 	}
 
 	expvar.NewString("build").Set(build)
-	log.Printf("main : Started : Application initializing : version %q", build)
-	defer log.Println("main: Completed")
+	logger.Printf("main : Started : Application initializing : version %q", build)
+	defer logger.Println("main: Completed")
 
 	out, err := conf.String(&cfg)
 	if err != nil {
 		return errors.Wrap(err, "generating config for output")
 	}
-	log.Printf("main: Config :\n%v\n", out)
+	logger.Printf("main: Config :\n%v\n", out)
 
-	log.Println("main: Initializing debugging support")
+	logger.Println("main: Initializing debugging support")
 
 	go func() {
-		log.Printf("main: Debug Listening %s", cfg.Web.DebugHost)
+		logger.Printf("main: Debug Listening %s", cfg.Web.DebugHost)
 		if err := http.ListenAndServe(cfg.Web.DebugHost, http.DefaultServeMux); err != nil {
-			log.Printf("main: Debug Listener closed : %v", err)
+			logger.Printf("main: Debug Listener closed : %v", err)
 		}
 	}()
 
 	// Initialize OBADA SDK
-	sdk, err := sdk.NewSdk(log, true)
+	sdk, err := sdkgo.NewSdk(logger, true)
 
 	if err != nil {
 		return errors.Wrap(err, "initializing OBADA SDK")
@@ -105,14 +105,14 @@ func run(log *log.Logger) error {
 	// Initialize ObitService
 	obitService := obitService.NewObitService(sdk)
 
-	log.Println("main: Initializing API support")
+	logger.Println("main: Initializing API support")
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(build, shutdown, log, obitService),
+		Handler:      handlers.API(build, shutdown, logger, obitService),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}
@@ -121,7 +121,7 @@ func run(log *log.Logger) error {
 
 	// Start the service listening for requests.
 	go func() {
-		log.Printf("main: API listening on %s", api.Addr)
+		logger.Printf("main: API listening on %s", api.Addr)
 		serverErrors <- api.ListenAndServe()
 	}()
 
@@ -130,7 +130,7 @@ func run(log *log.Logger) error {
 		return errors.Wrap(err, "server error")
 
 	case sig := <-shutdown:
-		log.Printf("main: %v : Start shutdown", sig)
+		logger.Printf("main: %v : Start shutdown", sig)
 
 		// Give outstanding requests a deadline for completion.
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
@@ -138,7 +138,12 @@ func run(log *log.Logger) error {
 
 		// Asking listener to shutdown and shed load.
 		if err := api.Shutdown(ctx); err != nil {
-			api.Close()
+			errClose := api.Close()
+
+			if errClose != nil {
+				return errors.Wrap(errClose, "could not stop server gracefully")
+			}
+
 			return errors.Wrap(err, "could not stop server gracefully")
 		}
 	}
