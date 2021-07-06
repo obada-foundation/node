@@ -1,6 +1,7 @@
 package obit
 
 import (
+	"context"
 	"github.com/obada-foundation/node/business/tests"
 	"testing"
 
@@ -15,10 +16,11 @@ func TestObit(t *testing.T) {
 		t.Fatal("Cannot construct sdk")
 	}
 
-	service := NewObitService(sdk)
+	service := NewObitService(sdk, logger, nil)
 
 	t.Log("Given need to check obit service functionality")
-	service.Create()
+	var dto sdkgo.ObitDto
+	service.Create(context.Background(), dto)
 
 	t.Cleanup(teardown)
 }

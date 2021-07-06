@@ -18,7 +18,7 @@ type createObit struct {
 	PartNumber       string            `validate:"required" json:"part_number"`
 	OwnerDid         string            `validate:"required" json:"owner_did"`
 	ObdDid           string            `json:"obd_did"`
-	Matadata         map[string]string `json:"matadata"`
+	Metadata         map[string]string `json:"metadata"`
 	StructuredData   map[string]string `json:"structured_data"`
 	Documents        map[string]string `json:"documents"`
 	ModifiedOn       int64             `json:"modified_on"`
@@ -41,14 +41,14 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 	dto.PartNumber = requestData.PartNumber
 	dto.OwnerDid = requestData.OwnerDid
 	dto.ObdDid = requestData.ObdDid
-	dto.Matadata = requestData.Matadata
+	dto.Matadata = requestData.Metadata
 	dto.StructuredData = requestData.StructuredData
 	dto.Documents = requestData.Documents
 	dto.ModifiedOn = requestData.ModifiedOn
 	dto.AlternateIDS = requestData.AlternateIDS
 	dto.Status = requestData.Status
 
-	if err := og.service.Create(dto); err != nil {
+	if err := og.service.Create(ctx, dto); err != nil {
 		return err
 	}
 
@@ -56,7 +56,13 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 }
 
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	return nil
+	obits, err := og.service.Search(ctx, 0)
+
+	if err != nil {
+		return err
+	}
+
+	return web.Respond(ctx, w, obits, http.StatusOK)
 }
 
 func (og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

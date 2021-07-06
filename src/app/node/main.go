@@ -11,13 +11,16 @@ import (
 	"syscall"
 	"time"
 
+	"database/sql"
 	"github.com/ardanlabs/conf"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/qldbsession"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
+	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
 	"github.com/obada-foundation/node/app/node/handlers"
+	dbInitService "github.com/obada-foundation/node/business/database"
 	obitService "github.com/obada-foundation/node/business/obit"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
@@ -46,6 +49,9 @@ func run(logger *log.Logger) error {
 			WriteTimeout    time.Duration `conf:"default:5s"`
 			ShutdownTimeout time.Duration `conf:"default:5s"`
 		}
+		Sql struct {
+			SqlitePath string `conf:"default:obada.db"`
+		}
 		Zipkin struct {
 			ReporterURI string  `conf:"default:http://zipkin:9411/api/v2/spans"`
 			ServiceName string  `conf:"default:obada-node"`
@@ -71,8 +77,8 @@ func run(logger *log.Logger) error {
 			fmt.Println(usage)
 			return nil
 		case conf.ErrVersionWanted:
-			version, err := conf.VersionString("OBADA-NODE", &cfg)
-			if err != nil {
+			version, er := conf.VersionString("OBADA-NODE", &cfg)
+			if er != nil {
 				return errors.Wrap(err, "generating config version")
 			}
 			fmt.Println(version)
@@ -124,6 +130,35 @@ func run(logger *log.Logger) error {
 		qldb.Shutdown(context.Background())
 	}()
 
+	if _, err := os.Stat(cfg.Sql.SqlitePath); os.IsNotExist(err) {
+		file, err := os.Create(cfg.Sql.SqlitePath)
+
+		if err != nil {
+			return errors.Wrap(err, "Problem with creating sqlite db file")
+		}
+
+		file.Close()
+	}
+
+	// Initialize sqlite
+	db, err := sql.Open("sqlite3", cfg.Sql.SqlitePath)
+	defer func() {
+		logger.Println("main: SQLite closing database connection")
+		db.Close()
+	}()
+
+	if err != nil {
+		return errors.Wrap(err, "initializing sqlite database")
+	}
+
+	initService := dbInitService.NewService(db, qldb, logger)
+
+	if initService.IsFirstRun() == true {
+		if err := initService.Migrate(); err != nil {
+			return errors.Wrap(err, "Problem with running migrations")
+		}
+	}
+
 	// Initialize OBADA SDK
 	sdk, err := sdkgo.NewSdk(logger, true)
 
@@ -132,7 +167,7 @@ func run(logger *log.Logger) error {
 	}
 
 	// Initialize ObitService
-	obit := obitService.NewObitService(sdk, logger, qldb)
+	obit := obitService.NewObitService(sdk, logger, db, qldb)
 
 	logger.Println("main: Initializing API support")
 

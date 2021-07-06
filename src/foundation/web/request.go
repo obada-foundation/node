@@ -21,7 +21,6 @@ var validate *validator.Validate
 var translator *ut.UniversalTranslator
 
 func init() {
-
 	// Instantiate the validator for use.
 	validate = validator.New()
 

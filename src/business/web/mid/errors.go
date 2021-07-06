@@ -32,8 +32,8 @@ func Errors(logger *log.Logger) web.Middleware {
 				logger.Printf("%s : ERROR : %v", v.TraceID, err)
 
 				// Respond to the error.
-				if err := web.RespondError(ctx, w, err); err != nil {
-					return err
+				if er := web.RespondError(ctx, w, err); err != nil {
+					return er
 				}
 
 				// If we receive the shutdown err we need to return it
