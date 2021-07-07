@@ -18,10 +18,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/qldbsession"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
-	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/obada-foundation/node/app/node/handlers"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	obitService "github.com/obada-foundation/node/business/obit"
+	sqsdriver "github.com/obada-foundation/node/business/queue/sqs"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
 )
@@ -62,6 +63,10 @@ func run(logger *log.Logger) error {
 			Database string `conf:"default:obada,env:DATABASE"`
 			Key      string `conf:"env:KEY,noprint"`
 			Secret   string `conf:"env:SECRET,noprint"`
+		}
+		SQS struct {
+			Timeout time.Duration `conf:"default:5s"`
+			Url     string        `conf:"default:https://sqs.us-east-1.amazonaws.com/271164744603/obada"`
 		}
 	}
 	cfg.Version.SVN = build
@@ -106,12 +111,13 @@ func run(logger *log.Logger) error {
 		}
 	}()
 
-	// =========================================================================
-	// Start QLDB
-
+	// Create AWS session
 	awsConfig := aws.NewConfig().WithRegion(cfg.QLDB.Region)
 	awsConfig.Credentials = credentials.NewStaticCredentials(cfg.QLDB.Key, cfg.QLDB.Secret, "")
 	awsSession := session.Must(session.NewSession(awsConfig))
+
+	// =========================================================================
+	// Start QLDB
 	qldbSession := qldbsession.New(awsSession)
 
 	qldb, err := qldbdriver.New(
@@ -129,6 +135,9 @@ func run(logger *log.Logger) error {
 		logger.Printf("main: QLDB Stopping database connection : %s", cfg.QLDB.Database)
 		qldb.Shutdown(context.Background())
 	}()
+
+	// SQS Init
+	sqs := sqsdriver.NewSQS(awsSession, cfg.SQS.Timeout)
 
 	if _, err := os.Stat(cfg.Sql.SqlitePath); os.IsNotExist(err) {
 		file, err := os.Create(cfg.Sql.SqlitePath)
@@ -153,7 +162,13 @@ func run(logger *log.Logger) error {
 
 	initService := dbInitService.NewService(db, qldb, logger)
 
-	if initService.IsFirstRun() == true {
+	isFirstRun, err := initService.IsFirstRun()
+
+	if err != nil {
+		return err
+	}
+
+	if isFirstRun == true {
 		if err := initService.Migrate(); err != nil {
 			return errors.Wrap(err, "Problem with running migrations")
 		}
@@ -167,7 +182,16 @@ func run(logger *log.Logger) error {
 	}
 
 	// Initialize ObitService
-	obit := obitService.NewObitService(sdk, logger, db, qldb)
+	obit := obitService.NewObitService(sdk, logger, db, qldb, sqs)
+
+	// Start database sync
+	go func() {
+		for {
+			if err := obit.Sync(context.Background(), cfg.SQS.Url); err != nil {
+				logger.Println(err)
+			}
+		}
+	}()
 
 	logger.Println("main: Initializing API support")
 

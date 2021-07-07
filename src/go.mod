@@ -3,6 +3,7 @@ module github.com/obada-foundation/node
 go 1.16
 
 require (
+	github.com/amzn/ion-go v1.1.2
 	github.com/ardanlabs/conf v1.4.0
 	github.com/aws/aws-sdk-go v1.39.0
 	github.com/awslabs/amazon-qldb-driver-go v1.1.1
