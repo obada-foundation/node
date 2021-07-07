@@ -52,9 +52,8 @@ Obit:
   required:
     - obit_did
     - usn
-    - obit_did_versions
+    - obit_alternate_ids
     - owner_did
-    - obd_did
     - obit_status
     - manufacturer
     - part_number
@@ -72,7 +71,7 @@ Obit:
         Base(58) encoding the OBIT ID. Take the first 8 characters.
         Check for duplicates. With 16 million OBITs there is a 40% chance of collision. If so, add 4 characters. Repeat as necessary until a unique USN is generated.
       example: "2zEz-xLJR"
-    obit_did_versions:
+    obit_alternate_ids:
       type: array
       description: Client generated things. First hash + last hash
       items:
@@ -122,10 +121,11 @@ Obit:
       description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))
       items:
         $ref: '#/StructureDataRecord'
-    modified_at:
-      type: string
-      format: date-time
-      example: "2020-01-01T13:24:35Z"
+    modified_on:
+      description: UNIX timestamp
+      type: integer
+      format: int64
+      example: 1624946810
     root_hash:
       description: >
         Hash calculated by SHA256 (previous Obit root hash + Obit data).
