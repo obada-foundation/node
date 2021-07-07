@@ -22,8 +22,25 @@ func NewService(db *sql.DB, qldb *qldbdriver.QLDBDriver, logger *log.Logger) Ser
 }
 
 // IsFirstRun checks if service runs first time on machine
-func (s Service) IsFirstRun() bool {
-	return false
+func (s Service) IsFirstRun() (bool, error) {
+	var cnt int
+
+	q := `
+		SELECT 
+		    count(*) as cnt 
+		FROM 
+		    sqlite_master 
+		WHERE 
+		    type='table' AND name='gateway_view';
+	`
+
+	row := s.db.QueryRow(q)
+
+	if err := row.Scan(&cnt); err != nil {
+		return false, err
+	}
+
+	return cnt == 0, nil
 }
 
 // Migrate attempts to bring the schema for qldb up to date with the migrations
@@ -53,32 +70,39 @@ func (s Service) qldbMigrate() error {
 // Migrate attempts to bring the schema for sqlite up to date with the migrations
 // defined in this package.
 func (s Service) sqliteMigrate() error {
-	q := `create table gateway_view (
-		obit_did           varchar(255) not null,
-		usn                varchar(255) not null,
-		serial_number_hash varchar(255) not null,
-		manufacturer       varchar(255) not null,
-		part_number        varchar(255) not null,
-		alternate_ids	   json         null,
-		owner_did          varchar(255) null,
-		obd_did            varchar(255) null,
-		status        	   varchar(10)  null,
-		metadata           json         null,
-		structured_data    json         null,
-		documents          json         null,
-		modified_on        int          null,
-		root_hash          varchar(255) not null,
-		constraint gateway_view_obit_did_usn_serial_number_hash_unique unique (obit_did, usn, serial_number_hash)
-	)`
-
-	stmt, err := s.db.Prepare(q)
-
-	if err != nil {
-		return err
+	queries := []string{
+		`create table gateway_view (
+			obit_did           varchar(255) not null,
+			usn                varchar(255) not null,
+			serial_number_hash varchar(255) not null,
+			manufacturer       varchar(255) not null,
+			part_number        varchar(255) not null,
+			alternate_ids	   json         null,
+			owner_did          varchar(255) null,
+			obd_did            varchar(255) null,
+			status        	   varchar(10)  null,
+			metadata           json         null,
+			structured_data    json         null,
+			documents          json         null,
+			modified_on        int          null,
+			root_hash          varchar(255) not null,
+			constraint gateway_view_obit_did_usn_serial_number_hash_unique unique (obit_did, usn, serial_number_hash)
+		)`,
+		`create table config (
+			last_obit varchar(255) not null
+		)`,
 	}
 
-	if _, err := stmt.Exec(); err != nil {
-		return err
+	for _, q := range queries {
+		stmt, err := s.db.Prepare(q)
+
+		if err != nil {
+			return err
+		}
+
+		if _, err := stmt.Exec(); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -92,9 +116,9 @@ func (s Service) Migrate() error {
 		return err
 	}
 
-	if err := s.qldbMigrate(); err != nil {
-		return err
-	}
+	//if err := s.qldbMigrate(); err != nil {
+	//	return err
+	//}
 
 	return nil
 }
