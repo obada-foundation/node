@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"github.com/amzn/ion-go/ion"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
@@ -19,31 +21,6 @@ type Service struct {
 	qldb   *qldbdriver.QLDBDriver
 }
 
-type QLDBObit struct {
-	ObitDID          string            `ion:"ObitDID" db:"obit_id" json:"obit_id"`
-	Usn              string            `ion:"Usn" json:"usn"`
-	SerialNumberHash string            `ion:"SerialNumberHash" json:"serial_number_hash"`
-	Manufacturer     string            `ion:"Manufacturer" json:"manufacturer"`
-	PartNumber       string            `ion:"PartNumber" json:"part_number"`
-	AlternateIDS     []string          `ion:"AlternateIDS" json:"alternate_ids"`
-	OwnerDID         string            `ion:"OwnerDID" json:"owner_did"`
-	ObdDID           string            `ion:"ObdDID" json:"obd_did"`
-	Matadata         map[string]string `ion:"MetaData" json:"matadata"`
-	StructuredData   map[string]string `ion:"StructuredData" json:"structured_data"`
-	Documents        map[string]string `ion:"Documents" json:"documents"`
-	ModifiedOn       int64             `ion:"ModifiedOn" json:"modified_on"`
-	Status           string            `ion:"Status" json:"status"`
-	RootHash         string            `ion:"RootHash" json:"root_hash"`
-}
-
-type Obits struct {
-	Obits       []QLDBObit `json:"data"`
-	Total       uint       `json:"total"`
-	PerPage     uint       `json:"per_page"`
-	CurrentPage uint       `json:"current_page"`
-	LastPage    uint       `json:"last_page"`
-}
-
 // NewObitService creates new version of Obit service
 func NewObitService(sdk *sdkgo.Sdk, logger *log.Logger, db *sql.DB, qldb *qldbdriver.QLDBDriver) *Service {
 	return &Service{
@@ -52,6 +29,70 @@ func NewObitService(sdk *sdkgo.Sdk, logger *log.Logger, db *sql.DB, qldb *qldbdr
 		db:     db,
 		qldb:   qldb,
 	}
+}
+
+func (os Service) updateSql(ctx context.Context, obit QLDBObit) error {
+	const q = `
+		UPDATE 
+		    gateway_view
+		SET 
+			alternate_ids = ?, 
+			owner_did = ?,
+			obd_did = ?,
+			status = ?,
+			metadata = ?,
+			structured_data = ?,
+			documents = ?,
+			modified_on = ?,
+			root_hash = ?
+		WHERE 
+			obit_did = ?
+	`
+
+	stmt, err := os.db.Prepare(q)
+
+	if err != nil {
+		return err
+	}
+
+	altIDS, err := json.Marshal(obit.AlternateIDS)
+	if err != nil {
+		return err
+	}
+
+	metadata, err := json.Marshal(obit.Matadata)
+	if err != nil {
+		return err
+	}
+
+	stctData, err := json.Marshal(obit.StructuredData)
+	if err != nil {
+		return err
+	}
+
+	docs, err := json.Marshal(obit.Documents)
+	if err != nil {
+		return err
+	}
+
+	_, err = stmt.Exec(
+		altIDS,
+		obit.OwnerDID,
+		obit.ObdDID,
+		obit.Status,
+		metadata,
+		stctData,
+		docs,
+		obit.ModifiedOn,
+		obit.RootHash,
+		obit.ObitDID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (os Service) createSql(ctx context.Context, obit QLDBObit) error {
@@ -126,59 +167,127 @@ func (os Service) createSql(ctx context.Context, obit QLDBObit) error {
 	return nil
 }
 
-func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
-	const q = "INSERT INTO Obits ?"
-
+func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	_, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		var o QLDBObit
-
-		obitId := obit.GetObitID()
-		o.ObitDID = obitId.GetHash().GetHash()
-		o.Usn = obitId.GetUsn()
-		o.SerialNumberHash = obit.GetSerialNumberHash().GetValue()
-		o.Manufacturer = obit.GetManufacturer().GetValue()
-		o.PartNumber = obit.GetPartNumber().GetValue()
-		o.AlternateIDS = obit.GetAlternateIDS().GetValue()
-		o.OwnerDID = obit.GetOwnerDID().GetValue()
-		o.ObdDID = obit.GetObdDID().GetValue()
-
-		mdRecords := obit.GetMetadata()
-		metadata := make(map[string]string)
-
-		for _, record := range mdRecords.GetAll() {
-			metadata[record.GetKey().GetValue()] = record.GetValue().GetValue()
-		}
-
-		o.Matadata = metadata
-
-		strRecords := obit.GetStructuredData()
-		strData := make(map[string]string)
-
-		for _, record := range strRecords.GetAll() {
-			strData[record.GetKey().GetValue()] = record.GetValue().GetValue()
-		}
-
-		o.StructuredData = strData
-
-		docRecords := obit.GetDocuments()
-		docs := make(map[string]string)
-
-		for _, record := range docRecords.GetAll() {
-			docs[record.GetKey().GetValue()] = record.GetValue().GetValue()
-		}
-
-		o.Documents = docs
-		o.ModifiedOn = obit.GetModifiedOn().GetValue()
-
-		o.Status = obit.GetStatus().GetValue()
-
-		rootHash, err := obit.GetRootHash()
+		o, err := NewQLDBObit(obit)
 
 		if err != nil {
 			return nil, err
 		}
 
-		o.RootHash = rootHash.GetHash()
+		const q = `
+			UPDATE 
+				Obits 
+			SET
+				AlternateIDS = ?,
+				OwnerDID = ?,
+				ObdDID = ?,
+				MetaData = ?,
+				StructuredData = ?,
+				Documents = ?,
+				ModifiedOn = ?,
+				Status = ?,
+				RootHash = ?
+			WHERE
+				ObitDID = ?
+		`
+
+		_, err = txn.Execute(
+			q,
+			o.AlternateIDS,
+			o.OwnerDID,
+			o.ObdDID,
+			o.Matadata,
+			o.StructuredData,
+			o.Documents,
+			o.ModifiedOn,
+			o.Status,
+			o.RootHash,
+			o.ObitDID,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if err := os.updateSql(ctx, o); err != nil {
+			os.logger.Printf("Couldn't update obit to sql db: %v. Trying to abort QLDB transaction", obit)
+
+			if er := txn.Abort(); er != nil {
+				return nil, errors.Wrap(err, er.Error())
+			}
+
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	return err
+}
+
+func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
+	var o QLDBObit
+
+	obitId := obit.GetObitID()
+	o.ObitDID = obitId.GetHash().GetHash()
+	o.Usn = obitId.GetUsn()
+	o.SerialNumberHash = obit.GetSerialNumberHash().GetValue()
+	o.Manufacturer = obit.GetManufacturer().GetValue()
+	o.PartNumber = obit.GetPartNumber().GetValue()
+	o.AlternateIDS = obit.GetAlternateIDS().GetValue()
+	o.OwnerDID = obit.GetOwnerDID().GetValue()
+	o.ObdDID = obit.GetObdDID().GetValue()
+
+	mdRecords := obit.GetMetadata()
+	metadata := make(map[string]string)
+
+	for _, record := range mdRecords.GetAll() {
+		metadata[record.GetKey().GetValue()] = record.GetValue().GetValue()
+	}
+
+	o.Matadata = metadata
+
+	strRecords := obit.GetStructuredData()
+	strData := make(map[string]string)
+
+	for _, record := range strRecords.GetAll() {
+		strData[record.GetKey().GetValue()] = record.GetValue().GetValue()
+	}
+
+	o.StructuredData = strData
+
+	docRecords := obit.GetDocuments()
+	docs := make(map[string]string)
+
+	for _, record := range docRecords.GetAll() {
+		docs[record.GetKey().GetValue()] = record.GetValue().GetValue()
+	}
+
+	o.Documents = docs
+	o.ModifiedOn = obit.GetModifiedOn().GetValue()
+
+	o.Status = obit.GetStatus().GetValue()
+	rootHash, err := obit.GetRootHash()
+
+	if err != nil {
+		return o, err
+	}
+
+	o.RootHash = rootHash.GetHash()
+
+	return o, nil
+}
+
+func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
+	_, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		o, err := NewQLDBObit(obit)
+
+		if err != nil {
+			return nil, err
+		}
+
+		const q = "INSERT INTO Obits ?"
 
 		if _, err := txn.Execute(q, o); err != nil {
 			return nil, err
@@ -215,16 +324,36 @@ func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) error {
 	return nil
 }
 
-// Update method updates a new Obit
-func (os Service) Update(ctx context.Context) {
+// Update method updates Obit
+func (os Service) Update(ctx context.Context, id string, dto sdkgo.ObitDto) error {
+	obit, err := os.sdk.NewObit(dto)
 
+	if err != nil {
+		return err
+	}
+
+	obitID := obit.GetObitID()
+	hash := obitID.GetHash().GetHash()
+
+	if hash != id {
+		return errors.New(fmt.Sprintf("Obit integrity issue. Expect to have id: %s, %s given", id, hash))
+	}
+
+	if err := os.updateQLDB(ctx, obit); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// Delete method search Obits by given criteria ??
-func (os Service) Delete(ctx context.Context) {
+// Delete method delete Obit by id (did, usn)
+func (os Service) Delete(ctx context.Context, id string) error {
+	// This method doesn't make sense ask Rohi for removing it. We could just update status
 
+	return nil
 }
 
+// GetObitsCount returns total number of obits in database
 func (os Service) GetObitsCount(ctx context.Context) (uint, error) {
 	var cnt uint
 
@@ -331,7 +460,152 @@ func (os Service) Search(ctx context.Context, offset uint) (Obits, error) {
 	return obits, nil
 }
 
-// History the history of Obit changes
-func (os Service) History(ctx context.Context) {
+// Show returns obit by given id
+func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
+	var obit QLDBObit
+	var altIDS []byte
+	var metadata []byte
+	var stctData []byte
+	var docs []byte
 
+	const q = `
+		SELECT 
+			* 
+		FROM 
+			gateway_view 
+		WHERE 
+			obit_did = ? OR
+			usn = ?
+	`
+
+	row := os.db.QueryRow(q, id, id)
+
+	err := row.Scan(
+		&obit.ObitDID,
+		&obit.Usn,
+		&obit.SerialNumberHash,
+		&obit.Manufacturer,
+		&obit.PartNumber,
+		&altIDS,
+		&obit.OwnerDID,
+		&obit.ObdDID,
+		&obit.Status,
+		&metadata,
+		&stctData,
+		&docs,
+		&obit.ModifiedOn,
+		&obit.RootHash,
+	)
+
+	if err != nil {
+		return obit, err
+	}
+
+	if err := json.Unmarshal(metadata, &obit.Matadata); err != nil {
+		return obit, err
+	}
+
+	if err := json.Unmarshal(stctData, &obit.StructuredData); err != nil {
+		return obit, err
+	}
+
+	if err := json.Unmarshal(docs, &obit.Documents); err != nil {
+		return obit, err
+	}
+
+	if err := json.Unmarshal(altIDS, &obit.AlternateIDS); err != nil {
+		return obit, err
+	}
+
+	os.logger.Printf("%v", obit)
+
+	return obit, nil
+}
+
+// History the history of Obit changes
+func (os Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
+	var history []QldbMeta
+
+	m, err := os.getObitQLDBMeta(ctx, id)
+
+	if err != nil {
+		return history, err
+	}
+
+	_, err = os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		const q = `
+			SELECT 
+				*
+			FROM 
+				history(Obits) as h
+			WHERE 
+				h.metadata.id = ?
+		`
+
+		result, err := txn.Execute(q, m.Metadata.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		for result.Next(txn) {
+			ionBinary := result.GetCurrentData()
+
+			var m QldbMeta
+
+			if err = ion.Unmarshal(ionBinary, &m); err != nil {
+				return nil, err
+			}
+
+			history = append(history, m)
+		}
+
+		return nil, nil
+	})
+
+	if err != nil {
+		return history, err
+	}
+
+	return history, nil
+}
+
+func (os Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, error) {
+	m, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+		var m QldbMeta
+
+		const q = `
+			SELECT 
+				*
+			FROM 
+				_ql_committed_Obits as o 
+			WHERE 
+				o.data.Usn = ? OR 
+				o.data.ObitDID = ?
+		`
+
+		result, err := txn.Execute(q, id, id)
+		if err != nil {
+			return m, err
+		}
+
+		// Assume the result is not empty
+		hasNext := result.Next(txn)
+		if !hasNext && result.Err() != nil {
+			return m, result.Err()
+		}
+
+		ionBinary := result.GetCurrentData()
+
+		if err = ion.Unmarshal(ionBinary, &m); err != nil {
+			return m, err
+		}
+
+		return m, nil
+	})
+
+	if err != nil {
+		return m.(QldbMeta), err
+	}
+
+	return m.(QldbMeta), nil
 }
