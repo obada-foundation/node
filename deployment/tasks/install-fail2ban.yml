@@ -3,6 +3,8 @@
 - name: Install fail2ban package
   apt: update_cache=yes name=fail2ban state=latest
   become: yes
+  tags:
+    - full-deploy
 
 - name: Copy fail2ban local config
   template:
@@ -10,13 +12,19 @@
     dest: /etc/fail2ban/jail.local
     mode: 0644
   become: yes
+  tags:
+    - full-deploy
 
 - name: Restart fail2ban
   service:
     name: 'fail2ban'
     state: 'restarted'
   become: yes
+  tags:
+    - full-deploy
 
 - name: Reload fail2ban jails
   shell: type fail2ban-server > /dev/null && (fail2ban-client ping > /dev/null && fail2ban-client reload > /dev/null || true) || true
   become: yes
+  tags:
+    - full-deploy

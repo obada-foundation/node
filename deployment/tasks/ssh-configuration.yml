@@ -12,3 +12,5 @@
       line: "PermitRootLogin no"
   become: yes
   notify: sshd restart
+  tags:
+    - full-deploy

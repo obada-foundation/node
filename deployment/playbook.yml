@@ -38,6 +38,8 @@
         state: directory
       tags:
         - docker-compose
+        - full-deploy
+        - quick-deploy
       loop: [ "nginx" ]
 
     - name: "Copy nginx service file"
@@ -45,18 +47,28 @@
         src: etc/nginx/service.conf.j2
         dest: "{{ config_path }}/nginx/service.conf"
         mode: 0644
-
-    - name: "Copy Laravel environment file"
-      template:
-        src: env.j2
-        dest: "{{ config_path }}/.env"
-        mode: 0644
+      tags:
+        - full-deploy
+        - quick-deploy
 
     - name: "Copy docker-compose.yml"
       template:
         src: docker-compose.yml.j2
         dest: "{{ deployment_path }}/docker-compose.yml"
         mode: 0644
+      tags:
+        - full-deploy
+        - quick-deploy
+
+    - name: "Cleanup database"
+      shell: |
+        rm -rf ./db/obada.db
+        touch ./db/obada.db
+      when: clean_db == "yes"
+      become: yes
+      tags:
+        - full-deploy
+        - quick-deploy
 
     - name: "Run `docker-compose up`"
       docker_compose:
@@ -65,11 +77,7 @@
         pull: yes
         files:
           - docker-compose.yml
-        recreate: smart
-
-    - name: "Execute database migrations"
-      shell: |
-        docker exec gateway sh -l -c "php artisan migrate -n --force "
-      register: migrations
-
-    - debug: msg="{{ migrations.stdout }}"
+        recreate: always
+      tags:
+        - full-deploy
+        - quick-deploy

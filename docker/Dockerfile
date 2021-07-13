@@ -1,24 +1,24 @@
 # Dockerfile References: https://docs.docker.com/engine/reference/builder/
+FROM alpine:edge AS builder
 
-# Start from the latest golang base image
-FROM golang:latest as builder
+RUN apk update && apk upgrade
 
-# Set the Current Working Directory inside the container
+RUN apk add --no-cache go gcc g++
+
 WORKDIR /app
 
-# Copy the source from the current directory to the Working Directory inside the container
 COPY src/ .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main app/node/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags '-extldflags "-static"' -a -o main app/node/main.go
 
 ######## Start a new stage from scratch #######
 FROM alpine:latest
 
 ENV QLDB_DATABASE="obada"
-ENV QLDB_REGION="eu-central-1"
-ENV QLDB_KEY=""
-ENV QLDB_SECRET=""
+ENV AWS_REGION="us-east-1"
+ENV AWS_KEY=""
+ENV AWS_SECRET=""
 
 RUN apk --no-cache add ca-certificates
 
