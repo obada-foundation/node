@@ -22,7 +22,7 @@ import (
 	"github.com/obada-foundation/node/app/node/handlers"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	obitService "github.com/obada-foundation/node/business/obit"
-	sqsdriver "github.com/obada-foundation/node/business/queue/sqs"
+	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
 )
@@ -58,31 +58,34 @@ func run(logger *log.Logger) error {
 			ServiceName string  `conf:"default:obada-node"`
 			Probability float64 `conf:"default:0.05"`
 		}
-		QLDB struct {
-			Region   string `conf:"default:us-east-1,env:REGION"`
-			Database string `conf:"default:obada,env:DATABASE"`
-			Key      string `conf:"env:KEY,noprint"`
-			Secret   string `conf:"env:SECRET,noprint"`
+		AWS struct {
+			Region   string `conf:"default:us-east-1"`
+			Key      string `conf:"noprint"`
+			Secret   string `conf:"noprint"`
 		}
-		SQS struct {
+		QLDB struct {
+			Database string `conf:"default:obada"`
+		}
+		PUBSUB struct {
 			Timeout time.Duration `conf:"default:5s"`
-			Url     string        `conf:"default:https://sqs.us-east-1.amazonaws.com/271164744603/obada"`
+			QueueUrl     string   `conf:"default:https://sqs.us-east-1.amazonaws.com/271164744603/obada-tradeloop.fifo"`
+			TopicArn     string   `conf:"default:arn:aws:sns:us-east-1:271164744603:obada.fifo"`
 		}
 	}
 	cfg.Version.SVN = build
 	cfg.Version.Desc = "(c) OBADA Foundation 2021"
 
-	if err := conf.Parse(os.Args[1:], "OBADA-NODE", &cfg); err != nil {
+	if err := conf.Parse(os.Args[1:], "", &cfg); err != nil {
 		switch err {
 		case conf.ErrHelpWanted:
-			usage, er := conf.Usage("OBADA-NODE", &cfg)
+			usage, er := conf.Usage("", &cfg)
 			if er != nil {
 				return errors.Wrap(er, "generating config usage")
 			}
 			fmt.Println(usage)
 			return nil
 		case conf.ErrVersionWanted:
-			version, er := conf.VersionString("OBADA-NODE", &cfg)
+			version, er := conf.VersionString("", &cfg)
 			if er != nil {
 				return errors.Wrap(err, "generating config version")
 			}
@@ -112,8 +115,8 @@ func run(logger *log.Logger) error {
 	}()
 
 	// Create AWS session
-	awsConfig := aws.NewConfig().WithRegion(cfg.QLDB.Region)
-	awsConfig.Credentials = credentials.NewStaticCredentials(cfg.QLDB.Key, cfg.QLDB.Secret, "")
+	awsConfig := aws.NewConfig().WithRegion(cfg.AWS.Region)
+	awsConfig.Credentials = credentials.NewStaticCredentials(cfg.AWS.Key, cfg.AWS.Secret, "")
 	awsSession := session.Must(session.NewSession(awsConfig))
 
 	// =========================================================================
@@ -135,9 +138,6 @@ func run(logger *log.Logger) error {
 		logger.Printf("main: QLDB Stopping database connection : %s", cfg.QLDB.Database)
 		qldb.Shutdown(context.Background())
 	}()
-
-	// SQS Init
-	sqs := sqsdriver.NewSQS(awsSession, cfg.SQS.Timeout)
 
 	if _, err := os.Stat(cfg.Sql.SqlitePath); os.IsNotExist(err) {
 		file, err := os.Create(cfg.Sql.SqlitePath)
@@ -181,13 +181,15 @@ func run(logger *log.Logger) error {
 		return errors.Wrap(err, "initializing OBADA SDK")
 	}
 
+	ps := pubsub.NewClient(awsSession, cfg.PUBSUB.Timeout, cfg.PUBSUB.QueueUrl, cfg.PUBSUB.TopicArn)
+
 	// Initialize ObitService
-	obit := obitService.NewObitService(sdk, logger, db, qldb, sqs)
+	obit := obitService.NewObitService(sdk, logger, db, qldb, ps)
 
 	// Start database sync
 	go func() {
 		for {
-			if err := obit.Sync(context.Background(), cfg.SQS.Url); err != nil {
+			if err := obit.Sync(context.Background()); err != nil {
 				logger.Println(err)
 			}
 		}

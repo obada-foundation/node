@@ -5,6 +5,7 @@ import (
 	"github.com/obada-foundation/node/business/obit"
 	"github.com/obada-foundation/node/foundation/web"
 	"github.com/obada-foundation/sdkgo"
+	"github.com/obada-foundation/sdkgo/properties"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -19,12 +20,22 @@ type requestObit struct {
 	PartNumber       string            `validate:"required" json:"part_number"`
 	OwnerDid         string            `validate:"required" json:"owner_did"`
 	ObdDid           string            `json:"obd_did"`
-	Metadata         map[string]string `json:"metadata"`
-	StructuredData   map[string]string `json:"structured_data"`
-	Documents        map[string]string `json:"documents"`
+	Metadata         []KV 			   `json:"metadata"`
+	StructuredData   []KV			   `json:"structured_data"`
+	Documents        []Doc             `json:"documents"`
 	ModifiedOn       int64             `json:"modified_on"`
 	AlternateIDS     []string          `json:"alternate_ids"`
 	Status           string            `json:"status"`
+}
+
+type Doc struct {
+	Name string 	`json:"name"`
+	HashLink string `json:"hash_link"`
+}
+
+type KV struct {
+	Key string `json:"key"`
+	Value string `json:"value"`
 }
 
 func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -42,7 +53,7 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 }
 
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	obits, err := og.service.Search(ctx, 0)
+	obits, err := og.service.Search(ctx)
 
 	if err != nil {
 		return err
@@ -86,14 +97,24 @@ func requestBodyToDto(ctx context.Context, r *http.Request) (sdkgo.ObitDto, erro
 		return dto, err
 	}
 
+	kvs := func(kvs []KV) []properties.KV {
+		var newKVs []properties.KV
+
+		for _, kv := range kvs {
+			newKVs = append(newKVs, properties.KV(kv))
+		}
+
+		return newKVs
+	}
+
 	dto.SerialNumberHash = requestData.SerialNumberHash
 	dto.Manufacturer = requestData.Manufacturer
 	dto.PartNumber = requestData.PartNumber
 	dto.OwnerDid = requestData.OwnerDid
 	dto.ObdDid = requestData.ObdDid
-	dto.Matadata = requestData.Metadata
-	dto.StructuredData = requestData.StructuredData
-	dto.Documents = requestData.Documents
+	dto.Matadata = kvs(requestData.Metadata)
+	dto.StructuredData = kvs(requestData.StructuredData)
+	//dto.Documents = requestData.Documents
 	dto.ModifiedOn = requestData.ModifiedOn
 	dto.AlternateIDS = requestData.AlternateIDS
 	dto.Status = requestData.Status

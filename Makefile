@@ -16,6 +16,16 @@ run-local:
 deploy-production:
 	ansible-playbook deployment/playbook.yml --limit api.obada.io
 
+deploy: quick-deploy
+
+quick-deploy: deploy
+	read -r -p "What node are you want to deploy?: " NODE; \
+	ansible-playbook deployment/playbook.yml --limit $(NODE) --tags=quick-deploy
+
+full-deploy:
+	read -r -p "What node are you want to deploy?: " NODE; \
+	ansible-playbook deployment/playbook.yml --limit $(NODE) --tags=full-deploy
+
 deploy-staging:
 	ansible-playbook deployment/playbook.yml --limit dev.api.obada.io
 
@@ -57,7 +67,9 @@ deploy-node-api-library: generate-node-api-library
 	  git push origin master ; \
 	fi
 
-bpd: build-branch publish-branch-image deploy-staging
+bpd: build-branch publish-branch-image deploy
+
+bpdf: build-branch publish-branch-image deploy-fast
 
 lint-openapi-spec:
 	docker run \

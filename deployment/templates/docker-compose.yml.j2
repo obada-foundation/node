@@ -28,12 +28,16 @@ services:
       - LE_EMAIL=techops@obada.io
       - LE_FQDN={{ obada_member }}.node.obada.io
 
-  app:
+  node:
     image: obada/node:develop
-    container_name: gateway
-    volumes:
-      - ./etc/.env:/app/.env
+    container_name: node
     restart: always
+    environment:
+      - AWS_KEY={{ aws_key }}
+      - AWS_SECRET={{ aws_secret }}
+      - PUBSUB_QUEUE_URL={{ sqs_queue_url }}
+    volumes:
+      - ./db/obada.db:/root/obada.db
     networks:
       - backend
       - frontend
