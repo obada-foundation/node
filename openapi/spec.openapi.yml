@@ -17,8 +17,121 @@ info:
 
 tags:
   - name: Obit
+  - name: Helper
 
 paths:
+  /api/client/obits:
+    get:
+      summary: Returns a list of client obits
+      description: ''
+      operationId: getClientObits
+      tags:
+        - Helper
+      responses:
+        "200":
+          $ref: '#/components/responses/ClientObitsResponse'
+
+  /api/client/obit:
+    post:
+      summary: Save Client Obit
+      description: ''
+      operationId: saveClientObit
+      tags:
+        - Helper
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalObit'
+      responses:
+        "200":
+          $ref: '#/components/responses/ClientObitResponse'
+  /api/client/obit/{obit_did}:
+    get:
+      summary: Get Client Obit
+      description: ''
+      operationId: getClientObit
+      tags:
+        - Helper
+      parameters:
+        - name: obit_did
+          description: Required.
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "did:obada:81413bc1ad2074a6ae35d1f65f64f1bca2e8a20959f37ef0349a729ddc567d9b"
+      responses:
+        "200":
+          $ref: '#/components/responses/ClientObitResponse'
+  /api/server/obit/{obit_did}:
+    get:
+      summary: Get Obit From Blockchain
+      description: Retrieves Obit information from blockchain but does not download it.
+      operationId: fetchObitFromChain
+      tags:
+        - Helper
+      parameters:
+        - name: obit_did
+          description: Required.
+          required: true
+          in: path
+          schema:
+            type: string
+            example: "did:obada:81413bc1ad2074a6ae35d1f65f64f1bca2e8a20959f37ef0349a729ddc567d9b"
+      responses:
+        "200":
+          $ref: '#/components/responses/BlockChainObitResponse'
+  /api/obit/hash:
+    post:
+      summary: Generates The Root Hash using the data provided.
+      description: ''
+      operationId: generateRootHash
+      tags:
+        - Helper
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocalObit'
+      responses:
+        "200":
+          $ref: '#/components/responses/RootHashResponse'
+  /api/obit/definition:
+    get:
+      summary: Generate Obit Definition
+      description: 'Returns the Obit Definition for a given device_id, part_number and serial_number input.'
+      operationId: generateObitDef
+      tags:
+        - Helper
+      parameters:
+        - name: manufacturer
+          description: Device Id (Required)
+          required: true
+          in: query
+          schema:
+            type: string
+            example: "Apple"
+        - name: part_number
+          description: Part Number (Required)
+          required: true
+          in: query
+          schema:
+            type: string
+            example: "123456789"
+        - name: serial_number
+          description: Serial Number (Required)
+          required: true
+          in: query
+          schema:
+            type: string
+            example: "123456789"
+      responses:
+        "200":
+          $ref: "#/components/responses/ObitDefinitionResponse"
+        "404":
+          $ref: "#/components/responses/BadRequest"
+
   /obits:
     get:
       tags:
@@ -184,11 +297,87 @@ paths:
 
 components:
   schemas:
+    BlockChainObit:
+      $ref: "definitions/Obit.yml#/BlockChainObit"
+    ClientObit:
+      $ref: "definitions/Obit.yml#/ClientObit"
+    LocalObit:
+      $ref: "definitions/Obit.yml#/LocalObit"
     Obit:
       $ref: "definitions/Obit.yml#/Obit"
     ObitHistory:
       $ref: "definitions/Obit.yml#/ObitHistory"
+    ObitDefinition:
+      description: New Obit def
+      type: object
+      properties:
+        serial_hash:
+          type: string
+        usn:
+          type: string
+        obit_did:
+          type: string
+        usn_base58:
+          type: string
   responses:
+    ClientObitsResponse:
+      description: Client obits response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              obits:
+                type: array
+                description: Get description from Rohi
+                items:
+                  $ref: '#/components/schemas/Obit'
+    ClientObitResponse:
+      description: Client obit response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              obit:
+                $ref: '#/components/schemas/ClientObit'
+    BlockChainObitResponse:
+      description: Blockchain obit response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              blockchain_obit:
+                $ref: '#/components/schemas/BlockChainObit'
+    ObitDefinitionResponse:
+      description: Obit definition response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              obit:
+                $ref: "definitions/Obit.yml#/ObitDefinition"
+    RootHashResponse:
+      description: Obit root hash response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+              root_hash:
+                type: string
     ObitHistoryResponse:
       description: Collection of historical changes for given obit
       content:

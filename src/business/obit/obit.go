@@ -378,12 +378,45 @@ func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	return err
 }
 
-// Create method creates a new Obit
-func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) error {
-	if os.isSynced == false {
-		return errors.New("Cannot create or update obits. Node is syncing.")
+func (os Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error) {
+	var o QLDBObit
+
+	obit, err := os.sdk.NewObit(dto)
+
+	if err != nil {
+		return o, err
 	}
 
+	ID := obit.GetObitID()
+	DID := ID.GetHash().GetHash()
+
+	o, err = os.Show(ctx, DID)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) == false {
+			return o, err
+		}
+
+		if err := os.Create(ctx, dto); err != nil {
+			return o, err
+		}
+	} else {
+		if err := os.Update(ctx, DID, dto); err != nil {
+			return o, err
+		}
+	}
+
+	o, err = os.Show(ctx, DID)
+
+	if err != nil {
+		return o, nil
+	}
+
+	return o, nil
+}
+
+// Create method creates a new Obit
+func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) error {
 	obit, err := os.sdk.NewObit(dto)
 
 	if err != nil {
@@ -399,10 +432,6 @@ func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) error {
 
 // Update method updates Obit
 func (os Service) Update(ctx context.Context, id string, dto sdkgo.ObitDto) error {
-	if os.isSynced == false {
-		return errors.New("Cannot create or update obits. Node is syncing.")
-	}
-
 	obit, err := os.sdk.NewObit(dto)
 
 	if err != nil {
