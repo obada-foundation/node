@@ -197,20 +197,7 @@ LocalObit:
       type: array
       description: Get description from Rohi
       items:
-        description: A record that represent key/value metadata record
-        type: object
-        required:
-          - key
-          - value
-        properties:
-          key:
-            type: string
-            description: Metadata key
-            example: model
-          value:
-            type: string
-            description: Matadata value
-            example: Dell R740
+        $ref: '#/MetaDataRecord'
     documents:
       description: >
         To generate this link, take an SHA-256 hash of the document, and link to it as https://www.some-website.com?h1=hash-of-document. Note this does not yet adhere to the hashlink standard.
@@ -234,22 +221,9 @@ LocalObit:
       type: array
       description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))
       items:
-        description: A record that represent key/value structure data record
-        type: object
-        required:
-          - key
-          - value
-        properties:
-          key:
-            type: string
-            description: Structure data key
-            example: model
-          value:
-            type: string
-            description: Structure data value as a json string
-            example: '{"somekey":"somevalue"}'
+        $ref: '#/StructureDataRecord'
     modified_on:
-      type: int
+      type: integer
 
 ObitDefinition:
   description: New Obit def
@@ -309,12 +283,16 @@ ClientObit:
     root_hash:
       type: string
     metadata:
-      type: object
+      type: array
       description: Get description from Rohi
+      items:
+        $ref: '#/MetaDataRecord'
     documents:
       description: >
         To generate this link, take an SHA-256 hash of the document, and link to it as https://www.some-website.com?h1=hash-of-document. Note this does not yet adhere to the hashlink standard.
       type: object
     structured_data:
-      type: object
       description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))
+      type: array
+      items:
+        $ref: '#/StructureDataRecord'
