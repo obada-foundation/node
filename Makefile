@@ -46,6 +46,9 @@ generate-node-api-library: clone-node-api-library
 		-o /src \
 		-c /local/clients/php/config.yml
 
+artifacts:
+	docker build -f docker/Dockerfile.artifacts --no-cache --pull -t node.bin .
+
 build-branch:
 	docker build -t $(IMAGE) -f docker/Dockerfile .
 

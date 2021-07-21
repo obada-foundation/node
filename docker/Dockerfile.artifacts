@@ -1,0 +1,30 @@
+FROM alpine:edge AS builder
+
+ARG GITHUB_TOKEN
+
+RUN apk update && apk upgrade
+
+RUN apk add --no-cache go gcc g++ mingw-w64-gcc
+
+WORKDIR /build/src
+ADD src /build/src
+ADD README.md /build/
+
+ADD .git/ /build/src/.git/
+
+RUN \
+    export GOFLAGS="-mod=vendor" && \
+    export CGO_ENABLED=1 && \
+    GOOS=linux GOARCH=amd64 go build -o node.linux-amd64 -ldflags '-X main.revision=develop -s -w -extldflags "-static"' ./app/node && \
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o node.windows-amd64.exe -ldflags '-X main.revision=develop -s -w -extldflags "-static"' ./app/node
+
+RUN \
+    apk add --no-cache --update zip && \
+    ls -la && \
+    tar cvzf node.develop.linux-amd64.tar.gz node.linux-amd64 && \
+    zip node.develop.windows-amd64.zip node.windows-amd64.exe
+
+FROM alpine
+COPY --from=builder /build/src/node.* /artifacts/
+RUN ls -la /artifacts/*
+CMD ["sleep", "100"]

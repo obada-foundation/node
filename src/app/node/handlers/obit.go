@@ -60,7 +60,7 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 
 	resp := ObitCreate{
 		DID: ID.GetDid(),
-		Hash: ID.GetHash(),
+		Hash: ID.GetHash().GetHash(),
 		Usn: ID.GetUsn(),
 	}
 
