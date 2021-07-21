@@ -1,15 +1,14 @@
-GATEWAY_PROJECT = obada/server-gateway
-QLDB_PROJECT = obada/qldb
+PROJECT = obada/node
 COMMIT_BRANCH ?= develop
-GATEWAY_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_BRANCH)
-GATEWAY_RELEASE_IMAGE = $(GATEWAY_PROJECT):master
-GATEWAY_TAG_IMAGE = $(GATEWAY_PROJECT):$(COMMIT_TAG)
-QLDB_IMAGE = $(QLDB_PROJECT):$(COMMIT_BRANCH)
-QLDB_RELEASE_IMAGE = $(QLDB_PROJECT):master
-QLDB_TAG_IMAGE = $(QLDB_PROJECT):$(COMMIT_TAG)
+IMAGE = $(PROJECT):$(COMMIT_BRANCH)
+RELEASE_IMAGE = $(PROJECT):master
+TAG_IMAGE = $(PROJECT):$(COMMIT_TAG)
 
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
+
+lint:
+	cd src && golangci-lint --config .golangci.yml run --print-issued-lines --out-format=github-actions ./...
 
 run-local:
 	docker-compose -f docker-compose.yml up -d --force-recreate
@@ -17,25 +16,21 @@ run-local:
 deploy-production:
 	ansible-playbook deployment/playbook.yml --limit api.obada.io
 
+deploy: quick-deploy
+
+quick-deploy: deploy
+	read -r -p "What node are you want to deploy?: " NODE; \
+	ansible-playbook deployment/playbook.yml --limit $(NODE) --tags=quick-deploy
+
+full-deploy:
+	read -r -p "What node are you want to deploy?: " NODE; \
+	ansible-playbook deployment/playbook.yml --limit $(NODE) --tags=full-deploy
+
 deploy-staging:
 	ansible-playbook deployment/playbook.yml --limit dev.api.obada.io
 
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
-
-
-DB_RUNNING := $(shell sh -c "docker ps -q -f name=node-db|wc -l|tr -d ' '")
-prepare-test:
-	if [ $(DB_RUNNING) -eq 0 ]; then \
-		docker run -d --name node-db -e MYSQL_ROOT_PASSWORD=secret -e MYSQL_DATABASE=gateway mysql:8 ; \
-		sleep 15 ; \
-	fi
-
-test: prepare-test
-	docker run --rm -t --link node-db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit $$ARGS"
-
-test-local: prepare-test
-	docker run -v $$(pwd)/services/gateway:/app --rm -t --link node-db $(GATEWAY_IMAGE) sh -c "php artisan migrate --force -n && ./vendor/bin/phpunit $$ARGS"
 
 deploy-api-clients: deploy-node-api-library
 	@echo "Deployment of client libraries was done"
@@ -51,29 +46,20 @@ generate-node-api-library: clone-node-api-library
 		-o /src \
 		-c /local/clients/php/config.yml
 
-build-gateway-branch:
-	docker build -t $(GATEWAY_IMAGE) -f docker/gateway/Dockerfile . --build-arg APP_ENV=dev
+artifacts:
+	docker build -f docker/Dockerfile.artifacts --no-cache --pull -t node.bin .
 
-build-qldb-branch:
-	docker build -t $(QLDB_IMAGE) -f docker/qldb/Dockerfile .
+build-branch:
+	docker build -t $(IMAGE) -f docker/Dockerfile .
 
-publish-branch-image-gateway:
-	docker push $(GATEWAY_IMAGE)
+publish-branch-image:
+	docker push $(IMAGE)
 
-publish-branch-image-qldb:
-	docker push $(QLDB_IMAGE)
+build-release:
+	docker build -t $(RELEASE_IMAGE) -f docker/Dockerfile .
 
-build-gateway-release:
-	docker build -t $(GATEWAY_RELEASE_IMAGE) -f docker/app/Dockerfile . --build-arg APP_ENV=prod
-
-build-qldb-release:
-	docker build -t $(QLDB_RELEASE_IMAGE) -f docker/qldb/Dockerfile .
-
-build-gateway-tag:
-	docker tag $(GATEWAY_RELEASE_IMAGE) $(GATEWAY_TAG_IMAGE)
-
-build-qldb-tag:
-	docker tag $(QLDB_RELEASE_IMAGE) $(QLDB_TAG_IMAGE)
+build-tag:
+	docker tag $(RELEASE_IMAGE) $(TAG_IMAGE)
 
 deploy-node-api-library: generate-node-api-library
 	cd node-api-library ; \
@@ -84,14 +70,21 @@ deploy-node-api-library: generate-node-api-library
 	  git push origin master ; \
 	fi
 
-bpd: build-gateway-branch publish-branch-image-gateway deploy-staging
+bpd: build-branch publish-branch-image deploy
 
-bpdg: build-qldb-branch publish-branch-image-qldb deploy-staging
+bpdf: build-branch publish-branch-image deploy-fast
 
 lint-openapi-spec:
 	docker run \
       -v $$(pwd)/openapi:/openapi/ \
       wework/speccy lint /openapi/spec.openapi.yml
+
+run-node:
+	cd src/app/node && go run main.go
+
+export GOPRIVATE=github.com/obada-foundation
+vendor:
+	cd src && go mod tidy && go mod vendor
 
 help:
 	@echo "Help here"

@@ -2,6 +2,8 @@
 - name: Install unattended upgrades package.
   apt: name=unattended-upgrades state=present
   become: yes
+  tags:
+    - full-deploy
 
 - name: setup unattended-upgrades configuration file
   notify: unattended-upgrades restart
@@ -9,6 +11,8 @@
     src: ./templates/etc/unattended-upgrades/50unattended-upgrades
     dest: /etc/apt/apt.conf.d/50unattended-upgrades
   become: yes
+  tags:
+    - full-deploy
 
 - name: setup unattended-upgrades schedule
   notify: unattended-upgrades restart
@@ -16,7 +20,11 @@
     src: ./templates/etc/unattended-upgrades/10periodic
     dest: /etc/apt/apt.conf.d/10periodic
   become: yes
+  tags:
+    - full-deploy
 
 - name: ensure unattended-upgrades service is started and enabled
   service: name=unattended-upgrades enabled=true state=started
   become: yes
+  tags:
+    - full-deploy
