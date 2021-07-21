@@ -397,7 +397,7 @@ func (os Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error)
 			return o, err
 		}
 
-		if err := os.Create(ctx, dto); err != nil {
+		if _, err := os.Create(ctx, dto); err != nil {
 			return o, err
 		}
 	} else {
@@ -416,18 +416,22 @@ func (os Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error)
 }
 
 // Create method creates a new Obit
-func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) error {
+func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) (properties.ObitID, error) {
 	obit, err := os.sdk.NewObit(dto)
 
+	var ID properties.ObitID
+
 	if err != nil {
-		return err
+		return ID, err
 	}
 
 	if err = os.createQLDB(ctx, obit); err != nil {
-		return errors.Wrap(err, "creating obit")
+		return ID, errors.Wrap(err, "creating obit")
 	}
 
-	return nil
+	ID = obit.GetObitID()
+
+	return ID, nil
 }
 
 // Update method updates Obit

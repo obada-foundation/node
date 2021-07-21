@@ -219,7 +219,7 @@ paths:
               $ref: "#/components/schemas/Obit"
       responses:
         "201":
-          $ref: "#/components/responses/Created"
+          $ref: "#/components/responses/ObitCreated"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
 
@@ -389,6 +389,19 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/ObitHistory"
+    ObitCreated:
+      description: Collection of historical changes for given obit
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              did:
+                type: string
+              usn:
+                type: string
+              hash:
+                type: string
     Created:
       description: The request was successful and the resource was created.
     NoContent:

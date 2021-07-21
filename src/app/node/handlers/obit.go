@@ -39,6 +39,12 @@ type KV struct {
 	Value string `json:"value"`
 }
 
+type ObitCreate struct {
+	Hash string `json:"hash"`
+	DID string `json:"did"`
+	Usn string `json:"usn"`
+}
+
 func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	dto, err := requestBodyToDto(ctx, r)
 
@@ -46,11 +52,19 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 		return err
 	}
 
-	if err := og.service.Create(ctx, dto); err != nil {
+	ID, err := og.service.Create(ctx, dto)
+
+	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, "", http.StatusCreated)
+	resp := ObitCreate{
+		DID: ID.GetDid(),
+		Hash: ID.GetHash(),
+		Usn: ID.GetUsn(),
+	}
+
+	return web.Respond(ctx, w, resp, http.StatusCreated)
 }
 
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
