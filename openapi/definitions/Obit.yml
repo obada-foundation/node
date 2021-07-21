@@ -50,15 +50,10 @@ Obit:
   description: OBADA record.
   type: object
   required:
-    - obit_did
-    - usn
-    - obit_alternate_ids
     - owner_did
-    - obit_status
     - manufacturer
     - part_number
     - serial_number_hash
-    - root_hash
   properties:
     obit_did:
       type: string
@@ -158,4 +153,168 @@ ObitHistory:
       format: date-time
       example: "2020-01-01T13:24:35Z"
 
+LocalObit:
+  required:
+    - manufacturer
+    - part_number
+    - serial_number
+    - modified_on
+    - obit_status
+    - owner
+  properties:
+    owner:
+      type: string
+      description: Owner is the person/entity that owns the obit and the physical asset it represents.
+      example: "Tradeloop"
+    obit_status:
+      type: string
+      description: >
+        Represent available Obit statuses:
+          - FUNCTIONAL
+          - NON_FUNCTIONAL
+          - DISPOSED
+          - STOLEN
+          - DISABLED_BY_OWNER
+      enum:
+        - FUNCTIONAL
+        - NON_FUNCTIONAL
+        - DISPOSED
+        - STOLEN
+        - DISABLED_BY_OWNER
+    manufacturer:
+      type: string
+      description: "Waiting more specific details from Rohi"
+      example: "Sony"
+    part_number:
+      type: string
+      description: "Manufacturer provided. In cases where no part number is provided for the product, use model, or the most specific ID available from the manufacturer. MWCN2LL/A (an iPhone 11 Pro, Silver, 256GB, model A2160)"
+      example: "MWCN2LL/A"
+    serial_number:
+      type: string
+      description: Serial Number
+      example: "123456789"
+    metadata:
+      type: array
+      description: Get description from Rohi
+      items:
+        description: A record that represent key/value metadata record
+        type: object
+        required:
+          - key
+          - value
+        properties:
+          key:
+            type: string
+            description: Metadata key
+            example: model
+          value:
+            type: string
+            description: Matadata value
+            example: Dell R740
+    documents:
+      description: >
+        To generate this link, take an SHA-256 hash of the document, and link to it as https://www.some-website.com?h1=hash-of-document. Note this does not yet adhere to the hashlink standard.
+      type: array
+      items:
+        description: Document hashlink
+        type: object
+        required:
+          - name
+          - hashlink
+        properties:
+          name:
+            type: string
+            description: Associative name of hashlink
+            example: "Link to device wipe report"
+          hashlink:
+            type: string
+            description: Hashlink
+            example: "Link to device wipe report"
+    structured_data:
+      type: array
+      description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))
+      items:
+        description: A record that represent key/value structure data record
+        type: object
+        required:
+          - key
+          - value
+        properties:
+          key:
+            type: string
+            description: Structure data key
+            example: model
+          value:
+            type: string
+            description: Structure data value as a json string
+            example: '{"somekey":"somevalue"}'
+    modified_on:
+      type: int
 
+ObitDefinition:
+  description: New Obit def
+  type: object
+  properties:
+    serial_hash:
+      type: string
+    usn:
+      type: string
+    obit_did:
+      type: string
+    usn_base58:
+      type: string
+
+BlockChainObit:
+  type: object
+  properties:
+    root_hash:
+      type: string
+    obit_did:
+      type: string
+
+ClientObit:
+  type: object
+  properties:
+    id:
+      type: integer
+    obit_did:
+      type: string
+    usn:
+      type: string
+    owner_did:
+      type: string
+    obit_status:
+      type: string
+      description: >
+        Represent available Obit statuses:
+          - FUNCTIONAL
+          - NON_FUNCTIONAL
+          - DISPOSED
+          - STOLEN
+          - DISABLED_BY_OWNER
+      enum:
+        - FUNCTIONAL
+        - NON_FUNCTIONAL
+        - DISPOSED
+        - STOLEN
+        - DISABLED_BY_OWNER
+    manufacturer:
+      type: string
+    part_number:
+      type: string
+    serial_number_hash:
+      type: string
+    modified_on:
+      type: integer
+    root_hash:
+      type: string
+    metadata:
+      type: object
+      description: Get description from Rohi
+    documents:
+      description: >
+        To generate this link, take an SHA-256 hash of the document, and link to it as https://www.some-website.com?h1=hash-of-document. Note this does not yet adhere to the hashlink standard.
+      type: object
+    structured_data:
+      type: object
+      description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))

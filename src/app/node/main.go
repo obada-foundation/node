@@ -22,6 +22,7 @@ import (
 	"github.com/obada-foundation/node/app/node/handlers"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	obitService "github.com/obada-foundation/node/business/obit"
+	helperService "github.com/obada-foundation/node/business/helper"
 	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
@@ -186,6 +187,9 @@ func run(logger *log.Logger) error {
 	// Initialize ObitService
 	obit := obitService.NewObitService(sdk, logger, db, qldb, ps)
 
+	// Initialize HelperService
+	helper := helperService.NewService(sdk, logger)
+
 	// Start database sync
 	go func() {
 		for {
@@ -202,7 +206,7 @@ func run(logger *log.Logger) error {
 
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(build, shutdown, logger, obit),
+		Handler:      handlers.API(build, shutdown, logger, obit, helper),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

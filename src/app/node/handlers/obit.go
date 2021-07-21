@@ -6,7 +6,6 @@ import (
 	"github.com/obada-foundation/node/foundation/web"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/obada-foundation/sdkgo/properties"
-	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -15,6 +14,8 @@ type obitGroup struct {
 }
 
 type requestObit struct {
+	ObitDID			 interface{}	   `json:"obit_did"`
+	Usn              string			   `json:"usn"`
 	SerialNumberHash string            `validate:"required" json:"serial_number_hash"`
 	Manufacturer     string            `validate:"required" json:"manufacturer"`
 	PartNumber       string            `validate:"required" json:"part_number"`
@@ -38,6 +39,12 @@ type KV struct {
 	Value string `json:"value"`
 }
 
+type ObitCreate struct {
+	Hash string `json:"hash"`
+	DID string `json:"did"`
+	Usn string `json:"usn"`
+}
+
 func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	dto, err := requestBodyToDto(ctx, r)
 
@@ -45,11 +52,19 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 		return err
 	}
 
-	if err := og.service.Create(ctx, dto); err != nil {
+	ID, err := og.service.Create(ctx, dto)
+
+	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, "", http.StatusCreated)
+	resp := ObitCreate{
+		DID: ID.GetDid(),
+		Hash: ID.GetHash(),
+		Usn: ID.GetUsn(),
+	}
+
+	return web.Respond(ctx, w, resp, http.StatusCreated)
 }
 
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -60,18 +75,6 @@ func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.R
 	}
 
 	return web.Respond(ctx, w, obits, http.StatusOK)
-}
-
-func parseObitIDFromRequest(r *http.Request) (string, error) {
-	params := web.Params(r)
-
-	ID, ok := params["obitDID"]
-
-	if !ok {
-		return "", errors.New("Cannot find obitDID in URI")
-	}
-
-	return ID, nil
 }
 
 func (og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
