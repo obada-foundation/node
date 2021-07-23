@@ -60,3 +60,23 @@ Each option can be provided in two forms: command line or environment key:value 
   --version/-v  
   display version information
 ```
+
+## Integration
+
+OBADA provides integration solutions for PHP, Python and C#. You also can check simple applications that show how to use these solutions.
+All integration solutions are generated from [OpenAPI specification](https://github.com/obada-foundation/node/tree/master/openapi).
+
+### PHP
+
+- [Integration solution](https://github.com/obada-foundation/node-api-library)
+- [Example application](https://github.com/obada-foundation/example-client-system)
+
+### Python
+
+- [Integration solution](https://github.com/obada-foundation/node-api-library-python)
+- [Example application](https://github.com/obada-foundation/integration-scenarios/tree/master/python/simple-application)
+
+### C#
+
+- [Integration solution](https://github.com/obada-foundation/node-api-library-csharp)
+- [Example application](https://github.com/obada-foundation/integration-scenarios/tree/master/csharp/simple-application/SimpleApplication)
