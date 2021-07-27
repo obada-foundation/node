@@ -20,7 +20,7 @@ func NewIntProperty(description string, i int64, logger *log.Logger, debug bool)
 		logger.Printf("\n <|%s|> => NewIntProperty(%v)", description, i)
 	}
 
-	h, err := hash.NewHash(strconv.FormatInt(i, 10), logger, debug)
+	h, err := hash.NewHash([]byte(strconv.FormatInt(i, 10)), logger, debug)
 
 	if err != nil {
 		return ip, err
@@ -41,4 +41,3 @@ func (sp IntProperty) GetValue() int64 {
 func (sp IntProperty) GetHash() hash.Hash {
 	return sp.hash
 }
-

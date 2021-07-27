@@ -20,7 +20,7 @@ func NewStringProperty(description, value string, logger *log.Logger, debug bool
 		logger.Printf("\n <|%s|> => NewStringProperty(%v)", description, sp)
 	}
 
-	h, err := hash.NewHash(value, logger, debug)
+	h, err := hash.NewHash([]byte(value), logger, debug)
 
 	if err != nil {
 		return sp, fmt.Errorf("cannot hash %q: %w", value, err)
