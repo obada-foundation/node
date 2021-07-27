@@ -5,3 +5,4 @@ docker-compose.yml
 *.db
 src/app/node/node
 node-api-library
+node-api-library-csharp

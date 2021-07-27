@@ -272,15 +272,15 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 	docRecords := obit.GetDocuments()
 	docs := make(map[string]string)
 
-	for _, record := range docRecords.GetAll() {
-		docs[record.GetKey().GetValue()] = record.GetValue().GetValue()
+	for _, doc := range docRecords.GetAll() {
+		docs[doc.GetName().GetValue()] = doc.GetHashLink().GetHashLink()
 	}
 
 	o.Documents = docs
 	o.ModifiedOn = obit.GetModifiedOn().GetValue()
 
 	o.Status = obit.GetStatus().GetValue()
-	rootHash, err := obit.GetRootHash()
+	rootHash, err := obit.GetRootHash(nil)
 
 	if err != nil {
 		return o, err
@@ -475,8 +475,9 @@ func (os Service) GetObitsCount(ctx context.Context) (uint, error) {
 	return cnt, nil
 }
 
+// Search provides obits by given arguments
 func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
-	var obits []QLDBObit
+	obits := make([]QLDBObit, 0)
 
 	const q = `SELECT * FROM gateway_view`
 
@@ -523,9 +524,17 @@ func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
 			return obits, err
 		}
 
+		if o.Metadata == nil {
+			o.Metadata = make([]KV, 0)
+		}
+
 		json.Unmarshal(stctData, &o.StructuredData)
 		if err != nil {
 			return obits, err
+		}
+
+		if o.StructuredData == nil {
+			o.StructuredData = make([]KV, 0)
 		}
 
 		json.Unmarshal(docs, &o.Documents)
@@ -536,6 +545,10 @@ func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
 		json.Unmarshal(altIDS, &o.AlternateIDS)
 		if err != nil {
 			return obits, err
+		}
+
+		if o.AlternateIDS == nil {
+			o.AlternateIDS = make([]string, 0)
 		}
 
 		obits = append(obits, o)
@@ -642,7 +655,7 @@ func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
 // Show returns obit by given id
 func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
 	var obit QLDBObit
-	var altIDS []byte
+	altIDS := make([]byte, 1)
 	var metadata []byte
 	var stctData []byte
 	var docs []byte
@@ -684,16 +697,32 @@ func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
 		return obit, err
 	}
 
+	if obit.Metadata == nil {
+		obit.Metadata = make([]KV, 0)
+	}
+
 	if err := json.Unmarshal(stctData, &obit.StructuredData); err != nil {
 		return obit, err
+	}
+
+	if obit.StructuredData == nil {
+		obit.StructuredData = make([]KV, 0)
 	}
 
 	if err := json.Unmarshal(docs, &obit.Documents); err != nil {
 		return obit, err
 	}
 
+	if obit.Documents == nil {
+		obit.Documents = make(map[string]string)
+	}
+
 	if err := json.Unmarshal(altIDS, &obit.AlternateIDS); err != nil {
 		return obit, err
+	}
+
+	if obit.AlternateIDS == nil {
+		obit.AlternateIDS = make([]string, 0)
 	}
 
 	os.logger.Printf("%v", obit)

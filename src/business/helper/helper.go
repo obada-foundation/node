@@ -109,7 +109,7 @@ func (s Service) GenRootHash(lo LocalObit) (string, error) {
 		return "", err
 	}
 
-	h, err := o.GetRootHash()
+	h, err := o.GetRootHash(nil)
 
 	if err != nil {
 		return "", err

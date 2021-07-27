@@ -38,6 +38,18 @@ deploy-api-clients: deploy-node-api-library
 clone-node-api-library:
 	if [ ! -d "./node-api-library" ]; then git clone git@github.com:obada-foundation/node-api-library ./node-api-library; fi
 
+clone-node-api-library-csharp: ## Clone github.com/obada-foundation/node-api-library-csharp if it does not exists
+	if [ ! -d "./node-api-library-csharp" ]; then git clone -b main git@github.com:obada-foundation/node-api-library-csharp ./node-api-library-csharp; fi
+
+generate-node-api-library-csharp: clone-node-api-library-csharp
+	rm -rf $$(pwd)/node-api-library-csharp/*
+	docker run --rm \
+		-v $$(pwd)/openapi:/local -v $$(pwd)/node-api-library-csharp:/src openapitools/openapi-generator-cli generate \
+		-i /local/spec.openapi.yml \
+		-g csharp \
+		-o /src \
+		-c /local/clients/csharp/config.yml
+
 generate-node-api-library: clone-node-api-library
 	docker run --rm \
 		-v $$(pwd)/openapi:/local -v $$(pwd)/node-api-library:/src openapitools/openapi-generator-cli generate \
@@ -86,5 +98,13 @@ export GOPRIVATE=github.com/obada-foundation
 vendor:
 	cd src && go mod tidy && go mod vendor
 
-help:
-	@echo "Help here"
+help: ## Show this help.
+	 @IFS=$$'\n' ; \
+        help_lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//'`); \
+        for help_line in $${help_lines[@]}; do \
+            IFS=$$'#' ; \
+            help_split=($$help_line) ; \
+            help_command=`echo $${help_split[0]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
+            help_info=`echo $${help_split[2]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
+            printf "%-30s %s\n" $$help_command $$help_info ; \
+        done
