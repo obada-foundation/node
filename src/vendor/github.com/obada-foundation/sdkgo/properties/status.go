@@ -20,7 +20,7 @@ func NewStatusProperty(status string, logger *log.Logger, debug bool) (StatusPro
 		logger.Printf("\n <|Making status property|> => NewStatusProperty(%v)", status)
 	}
 
-	h, err := hash.NewHash(status, logger, debug)
+	h, err := hash.NewHash([]byte(status), logger, debug)
 
 	if err != nil {
 		return sp, fmt.Errorf("cannot hash %q: %w", status, err)

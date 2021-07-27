@@ -18,7 +18,7 @@ type Sdk struct {
 	validate *validator.Validate
 }
 
-// NewSdk creates a new obada SDK instance
+// NewSdk creates a new OBADA SDK instance
 func NewSdk(logger *log.Logger, debug bool) (*Sdk, error) {
 	v, err := initializeValidator()
 
@@ -59,7 +59,7 @@ func (sdk *Sdk) NewObit(dto ObitDto) (Obit, error) {
 	}
 
 	if sdk.debug {
-		sdk.logger.Printf("NewObit(%v)", dto)
+		sdk.logger.Printf("<|%s|> => NewObit(%v)", "<|Creating new Obit|>", dto)
 	}
 
 	snProp, err := properties.NewStringProperty(
@@ -140,7 +140,7 @@ func (sdk *Sdk) NewObit(dto ObitDto) (Obit, error) {
 		return o, err
 	}
 
-	metadataProp, err := properties.NewMapProperty(
+	metadataProp, err := properties.NewKVCollection(
 		"Making matadata hash",
 		dto.Matadata,
 		sdk.logger,
@@ -151,7 +151,7 @@ func (sdk *Sdk) NewObit(dto ObitDto) (Obit, error) {
 		return o, err
 	}
 
-	strctDataProp, err := properties.NewMapProperty(
+	strctDataProp, err := properties.NewKVCollection(
 		"Making structuredData hash",
 		dto.StructuredData,
 		sdk.logger,
@@ -162,7 +162,7 @@ func (sdk *Sdk) NewObit(dto ObitDto) (Obit, error) {
 		return o, err
 	}
 
-	documentsProp, err := properties.NewMapProperty(
+	documentsProp, err := properties.NewDocumentCollection(
 		"Making documents hash",
 		dto.Documents,
 		sdk.logger,
@@ -231,17 +231,17 @@ func (o Obit) GetObdDID() properties.StringProperty {
 }
 
 // GetMetadata returns Obit metadata
-func (o Obit) GetMetadata() properties.KvProperty {
+func (o Obit) GetMetadata() properties.KvCollection {
 	return o.metadata
 }
 
 // GetStructuredData returns Obit structured data
-func (o Obit) GetStructuredData() properties.KvProperty {
+func (o Obit) GetStructuredData() properties.KvCollection {
 	return o.structuredData
 }
 
 // GetDocuments returns Obit documents
-func (o Obit) GetDocuments() properties.KvProperty {
+func (o Obit) GetDocuments() properties.Documents {
 	return o.documents
 }
 
@@ -261,11 +261,11 @@ func (o Obit) GetStatus() properties.StatusProperty {
 }
 
 // GetRootHash returns obit root hash
-func (o Obit) GetRootHash() (hash.Hash, error) {
+func (o Obit) GetRootHash(parentRootHash *hash.Hash) (hash.Hash, error) {
 	var rootHash hash.Hash
 
 	if o.debug {
-		o.logger.Println("\n\nObit root hash calculation")
+		o.logger.Println("\n\n<|Obit root hash calculation|>")
 	}
 
 	sum := o.obitID.GetHash().GetDec() +
@@ -301,7 +301,17 @@ func (o Obit) GetRootHash() (hash.Hash, error) {
 		))
 	}
 
-	rootHash, err := hash.NewHash(fmt.Sprintf("%x", sum), o.logger, o.debug)
+	if parentRootHash != nil {
+		prhDec := parentRootHash.GetDec()
+
+		if o.debug {
+			o.logger.Println(fmt.Sprintf("(%d + %d) -> %d", sum, prhDec, sum + prhDec))
+		}
+
+		sum += prhDec
+	}
+
+	rootHash, err := hash.NewHash([]byte(fmt.Sprintf("%x", sum)), o.logger, o.debug)
 
 	if err != nil {
 		return rootHash, err
