@@ -97,41 +97,25 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/RootHashResponse'
-  /api/obit/definition:
-    get:
-      summary: Generate Obit Definition
-      description: 'Returns the Obit Definition for a given device_id, part_number and serial_number input.'
-      operationId: generateObitDef
+  /obit/id:
+    post:
+      summary: Generate Obit ID
+      description: 'Returns the Obit ID for a given device_id, part_number and serial_number input.'
+      operationId: generateId
       tags:
-        - Helper
-      parameters:
-        - name: manufacturer
-          description: Device Id (Required)
-          required: true
-          in: query
-          schema:
-            type: string
-            example: "Apple"
-        - name: part_number
-          description: Part Number (Required)
-          required: true
-          in: query
-          schema:
-            type: string
-            example: "123456789"
-        - name: serial_number
-          description: Serial Number (Required)
-          required: true
-          in: query
-          schema:
-            type: string
-            example: "123456789"
+        - Obit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestObitId'
       responses:
         "200":
-          $ref: "#/components/responses/ObitDefinitionResponse"
-        "404":
-          $ref: "#/components/responses/BadRequest"
-
+          $ref: "#/components/responses/ObitIdResponse"
+        "422":
+          $ref: "#components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /obits:
     get:
       tags:
@@ -297,6 +281,8 @@ paths:
 
 components:
   schemas:
+    RequestObitId:
+      $ref: "definitions/Obit.yml#/RequestObitId"
     BlockChainObit:
       $ref: "definitions/Obit.yml#/BlockChainObit"
     ClientObit:
@@ -320,6 +306,12 @@ components:
         usn_base58:
           type: string
   responses:
+    ObitIdResponse:
+      description: Obit ID response
+      content:
+        application/json:
+          schema:
+            $ref: "definitions/Obit.yml#/ObitId"
     ClientObitsResponse:
       description: Client obits response
       content:
@@ -406,6 +398,12 @@ components:
       description: The request was successful and the resource was created.
     NoContent:
       description: The request was successful and no content was returned.
+    InternalServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: "Errors.yml#/InternalServerError"
     BadRequest:
       description: The request was malformed.
     NotFound:

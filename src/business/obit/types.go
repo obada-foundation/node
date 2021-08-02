@@ -2,6 +2,11 @@ package obit
 
 import "github.com/amzn/ion-go/ion"
 
+type ID struct {
+	DID string `json:"did"`
+	ID  string `json:"id"`
+}
+
 type QLDBObit struct {
 	ObitDID          string            `ion:"ObitDID" db:"obit_id" json:"obit_did"`
 	Usn              string            `ion:"Usn" json:"usn"`
@@ -11,8 +16,8 @@ type QLDBObit struct {
 	AlternateIDS     []string          `ion:"AlternateIDS" json:"alternate_ids"`
 	OwnerDID         string            `ion:"OwnerDID" json:"owner_did"`
 	ObdDID           string            `ion:"ObdDID" json:"obd_did"`
-	Metadata         []KV 			   `ion:"MetaData" json:"metadata"`
-	StructuredData   []KV 		       `ion:"StructuredData" json:"structured_data"`
+	Metadata         []KV              `ion:"MetaData" json:"metadata"`
+	StructuredData   []KV              `ion:"StructuredData" json:"structured_data"`
 	Documents        map[string]string `ion:"Documents" json:"documents"`
 	ModifiedOn       int64             `ion:"ModifiedOn" json:"modified_on"`
 	Status           string            `ion:"Status" json:"status"`
@@ -20,7 +25,7 @@ type QLDBObit struct {
 }
 
 type KV struct {
-	Key string `ion:"Key" json:"key"`
+	Key   string `ion:"Key" json:"key"`
 	Value string `ion:"Value" json:"value"`
 }
 

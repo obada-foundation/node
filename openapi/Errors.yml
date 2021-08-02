@@ -9,19 +9,31 @@ NotFound:
       type: string
       default: The requested resource could not be found.
 
+InternalServerError:
+  description: A typical 500 error.
+  type: object
+  properties:
+    error:
+      type: string
+      default: Internal Server Error
+
 UnprocessableEntity:
   description: A typical 422 error.
   type: object
   properties:
-    code:
-      type: integer
-      default: 422
-    message:
+    error:
       type: string
-      default: The given data was invalid.
-    errors:
-      type: object
-      additionalProperties:
-        type: array
-        items:
-          type: string
+      default: data validation error
+    fields:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+            default: serial_number
+          error:
+            type: string
+            default: serial_number is a required field
+
+

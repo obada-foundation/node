@@ -6,3 +6,4 @@ docker-compose.yml
 src/app/node/node
 node-api-library
 node-api-library-csharp
+coverage.out

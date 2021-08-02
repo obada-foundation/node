@@ -225,6 +225,36 @@ LocalObit:
     modified_on:
       type: integer
 
+RequestObitId:
+  description: Request Obit Id payload
+  type: object
+  required:
+    - serial_number
+    - manufacturer
+    - part_number
+  properties:
+    manufacturer:
+      description: Manufacturer (Required)
+      type: string
+      example: "Apple"
+    part_number:
+      description: Part Number (Required)
+      type: string
+      example: "123456789"
+    serial_number:
+      description: Serial Number (Required)
+      type: string
+      example: "123456789"
+
+ObitId:
+  description: New Obit Id
+  type: object
+  properties:
+    id:
+      type: string
+    did:
+      type: string
+
 ObitDefinition:
   description: New Obit def
   type: object

@@ -2,6 +2,8 @@ package mid
 
 import (
 	"context"
+	"github.com/obada-foundation/node/business/sys/validate"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 
@@ -31,9 +33,31 @@ func Errors(logger *log.Logger) web.Middleware {
 				// Log the error.
 				logger.Printf("%s : ERROR : %v", v.TraceID, err)
 
-				// Respond to the error.
-				if er := web.RespondError(ctx, w, err); err != nil {
-					return er
+				// Build out the error response.
+				var er validate.ErrorResponse
+				var status int
+				switch act := errors.Cause(err).(type) {
+				case validate.FieldErrors:
+					er = validate.ErrorResponse{
+						Error:  "data validation error",
+						Fields: act.Error(),
+					}
+					status = http.StatusUnprocessableEntity
+				case *validate.RequestError:
+					er = validate.ErrorResponse{
+						Error: act.Error(),
+					}
+					status = act.Status
+				default:
+					er = validate.ErrorResponse{
+						Error: http.StatusText(http.StatusInternalServerError),
+					}
+					status = http.StatusInternalServerError
+				}
+
+				// Respond with the error back to the client.
+				if err := web.Respond(ctx, w, er, status); err != nil {
+					return err
 				}
 
 				// If we receive the shutdown err we need to return it

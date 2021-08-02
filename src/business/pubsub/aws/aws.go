@@ -1,14 +1,14 @@
 package aws
 
 import (
-	"encoding/json"
-	"github.com/obada-foundation/node/business/pubsub"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sqs"
+	"github.com/obada-foundation/node/business/pubsub"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -16,18 +16,18 @@ import (
 var _ pubsub.Client = Client{}
 
 type Client struct {
-	timeout time.Duration
-	sqs *sqs.SQS
-	sns *sns.SNS
+	timeout  time.Duration
+	sqs      *sqs.SQS
+	sns      *sns.SNS
 	queueUrl string
 	topicArn string
 }
 
 func NewClient(session *session.Session, timeout time.Duration, queueUrl, topicArn string) Client {
 	return Client{
-		timeout: timeout,
-		sns: sns.New(session),
-		sqs: sqs.New(session),
+		timeout:  timeout,
+		sns:      sns.New(session),
+		sqs:      sqs.New(session),
 		queueUrl: queueUrl,
 		topicArn: topicArn,
 	}
@@ -46,8 +46,8 @@ func (c Client) Publish(ctx context.Context, msg *pubsub.Msg) (string, error) {
 	messageGroupId := "OBADAUpdate"
 
 	res, err := c.sns.PublishWithContext(ctx, &sns.PublishInput{
-		Message:  &jsonStr,
-		TopicArn: &c.topicArn,
+		Message:        &jsonStr,
+		TopicArn:       &c.topicArn,
 		MessageGroupId: &messageGroupId,
 	})
 

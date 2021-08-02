@@ -9,9 +9,10 @@ import (
 
 // ObitID represent obit identifier
 type ObitID struct {
-	usn  string
-	did  string
-	hash hash.Hash
+	usn     string
+	fullUsn string
+	did     string
+	hash    hash.Hash
 }
 
 // NewObitIDProperty creates new ObitID from given arguments
@@ -26,7 +27,7 @@ func NewObitIDProperty(serialNumberHash, manufacturer, partNumber StringProperty
 
 	if debug {
 		logger.Printf(
-			"\n <|%s|> => NewObitIDProperty(%v, %v, %v) -> (%d + %d + %d) -> %d",
+			"\n<|%s|> => NewObitIDProperty(%v, %v, %v) -> (%d + %d + %d) -> %d",
 			"Making ObitID",
 			serialNumberHash,
 			manufacturer,
@@ -38,7 +39,7 @@ func NewObitIDProperty(serialNumberHash, manufacturer, partNumber StringProperty
 		)
 	}
 
-	h, err := hash.NewHash(fmt.Sprintf("%x", sum), logger, debug)
+	h, err := hash.NewHash([]byte(fmt.Sprintf("%x", sum)), logger, debug)
 
 	if err != nil {
 		return id, fmt.Errorf("cannot create obit id: %w", err)
@@ -47,13 +48,18 @@ func NewObitIDProperty(serialNumberHash, manufacturer, partNumber StringProperty
 	hashStr := h.GetHash()
 
 	id.hash = h
-	id.did = fmt.Sprintf("did:obada:%s", hashStr)
-	id.usn = base58.Encode([]byte(hashStr))[:8]
+	id.did = "did:obada:" + hashStr
+
+	fullUsn := base58.Encode([]byte(hashStr))
+
+	id.usn = fullUsn[:8]
+	id.fullUsn = fullUsn
 
 	if debug {
-		log.Printf("Hash: %s", h.GetHash())
-		log.Printf("Did: %s", id.did)
-		log.Printf("Usn: %s", id.usn)
+		logger.Printf("Hash: %s", h.GetHash())
+		logger.Printf("Did: %s", id.did)
+		logger.Printf("Usn: %s", id.usn)
+		logger.Printf("Full Usn: %s", id.fullUsn)
 	}
 
 	return id, nil
@@ -69,7 +75,12 @@ func (id *ObitID) GetDid() string {
 	return id.did
 }
 
-// GetUsn returns the universal serial number
+// GetUsn returns short universal serial number
 func (id *ObitID) GetUsn() string {
 	return id.usn
+}
+
+// GetFullUsn returns full universal serial number
+func (id *ObitID) GetFullUsn() string {
+	return id.fullUsn
 }

@@ -5,17 +5,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/obada-foundation/node/foundation/web"
 	helperService "github.com/obada-foundation/node/business/helper"
+	"github.com/obada-foundation/node/foundation/web"
 )
 
 type rootHash struct {
-	logger *log.Logger
+	logger  *log.Logger
 	service *helperService.Service
 }
 
 type RootHashResponse struct {
-	Status int `json:"status"`
+	Status   int    `json:"status"`
 	RootHash string `json:"root_hash"`
 }
 

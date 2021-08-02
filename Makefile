@@ -98,6 +98,13 @@ export GOPRIVATE=github.com/obada-foundation
 vendor:
 	cd src && go mod tidy && go mod vendor
 
+
+test:
+	cd src && go test -v ./...
+
+coverage: ## Generates and shows code coverage in a browser
+	cd src && go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+
 help: ## Show this help.
 	 @IFS=$$'\n' ; \
         help_lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//'`); \

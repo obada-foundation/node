@@ -2,10 +2,15 @@ package handlers
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
 	"github.com/obada-foundation/node/business/obit"
+	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/foundation/web"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/obada-foundation/sdkgo/properties"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -13,36 +18,78 @@ type obitGroup struct {
 	service *obit.Service
 }
 
+type GenerateIDRequest struct {
+	SerialNumber string `validate:"required" json:"serial_number"`
+	Manufacturer string `validate:"required" json:"manufacturer"`
+	PartNumber   string `validate:"required" json:"part_number"`
+}
+
 type requestObit struct {
-	ObitDID			 interface{}	   `json:"obit_did"`
-	Usn              string			   `json:"usn"`
-	SerialNumberHash string            `validate:"required" json:"serial_number_hash"`
-	Manufacturer     string            `validate:"required" json:"manufacturer"`
-	PartNumber       string            `validate:"required" json:"part_number"`
-	OwnerDid         string            `validate:"required" json:"owner_did"`
-	ObdDid           string            `json:"obd_did"`
-	Metadata         []KV 			   `json:"metadata"`
-	StructuredData   []KV			   `json:"structured_data"`
-	Documents        []Doc             `json:"documents"`
-	ModifiedOn       int64             `json:"modified_on"`
-	AlternateIDS     []string          `json:"alternate_ids"`
-	Status           string            `json:"status"`
+	ObitDID          interface{} `json:"obit_did"`
+	Usn              string      `json:"usn"`
+	SerialNumberHash string      `validate:"required" json:"serial_number_hash"`
+	Manufacturer     string      `validate:"required" json:"manufacturer"`
+	PartNumber       string      `validate:"required" json:"part_number"`
+	OwnerDid         string      `validate:"required" json:"owner_did"`
+	ObdDid           string      `json:"obd_did"`
+	Metadata         []KV        `json:"metadata"`
+	StructuredData   []KV        `json:"structured_data"`
+	Documents        []Doc       `json:"documents"`
+	ModifiedOn       int64       `json:"modified_on"`
+	AlternateIDS     []string    `json:"alternate_ids"`
+	Status           string      `json:"status"`
 }
 
 type Doc struct {
-	Name string 	`json:"name"`
+	Name     string `json:"name"`
 	HashLink string `json:"hash_link"`
 }
 
 type KV struct {
-	Key string `json:"key"`
+	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
 type ObitCreate struct {
 	Hash string `json:"hash"`
-	DID string `json:"did"`
-	Usn string `json:"usn"`
+	DID  string `json:"did"`
+	Usn  string `json:"usn"`
+}
+
+func hashStr(str string) (string, error) {
+	h := sha256.New()
+
+	if _, err := h.Write([]byte(str)); err != nil {
+		return "", fmt.Errorf("cannot wite bytes %v to hasher: %w", []byte(str), err)
+	}
+
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+func (og obitGroup) generateId(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	var requestData GenerateIDRequest
+
+	if err := web.Decode(r, &requestData); err != nil {
+		return err
+	}
+
+	if err := validate.Check(requestData); err != nil {
+		return errors.Wrap(err, "validating data")
+	}
+
+	snh, err := hashStr(requestData.SerialNumber)
+
+	if err != nil {
+		return err
+	}
+
+	ID, err := og.service.GenerateID(snh, requestData.Manufacturer, requestData.PartNumber)
+
+	if err != nil {
+		return err
+	}
+
+	return web.Respond(ctx, w, ID, http.StatusOK)
 }
 
 func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -59,9 +106,9 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 	}
 
 	resp := ObitCreate{
-		DID: ID.GetDid(),
+		DID:  ID.GetDid(),
 		Hash: ID.GetHash().GetHash(),
-		Usn: ID.GetUsn(),
+		Usn:  ID.GetUsn(),
 	}
 
 	return web.Respond(ctx, w, resp, http.StatusCreated)

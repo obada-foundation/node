@@ -1,8 +1,8 @@
 package pubsub
 
 type Msg struct {
-	ID string `json:"id,omitempty"`
-	DID string `json:"did"`
+	ID       string `json:"id,omitempty"`
+	DID      string `json:"did"`
 	RootHash string `json:"root_hash"`
 }
 
@@ -21,5 +21,3 @@ type Attribute struct {
 type Body struct {
 	Message Msg `json:"Message"`
 }
-
-

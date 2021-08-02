@@ -12,14 +12,14 @@ import (
 
 // Service provider an API to manage helper calls
 type Service struct {
-	logger   *log.Logger
-	sdk      *sdkgo.Sdk
+	logger *log.Logger
+	sdk    *sdkgo.Sdk
 }
 
 func NewService(sdk *sdkgo.Sdk, logger *log.Logger) *Service {
 	return &Service{
 		logger: logger,
-		sdk: sdk,
+		sdk:    sdk,
 	}
 }
 
@@ -31,36 +31,6 @@ func hashStr(str string) (string, error) {
 	}
 
 	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-// GenObitDef generates obit definition
-func (s Service) GenObitDef(serialNumber, manufacturer, partNumber string) (ObitDef, error) {
-	var od ObitDef
-
-	hStr, err := hashStr(serialNumber)
-
-	if err != nil {
-		return od, err
-	}
-
-	dto := sdkgo.ObitIDDto{
-		SerialNumberHash: hStr,
-		Manufacturer: manufacturer,
-		PartNumber: partNumber,
-	}
-
-	obitID, err := s.sdk.NewObitID(dto)
-
-	if err != nil {
-		return od, err
-	}
-
-	od.SerialNumberHash = dto.SerialNumberHash
-	od.Usn = obitID.GetUsn()
-	od.DID = obitID.GetDid()
-	od.Usn58 = ""
-
-	return od, nil
 }
 
 func (s Service) ToDto(lo LocalObit) (sdkgo.ObitDto, error) {
@@ -109,7 +79,7 @@ func (s Service) GenRootHash(lo LocalObit) (string, error) {
 		return "", err
 	}
 
-	h, err := o.GetRootHash()
+	h, err := o.GetRootHash(nil)
 
 	if err != nil {
 		return "", err
@@ -117,5 +87,3 @@ func (s Service) GenRootHash(lo LocalObit) (string, error) {
 
 	return h.GetHash(), nil
 }
-
-

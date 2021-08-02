@@ -20,7 +20,7 @@ type Service struct {
 	sdk      *sdkgo.Sdk
 	db       *sql.DB
 	qldb     *qldbdriver.QLDBDriver
-	pubsub    pubsub.Client
+	pubsub   pubsub.Client
 	isSynced bool
 }
 
@@ -31,7 +31,7 @@ func NewObitService(sdk *sdkgo.Sdk, logger *log.Logger, db *sql.DB, qldb *qldbdr
 		sdk:      sdk,
 		db:       db,
 		qldb:     qldb,
-		pubsub:    pubsub,
+		pubsub:   pubsub,
 		isSynced: true,
 	}
 }
@@ -256,7 +256,7 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 
 		for _, rec := range records {
 			kv := KV{
-				Key: rec.GetKey().GetValue(),
+				Key:   rec.GetKey().GetValue(),
 				Value: rec.GetValue().GetValue(),
 			}
 
@@ -273,14 +273,14 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 	docs := make(map[string]string)
 
 	for _, record := range docRecords.GetAll() {
-		docs[record.GetKey().GetValue()] = record.GetValue().GetValue()
+		docs[record.GetName().GetValue()] = record.GetHashLink().GetHashLink()
 	}
 
 	o.Documents = docs
 	o.ModifiedOn = obit.GetModifiedOn().GetValue()
 
 	o.Status = obit.GetStatus().GetValue()
-	rootHash, err := obit.GetRootHash()
+	rootHash, err := obit.GetRootHash(nil)
 
 	if err != nil {
 		return o, err
@@ -293,7 +293,7 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 
 func (os Service) notify(ctx context.Context, obit QLDBObit) error {
 	id, err := os.pubsub.Publish(ctx, &pubsub.Msg{
-		DID: obit.ObitDID,
+		DID:      obit.ObitDID,
 		RootHash: obit.RootHash,
 	})
 
@@ -836,4 +836,26 @@ func (os Service) Sync(ctx context.Context) error {
 	default:
 		return errors.New("Integrity problem. Broken data.")
 	}
+}
+
+// GenerateID generates obit ID
+func (os Service) GenerateID(serialNumberHash, manufacturer, partNumber string) (ID, error) {
+	var id ID
+
+	dto := sdkgo.ObitIDDto{
+		SerialNumberHash: serialNumberHash,
+		Manufacturer:     manufacturer,
+		PartNumber:       partNumber,
+	}
+
+	sdkID, err := os.sdk.NewObitID(dto)
+
+	if err != nil {
+		return id, err
+	}
+
+	id.ID = sdkID.GetHash().GetHash()
+	id.DID = sdkID.GetDid()
+
+	return id, nil
 }

@@ -108,17 +108,13 @@ func (s Service) sqliteMigrate() error {
 	return nil
 }
 
-// Migrate attempts to bring the schema for qldb up to date with the migrations
+// Migrate attempts to bring the schema for QLDB up to date with the migrations
 // defined in this package.
 func (s Service) Migrate() error {
 
 	if err := s.sqliteMigrate(); err != nil {
 		return err
 	}
-
-	//if err := s.qldbMigrate(); err != nil {
-	//	return err
-	//}
 
 	return nil
 }

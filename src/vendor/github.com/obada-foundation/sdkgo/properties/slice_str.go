@@ -26,7 +26,7 @@ func NewSliceStrProperty(description string, value []string, logger *log.Logger,
 	var decTotal uint64
 
 	for _, str := range value {
-		h, err := hash.NewHash(str, logger, debug)
+		h, err := hash.NewHash([]byte(str), logger, debug)
 
 		if err != nil {
 			return stp, fmt.Errorf("cannot hash %q: %w", value, err)
@@ -36,7 +36,6 @@ func NewSliceStrProperty(description string, value []string, logger *log.Logger,
 
 		dec = append(dec, h.GetDec())
 	}
-
 
 	if debug {
 		var logStr []string
@@ -48,7 +47,7 @@ func NewSliceStrProperty(description string, value []string, logger *log.Logger,
 		logger.Printf("(%s) => %d", strings.Join(logStr, " + "), decTotal)
 	}
 
-	h, err := hash.NewHash(strconv.FormatUint(decTotal, 10), logger, debug)
+	h, err := hash.NewHash([]byte(strconv.FormatUint(decTotal, 10)), logger, debug)
 
 	if err != nil {
 		return stp, fmt.Errorf("cannot hash %q: %w", value, err)

@@ -1,7 +1,7 @@
 package pubsub
 
 import (
-"context"
+	"context"
 )
 
 type Client interface {
