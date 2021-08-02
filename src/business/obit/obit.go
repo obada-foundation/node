@@ -859,3 +859,20 @@ func (os Service) GenerateID(serialNumberHash, manufacturer, partNumber string) 
 
 	return id, nil
 }
+
+// Checksum generates obit checksum
+func (s Service) Checksum(ctx context.Context, dto sdkgo.ObitDto) (string, error) {
+	o, err := s.sdk.NewObit(dto)
+
+	if err != nil {
+		return "", err
+	}
+
+	h, err := o.GetRootHash(nil)
+
+	if err != nil {
+		return "", err
+	}
+
+	return h.GetHash(), nil
+}

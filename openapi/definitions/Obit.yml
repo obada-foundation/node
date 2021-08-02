@@ -255,6 +255,13 @@ ObitId:
     did:
       type: string
 
+Checksum:
+  description: Obit checksum
+  type: object
+  properties:
+    root_hash:
+      type: string
+
 ObitDefinition:
   description: New Obit def
   type: object

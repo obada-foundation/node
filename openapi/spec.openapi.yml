@@ -82,21 +82,25 @@ paths:
       responses:
         "200":
           $ref: '#/components/responses/BlockChainObitResponse'
-  /api/obit/hash:
+  /obit/checksum:
     post:
-      summary: Generates The Root Hash using the data provided.
+      summary: Generates the obit checksum.
       description: ''
-      operationId: generateRootHash
+      operationId: checksum
       tags:
-        - Helper
+        - Obit
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LocalObit'
+              $ref: '#/components/schemas/Obit'
       responses:
         "200":
           $ref: '#/components/responses/RootHashResponse'
+        "422":
+          $ref: "#components/responses/UnprocessableEntity"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /obit/id:
     post:
       summary: Generate Obit ID
@@ -348,28 +352,14 @@ components:
                 type: integer
               blockchain_obit:
                 $ref: '#/components/schemas/BlockChainObit'
-    ObitDefinitionResponse:
-      description: Obit definition response
+
+    ChecksumResponse:
+      description: Obit checksum response
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              status:
-                type: integer
-              obit:
-                $ref: "definitions/Obit.yml#/ObitDefinition"
-    RootHashResponse:
-      description: Obit root hash response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: integer
-              root_hash:
-                type: string
+            $ref: "definitions/Obit.yml#/Checksum"
+
     ObitHistoryResponse:
       description: Collection of historical changes for given obit
       content:

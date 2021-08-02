@@ -92,6 +92,28 @@ func (og obitGroup) generateId(ctx context.Context, w http.ResponseWriter, r *ht
 	return web.Respond(ctx, w, ID, http.StatusOK)
 }
 
+func (og obitGroup) checksum(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	dto, err := requestBodyToDto(ctx, r)
+
+	if err != nil {
+		return err
+	}
+
+	rootHash, err := og.service.Checksum(ctx, dto)
+
+	if err != nil {
+		return err
+	}
+
+	resp := struct {
+		rootHash string `json:"root_hash"`
+	}{
+		rootHash: rootHash,
+	}
+
+	return web.Respond(ctx, w, resp, http.StatusOK)
+}
+
 func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	dto, err := requestBodyToDto(ctx, r)
 
@@ -145,6 +167,10 @@ func requestBodyToDto(ctx context.Context, r *http.Request) (sdkgo.ObitDto, erro
 
 	if err := web.Decode(r, &requestData); err != nil {
 		return dto, err
+	}
+
+	if err := validate.Check(requestData); err != nil {
+		return dto, errors.Wrap(err, "validating data")
 	}
 
 	kvs := func(kvs []KV) []properties.KV {

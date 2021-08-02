@@ -1,9 +1,9 @@
 package obit
 
 import (
-	"bytes"
+	"context"
+	"github.com/obada-foundation/node/business/tests"
 	"github.com/obada-foundation/sdkgo"
-	"log"
 	"testing"
 )
 
@@ -18,23 +18,31 @@ type args struct {
 	partNumber       string
 }
 
-func createService(t *testing.T) (*Service, *log.Logger) {
-	sdk, err := sdkgo.NewSdk(nil, false)
+type ObitTests struct {
+	service *Service
+}
+
+func TestService(t *testing.T) {
+	test := tests.NewIntegration(t)
+	t.Cleanup(test.Teardown)
+
+	sdk, err := sdkgo.NewSdk(test.Logger, false)
 
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	var logStr bytes.Buffer
+	service := NewObitService(sdk, test.Logger, test.DB, nil, nil)
 
-	logger := log.New(&logStr, "", 0)
+	tests := ObitTests{
+		service: service,
+	}
 
-	service := NewObitService(sdk, logger, nil, nil, nil)
-
-	return service, logger
+	t.Run("generateID", tests.generateID)
+	t.Run("checksum", tests.checksum)
 }
 
-func TestService_GenerateID(t *testing.T) {
+func (os ObitTests) generateID(t *testing.T) {
 	testCases := []testCase{
 		{
 			args: args{
@@ -60,12 +68,10 @@ func TestService_GenerateID(t *testing.T) {
 		},
 	}
 
-	service, _ := createService(t)
-
 	for _, tc := range testCases {
 		args := tc.args
 
-		got, err := service.GenerateID(args.serialNumberHash, args.manufacturer, args.partNumber)
+		got, err := os.service.GenerateID(args.serialNumberHash, args.manufacturer, args.partNumber)
 
 		if err != nil {
 			t.Error(err.Error())
@@ -75,6 +81,41 @@ func TestService_GenerateID(t *testing.T) {
 			t.Errorf(
 				"service.GenerateID(%q, %q, %q) = %v+ want %v+",
 				args.serialNumberHash, args.manufacturer, args.partNumber, got, tc.want,
+			)
+		}
+	}
+}
+
+func (os ObitTests) checksum(t *testing.T) {
+	testCases := []struct{
+		arg sdkgo.ObitDto
+		want string
+	}{
+		{
+			arg: sdkgo.ObitDto{
+				ObitIDDto: sdkgo.ObitIDDto{
+					SerialNumberHash: "cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d",
+					Manufacturer: "SONY",
+					PartNumber: "PN123456S",
+				},
+				OwnerDid: "did:obada:owner:123456",
+				ModifiedOn: 1624387537,
+			},
+			want: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
+		},
+	}
+
+	for _, tc := range testCases {
+		got, err := os.service.Checksum(context.Background(), tc.arg)
+
+		if err != nil {
+			t.Error(err.Error())
+		}
+
+		if got != tc.want {
+			t.Errorf(
+				"service.Checksum(%v+) = %s want %s",
+				tc.arg, got, tc.want,
 			)
 		}
 	}

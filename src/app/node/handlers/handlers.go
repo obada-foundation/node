@@ -47,18 +47,12 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 	}
 
 	app.Handle(http.MethodPost, "/obit/id", ob.generateId)
+	app.Handle(http.MethodPost, "/obit/checksum", ob.checksum)
 	app.Handle(http.MethodGet, "/obits", ob.search)
 	app.Handle(http.MethodPost, "/obits", ob.create)
 	app.Handle(http.MethodGet, "/obits/:obitDID", ob.show)
 	app.Handle(http.MethodPut, "/obits/:obitDID", ob.update)
 	app.Handle(http.MethodGet, "/obits/:obitDID/history", ob.history)
-
-	rh := rootHash{
-		logger:  cfg.Logger,
-		service: cfg.HelperService,
-	}
-
-	app.Handle(http.MethodPost, "/api/obit/hash", rh.generateRootHash)
 
 	c := client{
 		logger:        cfg.Logger,

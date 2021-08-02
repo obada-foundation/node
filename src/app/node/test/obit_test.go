@@ -46,6 +46,9 @@ func TestAPI(t *testing.T) {
 
 	t.Run("generateID200", tests.generateID200)
 	t.Run("generateID200", tests.generateID422)
+	t.Run("checksum200", tests.checksum200)
+	t.Run("checksum422", tests.checksum422)
+	t.Run("checksum500", tests.checksum500)
 }
 
 func (os ObitTests) generateID200(t *testing.T) {
@@ -120,6 +123,114 @@ func (os ObitTests) generateID422(t *testing.T) {
 		os.app.ServeHTTP(w, r)
 
 		resp := w.Result()
+		if resp.StatusCode != http.StatusUnprocessableEntity {
+			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusUnprocessableEntity)
+		}
+
+		contentType := resp.Header.Get("Content-Type")
+		wantContentType := "application/json"
+		if contentType != wantContentType {
+			t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
+		}
+
+		var er validate.ErrorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&er); err != nil {
+			t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &er, err)
+		}
+
+		wantErrMsg := "data validation error"
+		if er.Error != wantErrMsg {
+			t.Errorf("Handler() Body.Error = %q; want %q", er.Error, wantErrMsg)
+		}
+
+		if er.Fields != tc.want {
+			t.Errorf("Handler() Body.Fields = %q; want %q", er.Fields, tc.want)
+		}
+	}
+}
+
+func (os ObitTests) checksum200(t *testing.T) {
+	body := `
+		{
+			"serial_number_hash": "SN123456X", 
+			"manufacturer": "SONY", 
+			"part_number": "PN123456S",
+			"owner_did": "did:obada:owner:123456",
+			"modified_on": 1624387537
+		}
+	`
+
+	r := httptest.NewRequest(http.MethodPost, "/obit/checksum", strings.NewReader(body))
+	w := httptest.NewRecorder()
+
+	os.app.ServeHTTP(w, r)
+
+	resp := w.Result()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+}
+
+func (os ObitTests) checksum500(t *testing.T) {
+	testCases := []struct{
+		arg string
+		want string
+	} {
+		{
+			arg: "",
+			want: "Internal Server Error",
+		},
+	}
+
+	for _, tc := range testCases {
+		r := httptest.NewRequest(http.MethodPost, "/obit/checksum", strings.NewReader(tc.arg))
+		w := httptest.NewRecorder()
+
+		os.app.ServeHTTP(w, r)
+
+		resp := w.Result()
+
+		if resp.StatusCode != http.StatusInternalServerError {
+			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusInternalServerError)
+		}
+
+		contentType := resp.Header.Get("Content-Type")
+		wantContentType := "application/json"
+		if contentType != wantContentType {
+			t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
+		}
+
+		var er validate.ErrorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&er); err != nil {
+			t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &er, err)
+		}
+
+		if er.Error != tc.want {
+			t.Errorf("Handler() Body.Error = %q; want %q", er.Error, tc.want)
+		}
+	}
+}
+
+func (os ObitTests) checksum422(t *testing.T) {
+	testCases := []struct{
+		arg string
+		want string
+	} {
+		{
+			arg: "{}",
+			want: `[{"field":"serial_number_hash","error":"serial_number_hash is a required field"},{"field":"manufacturer","error":"manufacturer is a required field"},{"field":"part_number","error":"part_number is a required field"},{"field":"owner_did","error":"owner_did is a required field"}]`,
+		},
+	}
+
+	for _, tc := range testCases {
+		r := httptest.NewRequest(http.MethodPost, "/obit/checksum", strings.NewReader(tc.arg))
+		w := httptest.NewRecorder()
+
+		os.app.ServeHTTP(w, r)
+
+		resp := w.Result()
+
 		if resp.StatusCode != http.StatusUnprocessableEntity {
 			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusUnprocessableEntity)
 		}
