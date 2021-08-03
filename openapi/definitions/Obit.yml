@@ -121,10 +121,9 @@ Obit:
       type: integer
       format: int64
       example: 1624946810
-    root_hash:
+    checksum:
       description: >
-        Hash calculated by SHA256 (previous Obit root hash + Obit data).
-        TODO: Discuss root hash with Rohi.
+        Hash calculated by SHA256 (previous Obit checksum + Obit data).
       type: string
 
 ObitHistory:
@@ -259,7 +258,7 @@ Checksum:
   description: Obit checksum
   type: object
   properties:
-    root_hash:
+    checksum:
       type: string
 
 ObitDefinition:

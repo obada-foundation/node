@@ -3,7 +3,7 @@ package pubsub
 type Msg struct {
 	ID       string `json:"id,omitempty"`
 	DID      string `json:"did"`
-	RootHash string `json:"root_hash"`
+	Checksum string `json:"checksum"`
 }
 
 type SendRequest struct {

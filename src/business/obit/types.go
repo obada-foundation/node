@@ -21,7 +21,7 @@ type QLDBObit struct {
 	Documents        map[string]string `ion:"Documents" json:"documents"`
 	ModifiedOn       int64             `ion:"ModifiedOn" json:"modified_on"`
 	Status           string            `ion:"Status" json:"status"`
-	RootHash         string            `ion:"RootHash" json:"root_hash"`
+	Checksum         string            `ion:"Checksum" json:"checksum"`
 }
 
 type KV struct {

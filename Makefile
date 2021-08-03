@@ -98,6 +98,8 @@ export GOPRIVATE=github.com/obada-foundation
 vendor:
 	cd src && go mod tidy && go mod vendor
 
+fmt:
+	cd src && go fmt ./...
 
 test:
 	cd src && go test -v ./...

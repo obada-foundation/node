@@ -21,10 +21,10 @@ type Options struct {
 
 // APIConfig represents API server dependencies
 type APIConfig struct {
-	Shutdown       chan os.Signal
-	Logger         *log.Logger
-	ObitService    *obit.Service
-	HelperService  *helper.Service
+	Shutdown      chan os.Signal
+	Logger        *log.Logger
+	ObitService   *obit.Service
+	HelperService *helper.Service
 }
 
 // API register REST api endpoints
@@ -46,11 +46,11 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 		service: cfg.ObitService,
 	}
 
-	app.Handle(http.MethodPost, "/obit/id", ob.generateId)
+	app.Handle(http.MethodPost, "/obit/id", ob.generateID)
 	app.Handle(http.MethodPost, "/obit/checksum", ob.checksum)
 	app.Handle(http.MethodGet, "/obits", ob.search)
 	app.Handle(http.MethodPost, "/obits", ob.create)
-	app.Handle(http.MethodGet, "/obits/:obitDID", ob.show)
+	app.Handle(http.MethodGet, "/obits/:obitDID", ob.get)
 	app.Handle(http.MethodPut, "/obits/:obitDID", ob.update)
 	app.Handle(http.MethodGet, "/obits/:obitDID/history", ob.history)
 
@@ -60,7 +60,6 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 		obitService:   cfg.ObitService,
 	}
 
-	app.Handle(http.MethodGet, "/api/client/obit/:obitDID", c.getClientObit)
 	app.Handle(http.MethodGet, "/api/client/obits", c.getClientObits)
 	app.Handle(http.MethodPost, "/api/client/obit", c.saveClientObit)
 	app.Handle(http.MethodGet, "/api/server/obit/:obitDID", c.getServerObit)

@@ -3,8 +3,8 @@ package tests
 import (
 	"bytes"
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	"io"
 	"log"
@@ -72,4 +72,54 @@ func NewIntegration(t *testing.T) *Test {
 	}
 
 	return &test
+}
+
+func CreateObit(t *testing.T, test *Test) {
+	const q = `
+		INSERT INTO 
+		    gateway_view(
+				obit_did, 
+			 	usn, 
+		 		serial_number_hash, 
+		 		manufacturer, 
+			 	part_number, 
+			 	alternate_ids, 
+			 	owner_did,
+		 		obd_did,
+			 	status,
+		 		metadata,
+		 		structured_data,
+		 		documents,
+				modified_on,
+			 	checksum
+			) 
+		    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+
+	stmt, err := test.DB.Prepare(q)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = stmt.Exec(
+		"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+		"test",
+		"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d",
+		"SONY",
+		"PN123456S",
+		"[]",
+		"did:obada:owner:123456",
+		"",
+		"FUNCTIONAL",
+		"[]",
+		"[]",
+		"{}",
+		1624387537,
+		"2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
+	)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 }

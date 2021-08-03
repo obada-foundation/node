@@ -88,7 +88,7 @@ func (c Client) Subscribe(ctx context.Context) (*pubsub.Msg, error) {
 
 	if !ok {
 		msg.DID = fmt.Sprintf("%v", b["did"])
-		msg.RootHash = fmt.Sprintf("%v", b["root_hash"])
+		msg.Checksum = fmt.Sprintf("%v", b["checksum"])
 	} else {
 		if err := json.Unmarshal([]byte(fmt.Sprintf("%v", message)), &msg); err != nil {
 			return nil, errors.Wrap(err, fmt.Sprintf("pubsub :: subscribe :: unmarshal Message body %v: ", b))

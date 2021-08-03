@@ -25,6 +25,8 @@ func TestAPI(t *testing.T) {
 	test := tests.NewIntegration(t)
 	t.Cleanup(test.Teardown)
 
+	tests.CreateObit(t, test)
+
 	shutdown := make(chan os.Signal, 1)
 
 	sdk, err := sdkgo.NewSdk(test.Logger, false)
@@ -37,10 +39,9 @@ func TestAPI(t *testing.T) {
 
 	tests := ObitTests{
 		app: handlers.API(handlers.APIConfig{
-			shutdown,
-			test.Logger,
-			os,
-			nil,
+			Shutdown:    shutdown,
+			Logger:      test.Logger,
+			ObitService: os,
 		}),
 	}
 
@@ -49,17 +50,20 @@ func TestAPI(t *testing.T) {
 	t.Run("checksum200", tests.checksum200)
 	t.Run("checksum422", tests.checksum422)
 	t.Run("checksum500", tests.checksum500)
+	t.Run("get404", tests.get404)
+	t.Run("get200", tests.get200)
 }
 
-func (os ObitTests) generateID200(t *testing.T) {
+func (obs ObitTests) generateID200(t *testing.T) {
 	body := `{"serial_number": "SN123456X", "manufacturer": "SONY", "part_number": "PN123456S"}`
 
 	r := httptest.NewRequest(http.MethodPost, "/obit/id", strings.NewReader(body))
 	w := httptest.NewRecorder()
 
-	os.app.ServeHTTP(w, r)
+	obs.app.ServeHTTP(w, r)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusOK)
@@ -89,29 +93,29 @@ func (os ObitTests) generateID200(t *testing.T) {
 
 }
 
-func (os ObitTests) generateID422(t *testing.T) {
+func (obs ObitTests) generateID422(t *testing.T) {
 	testCases := []struct {
-		arg string
+		arg  string
 		want string
 	}{
 		{
-			arg: `{}`,
+			arg:  `{}`,
 			want: `[{"field":"serial_number","error":"serial_number is a required field"},{"field":"manufacturer","error":"manufacturer is a required field"},{"field":"part_number","error":"part_number is a required field"}]`,
 		},
 		{
-			arg: `{"serial_number": "", "manufacturer": "", "part_number": ""}`,
+			arg:  `{"serial_number": "", "manufacturer": "", "part_number": ""}`,
 			want: `[{"field":"serial_number","error":"serial_number is a required field"},{"field":"manufacturer","error":"manufacturer is a required field"},{"field":"part_number","error":"part_number is a required field"}]`,
 		},
 		{
-			arg: `{"serial_number": "SN123456X", "manufacturer": "", "part_number": ""}`,
+			arg:  `{"serial_number": "SN123456X", "manufacturer": "", "part_number": ""}`,
 			want: `[{"field":"manufacturer","error":"manufacturer is a required field"},{"field":"part_number","error":"part_number is a required field"}]`,
 		},
 		{
-			arg: `{"serial_number": "", "manufacturer": "SONY", "part_number": ""}`,
+			arg:  `{"serial_number": "", "manufacturer": "SONY", "part_number": ""}`,
 			want: `[{"field":"serial_number","error":"serial_number is a required field"},{"field":"part_number","error":"part_number is a required field"}]`,
 		},
 		{
-			arg: `{"serial_number": "", "manufacturer": "", "part_number": "PN123456S"}`,
+			arg:  `{"serial_number": "", "manufacturer": "", "part_number": "PN123456S"}`,
 			want: `[{"field":"serial_number","error":"serial_number is a required field"},{"field":"manufacturer","error":"manufacturer is a required field"}]`,
 		},
 	}
@@ -120,9 +124,11 @@ func (os ObitTests) generateID422(t *testing.T) {
 		r := httptest.NewRequest(http.MethodPost, "/obit/id", strings.NewReader(tc.arg))
 		w := httptest.NewRecorder()
 
-		os.app.ServeHTTP(w, r)
+		obs.app.ServeHTTP(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
+
 		if resp.StatusCode != http.StatusUnprocessableEntity {
 			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusUnprocessableEntity)
 		}
@@ -149,7 +155,7 @@ func (os ObitTests) generateID422(t *testing.T) {
 	}
 }
 
-func (os ObitTests) checksum200(t *testing.T) {
+func (obs ObitTests) checksum200(t *testing.T) {
 	body := `
 		{
 			"serial_number_hash": "SN123456X", 
@@ -163,22 +169,23 @@ func (os ObitTests) checksum200(t *testing.T) {
 	r := httptest.NewRequest(http.MethodPost, "/obit/checksum", strings.NewReader(body))
 	w := httptest.NewRecorder()
 
-	os.app.ServeHTTP(w, r)
+	obs.app.ServeHTTP(w, r)
 
 	resp := w.Result()
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusOK)
 	}
 }
 
-func (os ObitTests) checksum500(t *testing.T) {
-	testCases := []struct{
-		arg string
+func (obs ObitTests) checksum500(t *testing.T) {
+	testCases := []struct {
+		arg  string
 		want string
-	} {
+	}{
 		{
-			arg: "",
+			arg:  "",
 			want: "Internal Server Error",
 		},
 	}
@@ -187,9 +194,10 @@ func (os ObitTests) checksum500(t *testing.T) {
 		r := httptest.NewRequest(http.MethodPost, "/obit/checksum", strings.NewReader(tc.arg))
 		w := httptest.NewRecorder()
 
-		os.app.ServeHTTP(w, r)
+		obs.app.ServeHTTP(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusInternalServerError {
 			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusInternalServerError)
@@ -212,14 +220,20 @@ func (os ObitTests) checksum500(t *testing.T) {
 	}
 }
 
-func (os ObitTests) checksum422(t *testing.T) {
-	testCases := []struct{
-		arg string
+func (obs ObitTests) checksum422(t *testing.T) {
+	testCases := []struct {
+		arg  string
 		want string
-	} {
+	}{
 		{
-			arg: "{}",
+			arg:  "{}",
 			want: `[{"field":"serial_number_hash","error":"serial_number_hash is a required field"},{"field":"manufacturer","error":"manufacturer is a required field"},{"field":"part_number","error":"part_number is a required field"},{"field":"owner_did","error":"owner_did is a required field"}]`,
+		},
+		{
+			arg:  `{
+				"serial_number_hash": "cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d"
+			}`,
+			want: `[{"field":"manufacturer","error":"manufacturer is a required field"},{"field":"part_number","error":"part_number is a required field"},{"field":"owner_did","error":"owner_did is a required field"}]`,
 		},
 	}
 
@@ -227,9 +241,10 @@ func (os ObitTests) checksum422(t *testing.T) {
 		r := httptest.NewRequest(http.MethodPost, "/obit/checksum", strings.NewReader(tc.arg))
 		w := httptest.NewRecorder()
 
-		os.app.ServeHTTP(w, r)
+		obs.app.ServeHTTP(w, r)
 
 		resp := w.Result()
+		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusUnprocessableEntity {
 			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusUnprocessableEntity)
@@ -253,6 +268,93 @@ func (os ObitTests) checksum422(t *testing.T) {
 
 		if er.Fields != tc.want {
 			t.Errorf("Handler() Body.Fields = %q; want %q", er.Fields, tc.want)
+		}
+	}
+}
+
+func (obs ObitTests) get404(t *testing.T) {
+	testCases := []struct {
+		arg  string
+		want string
+	}{
+		{
+			arg:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecx",
+			want: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		r := httptest.NewRequest(http.MethodGet, "/obits/" + tc.arg, nil)
+		w := httptest.NewRecorder()
+
+		obs.app.ServeHTTP(w, r)
+
+		resp := w.Result()
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusNotFound {
+			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusNotFound)
+		}
+
+		contentType := resp.Header.Get("Content-Type")
+		wantContentType := "application/json"
+		if contentType != wantContentType {
+			t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
+		}
+
+		var er validate.ErrorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&er); err != nil {
+			t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &er, err)
+		}
+
+		wantErrMsg := "not found"
+		if er.Error != wantErrMsg {
+			t.Errorf("Handler() Body.Error = %q; want %q", er.Error, wantErrMsg)
+		}
+
+		if er.Fields != tc.want {
+			t.Errorf("Handler() Body.Fields = %q; want %q", er.Fields, tc.want)
+		}
+	}
+}
+
+func (obs ObitTests) get200(t *testing.T) {
+	testCases := []struct {
+		arg  string
+		want string
+	}{
+		{
+			arg: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+		},
+	}
+
+	for _, tc := range testCases {
+		r := httptest.NewRequest(http.MethodGet, "/obits/" + tc.arg, nil)
+		w := httptest.NewRecorder()
+
+		obs.app.ServeHTTP(w, r)
+
+		resp := w.Result()
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("Handler() status = %d, want %d", resp.StatusCode, http.StatusOK)
+		}
+
+		contentType := resp.Header.Get("Content-Type")
+		wantContentType := "application/json"
+		if contentType != wantContentType {
+			t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
+		}
+
+		var o obitService.QLDBObit
+		if err := json.NewDecoder(resp.Body).Decode(&o); err != nil {
+			t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &o, err)
+		}
+
+		wantDID := tc.arg
+		if o.ObitDID != wantDID {
+			t.Errorf("Handler() Body.ObitID = %q; want %q", o.ObitDID, wantDID)
 		}
 	}
 }

@@ -48,7 +48,7 @@ func (c client) getServerObit(ctx context.Context, w http.ResponseWriter, r *htt
 		return err
 	}
 
-	o, err := c.obitService.Show(ctx, DID[10:])
+	o, err := c.obitService.Get(ctx, DID[10:])
 
 	if err != nil {
 		return err
@@ -58,31 +58,8 @@ func (c client) getServerObit(ctx context.Context, w http.ResponseWriter, r *htt
 		Status: 0,
 	}
 
-	resp.BlockChainObit.RootHash = o.RootHash
+	resp.BlockChainObit.RootHash = o.Checksum
 	resp.BlockChainObit.ObitDID = o.ObitDID
-
-	web.Respond(ctx, w, resp, http.StatusOK)
-
-	return nil
-}
-
-func (c client) getClientObit(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	DID, err := parseObitIDFromRequest(r)
-
-	if err != nil {
-		return err
-	}
-
-	o, err := c.obitService.Show(ctx, DID[10:])
-
-	if err != nil {
-		return err
-	}
-
-	resp := GetClientObitResponse{
-		Status: 0,
-		Obit:   o,
-	}
 
 	web.Respond(ctx, w, resp, http.StatusOK)
 

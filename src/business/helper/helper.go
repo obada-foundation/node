@@ -64,26 +64,3 @@ func (s Service) ToDto(lo LocalObit) (sdkgo.ObitDto, error) {
 
 	return dto, nil
 }
-
-// GenRootHash generates obit root hash
-func (s Service) GenRootHash(lo LocalObit) (string, error) {
-	dto, err := s.ToDto(lo)
-
-	if err != nil {
-		return "", err
-	}
-
-	o, err := s.sdk.NewObit(dto)
-
-	if err != nil {
-		return "", err
-	}
-
-	h, err := o.GetRootHash(nil)
-
-	if err != nil {
-		return "", err
-	}
-
-	return h.GetHash(), nil
-}

@@ -85,7 +85,7 @@ func (s Service) sqliteMigrate() error {
 			structured_data    json         null,
 			documents          json         null,
 			modified_on        int          null,
-			root_hash          varchar(255) not null,
+			checksum           varchar(64) not null,
 			constraint gateway_view_obit_did_usn_serial_number_hash_unique unique (obit_did, usn, serial_number_hash)
 		)`,
 		`create table config (

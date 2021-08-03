@@ -66,7 +66,7 @@ func hashStr(str string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func (og obitGroup) generateId(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (og obitGroup) generateID(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	var requestData GenerateIDRequest
 
 	if err := web.Decode(r, &requestData); err != nil {
@@ -99,16 +99,16 @@ func (og obitGroup) checksum(ctx context.Context, w http.ResponseWriter, r *http
 		return err
 	}
 
-	rootHash, err := og.service.Checksum(ctx, dto)
+	checksum, err := og.service.Checksum(ctx, dto)
 
 	if err != nil {
 		return err
 	}
 
 	resp := struct {
-		rootHash string `json:"root_hash"`
+		Checksum string `json:"checksum"`
 	}{
-		rootHash: rootHash,
+		Checksum: checksum,
 	}
 
 	return web.Respond(ctx, w, resp, http.StatusOK)
@@ -146,13 +146,13 @@ func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.R
 	return web.Respond(ctx, w, obits, http.StatusOK)
 }
 
-func (og obitGroup) show(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (og obitGroup) get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	ID, err := parseObitIDFromRequest(r)
 	if err != nil {
 		return err
 	}
 
-	obit, err := og.service.Show(ctx, ID)
+	obit, err := og.service.Get(ctx, ID)
 
 	if err != nil {
 		return err

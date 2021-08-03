@@ -43,6 +43,11 @@ func Errors(logger *log.Logger) web.Middleware {
 						Fields: act.Error(),
 					}
 					status = http.StatusUnprocessableEntity
+				case *validate.ErrorNotFoundResponse:
+					er = validate.ErrorResponse{
+						Error: act.Error(),
+					}
+					status = http.StatusNotFound
 				case *validate.RequestError:
 					er = validate.ErrorResponse{
 						Error: act.Error(),

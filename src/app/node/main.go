@@ -205,11 +205,11 @@ func run(logger *log.Logger) error {
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 	api := http.Server{
-		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(handlers.APIConfig{
-			Shutdown: shutdown,
-			Logger: logger,
-			ObitService: obit,
+		Addr: cfg.Web.APIHost,
+		Handler: handlers.API(handlers.APIConfig{
+			Shutdown:      shutdown,
+			Logger:        logger,
+			ObitService:   obit,
 			HelperService: helper,
 		}),
 		ReadTimeout:  cfg.Web.ReadTimeout,

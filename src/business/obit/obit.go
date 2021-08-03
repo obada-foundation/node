@@ -8,6 +8,7 @@ import (
 	"github.com/amzn/ion-go/ion"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/node/business/pubsub"
+	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/obada-foundation/sdkgo/properties"
 	"github.com/pkg/errors"
@@ -36,7 +37,7 @@ func NewObitService(sdk *sdkgo.Sdk, logger *log.Logger, db *sql.DB, qldb *qldbdr
 	}
 }
 
-func (os Service) updateSql(ctx context.Context, obit QLDBObit) error {
+func (s Service) updateSql(ctx context.Context, obit QLDBObit) error {
 	const q = `
 		UPDATE 
 		    gateway_view
@@ -49,12 +50,12 @@ func (os Service) updateSql(ctx context.Context, obit QLDBObit) error {
 			structured_data = ?,
 			documents = ?,
 			modified_on = ?,
-			root_hash = ?
+			checksum = ?
 		WHERE 
 			obit_did = ?
 	`
 
-	stmt, err := os.db.Prepare(q)
+	stmt, err := s.db.Prepare(q)
 
 	if err != nil {
 		return err
@@ -89,7 +90,7 @@ func (os Service) updateSql(ctx context.Context, obit QLDBObit) error {
 		stctData,
 		docs,
 		obit.ModifiedOn,
-		obit.RootHash,
+		obit.Checksum,
 		obit.ObitDID,
 	)
 
@@ -100,7 +101,7 @@ func (os Service) updateSql(ctx context.Context, obit QLDBObit) error {
 	return nil
 }
 
-func (os Service) createSql(ctx context.Context, obit QLDBObit) error {
+func (s Service) createSql(ctx context.Context, obit QLDBObit) error {
 	const q = `
 		INSERT INTO 
 		    gateway_view(
@@ -117,12 +118,12 @@ func (os Service) createSql(ctx context.Context, obit QLDBObit) error {
 		 		structured_data,
 		 		documents,
 				modified_on,
-			 	root_hash
+			 	checksum
 			) 
 		    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
-	stmt, err := os.db.Prepare(q)
+	stmt, err := s.db.Prepare(q)
 
 	if err != nil {
 		return err
@@ -162,7 +163,7 @@ func (os Service) createSql(ctx context.Context, obit QLDBObit) error {
 		stctData,
 		docs,
 		obit.ModifiedOn,
-		obit.RootHash,
+		obit.Checksum,
 	)
 
 	if err != nil {
@@ -172,8 +173,8 @@ func (os Service) createSql(ctx context.Context, obit QLDBObit) error {
 	return nil
 }
 
-func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
-	_, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 		o, err := NewQLDBObit(obit)
 
 		if err != nil {
@@ -192,7 +193,7 @@ func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 				Documents = ?,
 				ModifiedOn = ?,
 				Status = ?,
-				RootHash = ?
+				Checksum = ?
 			WHERE
 				ObitDID = ?
 		`
@@ -207,7 +208,7 @@ func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 			o.Documents,
 			o.ModifiedOn,
 			o.Status,
-			o.RootHash,
+			o.Checksum,
 			o.ObitDID,
 		)
 
@@ -215,8 +216,8 @@ func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 			return nil, err
 		}
 
-		if err := os.updateSql(ctx, o); err != nil {
-			os.logger.Printf("Couldn't update obit to sql db: %v. Trying to abort QLDB transaction", obit)
+		if err := s.updateSql(ctx, o); err != nil {
+			s.logger.Printf("Couldn't update obit to sql db: %v. Trying to abort QLDB transaction", obit)
 
 			if er := txn.Abort(); er != nil {
 				return nil, errors.Wrap(err, er.Error())
@@ -225,7 +226,7 @@ func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 			return nil, err
 		}
 
-		if err := os.notify(ctx, o); err != nil {
+		if err := s.notify(ctx, o); err != nil {
 			return nil, err
 		}
 
@@ -235,6 +236,7 @@ func (os Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	return err
 }
 
+// NewQLDBObit creates a new QLDB obit
 func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 	var o QLDBObit
 
@@ -280,41 +282,40 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 	o.ModifiedOn = obit.GetModifiedOn().GetValue()
 
 	o.Status = obit.GetStatus().GetValue()
-	rootHash, err := obit.GetRootHash(nil)
+	checksum, err := obit.GetRootHash(nil)
 
 	if err != nil {
 		return o, err
 	}
 
-	o.RootHash = rootHash.GetHash()
+	o.Checksum = checksum.GetHash()
 
 	return o, nil
 }
 
-func (os Service) notify(ctx context.Context, obit QLDBObit) error {
-	id, err := os.pubsub.Publish(ctx, &pubsub.Msg{
+func (s Service) notify(ctx context.Context, obit QLDBObit) error {
+	id, err := s.pubsub.Publish(ctx, &pubsub.Msg{
 		DID:      obit.ObitDID,
-		RootHash: obit.RootHash,
+		Checksum: obit.Checksum,
 	})
 
 	if err != nil {
 		return err
 	}
 
-	os.logger.Printf("obit :: Published update to the network received corresponding id %q", id)
+	s.logger.Printf("obit :: Published update to the network received corresponding id %q", id)
 
 	return nil
 }
 
-func (os Service) findByRootHash(ctx context.Context, rootHash string) (QLDBObit, error) {
+func (s Service) findByChecksum(ctx context.Context, checksum string) (QLDBObit, error) {
 	var o QLDBObit
 
-	_, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		os.logger.Printf("%v", rootHash)
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 
-		const q = "SELECT * FROM Obits WHERE RootHash = ?"
+		const q = "SELECT * FROM Obits WHERE Checksum = ?"
 
-		res, err := txn.Execute(q, rootHash)
+		res, err := txn.Execute(q, checksum)
 
 		if err != nil {
 			return nil, err
@@ -326,8 +327,6 @@ func (os Service) findByRootHash(ctx context.Context, rootHash string) (QLDBObit
 		}
 
 		ionBinary := res.GetCurrentData()
-
-		os.logger.Printf("%v", ionBinary)
 
 		err = ion.Unmarshal(ionBinary, &o)
 		if err != nil {
@@ -344,8 +343,8 @@ func (os Service) findByRootHash(ctx context.Context, rootHash string) (QLDBObit
 	return o, nil
 }
 
-func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
-	_, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+func (s Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 		o, err := NewQLDBObit(obit)
 
 		if err != nil {
@@ -358,8 +357,8 @@ func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 			return nil, err
 		}
 
-		if err := os.createSql(ctx, o); err != nil {
-			os.logger.Printf("Couldn't insert obit to sql db: %v. Trying to abort QLDB transaction", obit)
+		if err := s.createSql(ctx, o); err != nil {
+			s.logger.Printf("Couldn't insert obit to sql db: %v. Trying to abort QLDB transaction", obit)
 
 			if er := txn.Abort(); er != nil {
 				return nil, errors.Wrap(err, er.Error())
@@ -368,7 +367,7 @@ func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 			return nil, err
 		}
 
-		if err := os.notify(ctx, o); err != nil {
+		if err := s.notify(ctx, o); err != nil {
 			return nil, err
 		}
 
@@ -378,10 +377,11 @@ func (os Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	return err
 }
 
-func (os Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error) {
+// Save creates or updates obit
+func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error) {
 	var o QLDBObit
 
-	obit, err := os.sdk.NewObit(dto)
+	obit, err := s.sdk.NewObit(dto)
 
 	if err != nil {
 		return o, err
@@ -390,23 +390,23 @@ func (os Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error)
 	ID := obit.GetObitID()
 	DID := ID.GetHash().GetHash()
 
-	o, err = os.Show(ctx, DID)
+	o, err = s.Get(ctx, DID)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) == false {
 			return o, err
 		}
 
-		if _, err := os.Create(ctx, dto); err != nil {
-			return o, err
+		if _, er := s.Create(ctx, dto); er != nil {
+			return o, er
 		}
 	} else {
-		if err := os.Update(ctx, DID, dto); err != nil {
-			return o, err
+		if er := s.Update(ctx, DID, dto); er != nil {
+			return o, er
 		}
 	}
 
-	o, err = os.Show(ctx, DID)
+	o, err = s.Get(ctx, DID)
 
 	if err != nil {
 		return o, nil
@@ -416,8 +416,8 @@ func (os Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error)
 }
 
 // Create method creates a new Obit
-func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) (properties.ObitID, error) {
-	obit, err := os.sdk.NewObit(dto)
+func (s Service) Create(ctx context.Context, dto sdkgo.ObitDto) (properties.ObitID, error) {
+	obit, err := s.sdk.NewObit(dto)
 
 	var ID properties.ObitID
 
@@ -425,7 +425,7 @@ func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) (properties.Obi
 		return ID, err
 	}
 
-	if err = os.createQLDB(ctx, obit); err != nil {
+	if err = s.createQLDB(ctx, obit); err != nil {
 		return ID, errors.Wrap(err, "creating obit")
 	}
 
@@ -435,8 +435,8 @@ func (os Service) Create(ctx context.Context, dto sdkgo.ObitDto) (properties.Obi
 }
 
 // Update method updates Obit
-func (os Service) Update(ctx context.Context, id string, dto sdkgo.ObitDto) error {
-	obit, err := os.sdk.NewObit(dto)
+func (s Service) Update(ctx context.Context, id string, dto sdkgo.ObitDto) error {
+	obit, err := s.sdk.NewObit(dto)
 
 	if err != nil {
 		return err
@@ -449,7 +449,7 @@ func (os Service) Update(ctx context.Context, id string, dto sdkgo.ObitDto) erro
 		return errors.New(fmt.Sprintf("Obit integrity issue. Expect to have id: %s, %s given", id, hash))
 	}
 
-	if err := os.updateQLDB(ctx, obit); err != nil {
+	if err := s.updateQLDB(ctx, obit); err != nil {
 		return err
 	}
 
@@ -457,30 +457,31 @@ func (os Service) Update(ctx context.Context, id string, dto sdkgo.ObitDto) erro
 }
 
 // Delete method delete Obit by id (did, usn)
-func (os Service) Delete(ctx context.Context, id string) error {
+func (s Service) Delete(ctx context.Context, id string) error {
 	// This method doesn't make sense ask Rohi for removing it. We could just update status
 
 	return nil
 }
 
 // GetObitsCount returns total number of obits in database
-func (os Service) GetObitsCount(ctx context.Context) (uint, error) {
+func (s Service) GetObitsCount(ctx context.Context) (uint, error) {
 	var cnt uint
 
 	const q = `SELECT COUNT(*) as cnt FROM gateway_view`
 
-	row := os.db.QueryRow(q)
+	row := s.db.QueryRow(q)
 	row.Scan(&cnt)
 
 	return cnt, nil
 }
 
-func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
+// Search
+func (s Service) Search(ctx context.Context) ([]QLDBObit, error) {
 	var obits []QLDBObit
 
 	const q = `SELECT * FROM gateway_view`
 
-	stmt, err := os.db.Prepare(q)
+	stmt, err := s.db.Prepare(q)
 
 	if err != nil {
 		return obits, err
@@ -515,7 +516,7 @@ func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
 			&stctData,
 			&docs,
 			&o.ModifiedOn,
-			&o.RootHash,
+			&o.Checksum,
 		)
 
 		json.Unmarshal(metadata, &o.Metadata)
@@ -639,8 +640,8 @@ func (os Service) Search(ctx context.Context) ([]QLDBObit, error) {
 	return obits, nil
 }**/
 
-// Show returns obit by given id
-func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
+// Get returns obit by given id
+func (s Service) Get(ctx context.Context, id string) (QLDBObit, error) {
 	var obit QLDBObit
 	var altIDS []byte
 	var metadata []byte
@@ -657,7 +658,7 @@ func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
 			usn = ?
 	`
 
-	row := os.db.QueryRow(q, id, id)
+	row := s.db.QueryRow(q, id, id)
 
 	err := row.Scan(
 		&obit.ObitDID,
@@ -673,10 +674,14 @@ func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
 		&stctData,
 		&docs,
 		&obit.ModifiedOn,
-		&obit.RootHash,
+		&obit.Checksum,
 	)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return obit, &validate.ErrorNotFoundResponse{}
+		}
+
 		return obit, err
 	}
 
@@ -696,22 +701,20 @@ func (os Service) Show(ctx context.Context, id string) (QLDBObit, error) {
 		return obit, err
 	}
 
-	os.logger.Printf("%v", obit)
-
 	return obit, nil
 }
 
 // History the history of Obit changes
-func (os Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
+func (s Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
 	var history []QldbMeta
 
-	m, err := os.getObitQLDBMeta(ctx, id)
+	m, err := s.getObitQLDBMeta(ctx, id)
 
 	if err != nil {
 		return history, err
 	}
 
-	_, err = os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+	_, err = s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 		const q = `
 			SELECT 
 				*
@@ -748,8 +751,8 @@ func (os Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
 	return history, nil
 }
 
-func (os Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, error) {
-	m, err := os.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+func (s Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, error) {
+	m, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 		var m QldbMeta
 
 		const q = `
@@ -789,8 +792,9 @@ func (os Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, err
 	return m.(QldbMeta), nil
 }
 
-func (os Service) Sync(ctx context.Context) error {
-	msg, err := os.pubsub.Subscribe(ctx)
+// Sync should be deprecate once we agree about real distributed protocol
+func (s Service) Sync(ctx context.Context) error {
+	msg, err := s.pubsub.Subscribe(ctx)
 
 	if err != nil {
 		return errors.Wrap(err, "Cannot messages pull from the SQS")
@@ -800,11 +804,11 @@ func (os Service) Sync(ctx context.Context) error {
 		return nil
 	}
 
-	os.logger.Printf("obit :: received message from SQS %v", msg.ID)
+	s.logger.Printf("obit :: received message from SQS %v", msg.ID)
 
 	const q = `SELECT COUNT(*) as cnt FROM gateway_view WHERE obit_did = ? LIMIT 1`
 
-	stmt, err := os.db.Prepare(q)
+	stmt, err := s.db.Prepare(q)
 
 	if err != nil {
 		return err
@@ -818,7 +822,7 @@ func (os Service) Sync(ctx context.Context) error {
 		return err
 	}
 
-	o, err := os.findByRootHash(ctx, msg.RootHash)
+	o, err := s.findByChecksum(ctx, msg.Checksum)
 
 	if err != nil {
 		return err
@@ -830,16 +834,16 @@ func (os Service) Sync(ctx context.Context) error {
 
 	switch cnt {
 	case 0:
-		return os.createSql(ctx, o)
+		return s.createSql(ctx, o)
 	case 1:
-		return os.updateSql(ctx, o)
+		return s.updateSql(ctx, o)
 	default:
 		return errors.New("Integrity problem. Broken data.")
 	}
 }
 
 // GenerateID generates obit ID
-func (os Service) GenerateID(serialNumberHash, manufacturer, partNumber string) (ID, error) {
+func (s Service) GenerateID(serialNumberHash, manufacturer, partNumber string) (ID, error) {
 	var id ID
 
 	dto := sdkgo.ObitIDDto{
@@ -848,7 +852,7 @@ func (os Service) GenerateID(serialNumberHash, manufacturer, partNumber string) 
 		PartNumber:       partNumber,
 	}
 
-	sdkID, err := os.sdk.NewObitID(dto)
+	sdkID, err := s.sdk.NewObitID(dto)
 
 	if err != nil {
 		return id, err

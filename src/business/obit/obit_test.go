@@ -2,6 +2,7 @@ package obit
 
 import (
 	"context"
+	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/business/tests"
 	"github.com/obada-foundation/sdkgo"
 	"testing"
@@ -9,7 +10,7 @@ import (
 
 type testCase struct {
 	args args
-	want  ID
+	want ID
 }
 
 type args struct {
@@ -26,6 +27,8 @@ func TestService(t *testing.T) {
 	test := tests.NewIntegration(t)
 	t.Cleanup(test.Teardown)
 
+	tests.CreateObit(t, test)
+
 	sdk, err := sdkgo.NewSdk(test.Logger, false)
 
 	if err != nil {
@@ -40,6 +43,8 @@ func TestService(t *testing.T) {
 
 	t.Run("generateID", tests.generateID)
 	t.Run("checksum", tests.checksum)
+	t.Run("get", tests.get)
+	t.Run("get", tests.getNotFound)
 }
 
 func (os ObitTests) generateID(t *testing.T) {
@@ -62,7 +67,7 @@ func (os ObitTests) generateID(t *testing.T) {
 				partNumber:       "PN123456S",
 			},
 			want: ID{
-				ID: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+				ID:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 				DID: "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 			},
 		},
@@ -87,18 +92,18 @@ func (os ObitTests) generateID(t *testing.T) {
 }
 
 func (os ObitTests) checksum(t *testing.T) {
-	testCases := []struct{
-		arg sdkgo.ObitDto
+	testCases := []struct {
+		arg  sdkgo.ObitDto
 		want string
 	}{
 		{
 			arg: sdkgo.ObitDto{
 				ObitIDDto: sdkgo.ObitIDDto{
 					SerialNumberHash: "cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d",
-					Manufacturer: "SONY",
-					PartNumber: "PN123456S",
+					Manufacturer:     "SONY",
+					PartNumber:       "PN123456S",
 				},
-				OwnerDid: "did:obada:owner:123456",
+				OwnerDid:   "did:obada:owner:123456",
 				ModifiedOn: 1624387537,
 			},
 			want: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
@@ -116,6 +121,73 @@ func (os ObitTests) checksum(t *testing.T) {
 			t.Errorf(
 				"service.Checksum(%v+) = %s want %s",
 				tc.arg, got, tc.want,
+			)
+		}
+	}
+}
+
+func (os ObitTests) get(t *testing.T) {
+	testCases := []struct {
+		arg string
+		want QLDBObit
+	}{
+		{
+			arg: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+			want: QLDBObit{
+				ObitDID: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+				Checksum: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		got, err := os.service.Get(context.Background(), tc.arg)
+
+		if err != nil {
+			t.Error(err.Error())
+		}
+
+		if got.ObitDID != tc.want.ObitDID {
+			t.Errorf(
+				"service.Get(%q) Body.obit_did = %s want %s",
+				tc.arg, got.ObitDID, tc.want.ObdDID,
+			)
+		}
+
+		if got.Checksum != tc.want.Checksum {
+			t.Errorf(
+				"service.Get(%q) Body.checksum = %s want %s",
+				tc.arg, got.Checksum, tc.want.Checksum,
+			)
+		}
+	}
+}
+
+func (os ObitTests) getNotFound(t *testing.T) {
+	testCases := []struct {
+		arg string
+		want *validate.ErrorNotFoundResponse
+	}{
+		{
+			arg: "d7cf869423d12f623f5611e48d6f6665bbc44270b6e09da2f4c32bcb1b949ecd",
+			want: &validate.ErrorNotFoundResponse{},
+		},
+	}
+
+	for _, tc := range testCases {
+		_, err := os.service.Get(context.Background(), tc.arg);
+
+		if err == nil {
+			t.Errorf(
+				"service.Get(%q) Error = %s want %s",
+				tc.arg, err, tc.want,
+			)
+		}
+
+		if _, ok := err.(*validate.ErrorNotFoundResponse); !ok {
+			t.Errorf(
+				"service.Get(%q) Error = %s want %s",
+				tc.arg, err, tc.want,
 			)
 		}
 	}
