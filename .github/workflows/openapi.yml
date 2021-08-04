@@ -32,9 +32,7 @@ jobs:
       - id: checkout-branch
         run: |
           cd node-api-library
-          git pull --all
           git checkout ${{ env.BRANCH }}
-          cd ..
 
       - id: lint
         run: make lint-openapi-spec
