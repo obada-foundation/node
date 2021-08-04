@@ -1,10 +1,10 @@
 openapi: 3.0.0
 
 servers:
-  - description: OBADA Staging API
-    url: https://dev.node.obada.io
   - description: OBADA Production API
     url: http://obs.node.obada.io
+  - description: OBADA Staging API
+    url: https://dev.node.obada.io
 
 info:
   version: "0.0.1"
@@ -100,7 +100,7 @@ paths:
             default: 0
       responses:
         "200":
-          description: List of obits responded by given arguments.
+          description: List of obits with pagination responded by given arguments.
           content:
             application/json:
               schema:
