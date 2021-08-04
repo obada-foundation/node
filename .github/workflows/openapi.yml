@@ -22,17 +22,35 @@ jobs:
         run: |
           echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
 
-      - id: checkout-php-client
+      - id: checkout-node-api-library
         uses: actions/checkout@v2
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-foundation/node-api-library
           path: node-api-library
 
+      - id: checkout-node-api-library-python
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
+          repository: obada-foundation/node-api-library-python
+          path: node-api-library-python
+
+      - id: checkout-node-api-library-csharp
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
+          repository: obada-foundation/node-api-library-csharp
+          path: node-api-library-csharp
+
       - id: checkout-branch
         run: |
-          cd node-api-library
-          git checkout ${{ env.BRANCH }}
+          libraries="node-api-library node-api-library-python node-api-library-csharp"
+          for library in $libraries; do
+            cd $library
+            git checkout ${{ env.BRANCH }}
+            cd ..
+          done
 
       - id: lint
         run: make lint-openapi-spec
