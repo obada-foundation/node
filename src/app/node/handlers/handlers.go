@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/obada-foundation/node/business/helper"
 	"github.com/obada-foundation/node/business/obit"
+	"github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/business/web/mid"
 	"github.com/obada-foundation/node/foundation/web"
 
@@ -25,6 +26,7 @@ type APIConfig struct {
 	Logger        *log.Logger
 	ObitService   *obit.Service
 	HelperService *helper.Service
+	SearchService *search.Service
 }
 
 // API register REST api endpoints
@@ -43,7 +45,8 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 	)
 
 	ob := obitGroup{
-		service: cfg.ObitService,
+		obitService: cfg.ObitService,
+		searchService: cfg.SearchService,
 	}
 
 	app.Handle(http.MethodPost, "/obit/id", ob.generateID)
@@ -60,7 +63,6 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 		obitService:   cfg.ObitService,
 	}
 
-	app.Handle(http.MethodGet, "/api/client/obits", c.getClientObits)
 	app.Handle(http.MethodPost, "/api/client/obit", c.saveClientObit)
 	app.Handle(http.MethodGet, "/api/server/obit/:obitDID", c.getServerObit)
 

@@ -17,71 +17,8 @@ info:
 
 tags:
   - name: Obit
-  - name: Helper
 
 paths:
-  /api/client/obits:
-    get:
-      summary: Returns a list of client obits
-      description: ''
-      operationId: getClientObits
-      tags:
-        - Helper
-      responses:
-        "200":
-          $ref: '#/components/responses/ClientObitsResponse'
-
-  /api/client/obit:
-    post:
-      summary: Save Client Obit
-      description: ''
-      operationId: saveClientObit
-      tags:
-        - Helper
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LocalObit'
-      responses:
-        "200":
-          $ref: '#/components/responses/ClientObitResponse'
-  /api/client/obit/{obit_did}:
-    get:
-      summary: Get Client Obit
-      description: ''
-      operationId: getClientObit
-      tags:
-        - Helper
-      parameters:
-        - name: obit_did
-          description: Required.
-          required: true
-          in: path
-          schema:
-            type: string
-            example: "did:obada:81413bc1ad2074a6ae35d1f65f64f1bca2e8a20959f37ef0349a729ddc567d9b"
-      responses:
-        "200":
-          $ref: '#/components/responses/ClientObitResponse'
-  /api/server/obit/{obit_did}:
-    get:
-      summary: Get Obit From Blockchain
-      description: Retrieves Obit information from blockchain but does not download it.
-      operationId: fetchObitFromChain
-      tags:
-        - Helper
-      parameters:
-        - name: obit_did
-          description: Required.
-          required: true
-          in: path
-          schema:
-            type: string
-            example: "did:obada:81413bc1ad2074a6ae35d1f65f64f1bca2e8a20959f37ef0349a729ddc567d9b"
-      responses:
-        "200":
-          $ref: '#/components/responses/BlockChainObitResponse'
   /obit/checksum:
     post:
       summary: Generates the obit checksum.
@@ -124,50 +61,15 @@ paths:
     get:
       tags:
         - Obit
-      description: Search obits by given filters.
-      operationId: searchObits
+      description: Implements a fulltext search for obits by "searchTerm".
+      operationId: search
       parameters:
-        - name: serial_number_hash
-          description: Query argument that filters by serial number hash
+        - name: q
+          description: Query argument that used for a fulltext search
           in: query
           schema:
             type: string
             example: "fe403a1afe16203f4b8bb3a0e72d3e17567897bc15293e4a87b663e441030aea"
-        - name: obit_status
-          in: query
-          description: Query argument that filters by obit status
-          schema:
-            type: string
-            enum:
-              - FUNCTIONAL
-              - NON_FUNCTIONAL
-              - DISPOSED
-              - STOLEN
-              - DISABLED_BY_OWNER
-        - name: manufacturer
-          description: Query argument that filters by manufacturer
-          in: query
-          schema:
-            type: string
-            example: "Sony"
-        - name: part_number
-          description: Query argument that filters by part number
-          in: query
-          schema:
-            type: string
-            example: "MWCN2LL/A"
-        - name: usn
-          in: query
-          description: Universal serial number
-          schema:
-            type: string
-            example: "2zEz-xLJR"
-        - name: owner_did
-          in: query
-          description: OBADA owner DID
-          schema:
-            type: string
-            example: "did:obada:owner:123456"
         - name: offset
           in: query
           description: Number of records to skip for pagination.
@@ -175,26 +77,15 @@ paths:
             type: integer
             minimum: 0
             default: 0
-        - name: limit
-          in: query
-          description: Maximum number of records to return.
-          schema:
-            type: integer
-            minimum: 0
-            maximum: 100
-            default: 0
       responses:
         "200":
           description: List of obits responded by given arguments.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Obit"
+                $ref: "#/components/schemas/Obits"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
     post:
       tags:
         - Obit
@@ -289,28 +180,12 @@ components:
   schemas:
     RequestObitId:
       $ref: "definitions/Obit.yml#/RequestObitId"
-    BlockChainObit:
-      $ref: "definitions/Obit.yml#/BlockChainObit"
-    ClientObit:
-      $ref: "definitions/Obit.yml#/ClientObit"
-    LocalObit:
-      $ref: "definitions/Obit.yml#/LocalObit"
+    Obits:
+      $ref: "definitions/Obit.yml#/Obits"
     Obit:
       $ref: "definitions/Obit.yml#/Obit"
     ObitHistory:
       $ref: "definitions/Obit.yml#/ObitHistory"
-    ObitDefinition:
-      description: New Obit def
-      type: object
-      properties:
-        serial_hash:
-          type: string
-        usn:
-          type: string
-        obit_did:
-          type: string
-        usn_base58:
-          type: string
   responses:
     ObitIdResponse:
       description: Obit ID response
@@ -318,42 +193,6 @@ components:
         application/json:
           schema:
             $ref: "definitions/Obit.yml#/ObitId"
-    ClientObitsResponse:
-      description: Client obits response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: integer
-              obits:
-                type: array
-                description: Get description from Rohi
-                items:
-                  $ref: '#/components/schemas/Obit'
-    ClientObitResponse:
-      description: Client obit response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: integer
-              obit:
-                $ref: '#/components/schemas/ClientObit'
-    BlockChainObitResponse:
-      description: Blockchain obit response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: integer
-              blockchain_obit:
-                $ref: '#/components/schemas/BlockChainObit'
 
     ChecksumResponse:
       description: Obit checksum response

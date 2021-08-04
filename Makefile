@@ -102,10 +102,10 @@ fmt:
 	cd src && go fmt ./...
 
 test:
-	cd src && go test -v ./...
+	cd src && go test --tags "json1 fts5 secure_delete" -v ./...
 
 coverage: ## Generates and shows code coverage in a browser
-	cd src && go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
+	cd src && go test --tags "json1 fts5 secure_delete" ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 help: ## Show this help.
 	 @IFS=$$'\n' ; \

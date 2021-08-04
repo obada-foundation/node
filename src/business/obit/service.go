@@ -9,6 +9,7 @@ import (
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/node/business/pubsub"
 	"github.com/obada-foundation/node/business/sys/validate"
+	"github.com/obada-foundation/node/business/types"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/obada-foundation/sdkgo/properties"
 	"github.com/pkg/errors"
@@ -37,7 +38,7 @@ func NewObitService(sdk *sdkgo.Sdk, logger *log.Logger, db *sql.DB, qldb *qldbdr
 	}
 }
 
-func (s Service) updateSql(ctx context.Context, obit QLDBObit) error {
+func (s Service) updateSql(ctx context.Context, obit types.QLDBObit) error {
 	const q = `
 		UPDATE 
 		    gateway_view
@@ -101,7 +102,7 @@ func (s Service) updateSql(ctx context.Context, obit QLDBObit) error {
 	return nil
 }
 
-func (s Service) createSql(ctx context.Context, obit QLDBObit) error {
+func (s Service) createSql(ctx context.Context, obit types.QLDBObit) error {
 	const q = `
 		INSERT INTO 
 		    gateway_view(
@@ -237,8 +238,8 @@ func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 }
 
 // NewQLDBObit creates a new QLDB obit
-func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
-	var o QLDBObit
+func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
+	var o types.QLDBObit
 
 	obitId := obit.GetObitID()
 	o.ObitDID = obitId.GetHash().GetHash()
@@ -253,11 +254,11 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 	mdRecords := obit.GetMetadata()
 	strRecords := obit.GetStructuredData()
 
-	kvs := func(records []properties.Record) []KV {
-		var kvs []KV
+	kvs := func(records []properties.Record) []types.KV {
+		var kvs []types.KV
 
 		for _, rec := range records {
-			kv := KV{
+			kv := types.KV{
 				Key:   rec.GetKey().GetValue(),
 				Value: rec.GetValue().GetValue(),
 			}
@@ -293,7 +294,7 @@ func NewQLDBObit(obit sdkgo.Obit) (QLDBObit, error) {
 	return o, nil
 }
 
-func (s Service) notify(ctx context.Context, obit QLDBObit) error {
+func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
 	id, err := s.pubsub.Publish(ctx, &pubsub.Msg{
 		DID:      obit.ObitDID,
 		Checksum: obit.Checksum,
@@ -308,8 +309,8 @@ func (s Service) notify(ctx context.Context, obit QLDBObit) error {
 	return nil
 }
 
-func (s Service) findByChecksum(ctx context.Context, checksum string) (QLDBObit, error) {
-	var o QLDBObit
+func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLDBObit, error) {
+	var o types.QLDBObit
 
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 
@@ -378,8 +379,8 @@ func (s Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 }
 
 // Save creates or updates obit
-func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (QLDBObit, error) {
-	var o QLDBObit
+func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, error) {
+	var o types.QLDBObit
 
 	obit, err := s.sdk.NewObit(dto)
 
@@ -463,186 +464,9 @@ func (s Service) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// GetObitsCount returns total number of obits in database
-func (s Service) GetObitsCount(ctx context.Context) (uint, error) {
-	var cnt uint
-
-	const q = `SELECT COUNT(*) as cnt FROM gateway_view`
-
-	row := s.db.QueryRow(q)
-	row.Scan(&cnt)
-
-	return cnt, nil
-}
-
-// Search
-func (s Service) Search(ctx context.Context) ([]QLDBObit, error) {
-	var obits []QLDBObit
-
-	const q = `SELECT * FROM gateway_view`
-
-	stmt, err := s.db.Prepare(q)
-
-	if err != nil {
-		return obits, err
-	}
-
-	rows, err := stmt.Query()
-
-	if err != nil {
-		return obits, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var o QLDBObit
-
-		var altIDS []byte
-		var metadata []byte
-		var stctData []byte
-		var docs []byte
-
-		err := rows.Scan(
-			&o.ObitDID,
-			&o.Usn,
-			&o.SerialNumberHash,
-			&o.Manufacturer,
-			&o.PartNumber,
-			&altIDS,
-			&o.OwnerDID,
-			&o.ObdDID,
-			&o.Status,
-			&metadata,
-			&stctData,
-			&docs,
-			&o.ModifiedOn,
-			&o.Checksum,
-		)
-
-		json.Unmarshal(metadata, &o.Metadata)
-		if err != nil {
-			return obits, err
-		}
-
-		json.Unmarshal(stctData, &o.StructuredData)
-		if err != nil {
-			return obits, err
-		}
-
-		json.Unmarshal(docs, &o.Documents)
-		if err != nil {
-			return obits, err
-		}
-
-		json.Unmarshal(altIDS, &o.AlternateIDS)
-		if err != nil {
-			return obits, err
-		}
-
-		obits = append(obits, o)
-	}
-
-	return obits, nil
-}
-
-// Search method search Obits by given criteria
-/**func (os Service) Search(ctx context.Context, offset uint) (Obits, error) {
-	var obits Obits
-
-	const perPage = 50
-
-	obits.PerPage = perPage
-
-	if offset == 0 {
-		obits.CurrentPage = 1
-	} else {
-		obits.CurrentPage = offset * perPage
-	}
-
-	const q = `SELECT * FROM gateway_view LIMIT ? OFFSET ?`
-
-	stmt, err := os.db.Prepare(q)
-
-	if err != nil {
-		return obits, err
-	}
-
-	rows, err := stmt.Query(perPage, offset)
-
-	if err != nil {
-		return obits, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var o QLDBObit
-
-		var altIDS []byte
-		var metadata []byte
-		var stctData []byte
-		var docs []byte
-
-		err := rows.Scan(
-			&o.ObitDID,
-			&o.Usn,
-			&o.SerialNumberHash,
-			&o.Manufacturer,
-			&o.PartNumber,
-			&altIDS,
-			&o.OwnerDID,
-			&o.ObdDID,
-			&o.Status,
-			&metadata,
-			&stctData,
-			&docs,
-			&o.ModifiedOn,
-			&o.RootHash,
-		)
-
-		json.Unmarshal(metadata, &o.Matadata)
-		if err != nil {
-			return obits, err
-		}
-
-		json.Unmarshal(stctData, &o.StructuredData)
-		if err != nil {
-			return obits, err
-		}
-
-		json.Unmarshal(docs, &o.Documents)
-		if err != nil {
-			return obits, err
-		}
-
-		json.Unmarshal(altIDS, &o.AlternateIDS)
-		if err != nil {
-			return obits, err
-		}
-
-		obits.Obits = append(obits.Obits, o)
-	}
-
-	obitsCount, err := os.GetObitsCount(ctx)
-	if err != nil {
-		return obits, err
-	}
-
-	obits.Total = obitsCount
-
-	lastPage := uint(math.Ceil(float64(obitsCount) / float64(perPage)))
-
-	if lastPage == 0 {
-		lastPage = 1
-	}
-
-	obits.LastPage = lastPage
-
-	return obits, nil
-}**/
-
 // Get returns obit by given id
-func (s Service) Get(ctx context.Context, id string) (QLDBObit, error) {
-	var obit QLDBObit
+func (s Service) Get(ctx context.Context, id string) (types.QLDBObit, error) {
+	var obit types.QLDBObit
 	var altIDS []byte
 	var metadata []byte
 	var stctData []byte
@@ -650,12 +474,25 @@ func (s Service) Get(ctx context.Context, id string) (QLDBObit, error) {
 
 	const q = `
 		SELECT 
-			* 
+			gv.obit_did,
+		    gv.usn,
+		    gv.serial_number_hash,
+			gv.manufacturer,
+		    gv.part_number,
+		    gv.alternate_ids,
+		    gv.owner_did,
+		    gv.obd_did,
+		    gv.status,
+		   	gv.metadata,
+		    gv.structured_data,
+		    gv.documents,
+		    gv.modified_on,
+		    gv.checksum 
 		FROM 
-			gateway_view 
+			gateway_view AS gv
 		WHERE 
-			obit_did = ? OR
-			usn = ?
+			gv.obit_did = ? OR
+			gv.usn = ?
 	`
 
 	row := s.db.QueryRow(q, id, id)
@@ -792,7 +629,7 @@ func (s Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, erro
 	return m.(QldbMeta), nil
 }
 
-// Sync should be deprecate once we agree about real distributed protocol
+// Sync should be deprecated once we agree about real distributed protocol
 func (s Service) Sync(ctx context.Context) error {
 	msg, err := s.pubsub.Subscribe(ctx)
 

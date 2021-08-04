@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/obada-foundation/node/business/types"
 	"log"
 	"net/http"
 
@@ -18,17 +19,17 @@ type client struct {
 
 type SaveClientObitResponse struct {
 	Status int                  `json:"status"`
-	Obit   obitService.QLDBObit `json:"obit"`
+	Obit   types.QLDBObit `json:"obit"`
 }
 
 type GetClientObitResponse struct {
 	Status int                  `json:"status"`
-	Obit   obitService.QLDBObit `json:"obit"`
+	Obit   types.QLDBObit `json:"obit"`
 }
 
 type GetClientObitsResponse struct {
 	Status int                    `json:"status"`
-	Obits  []obitService.QLDBObit `json:"obits"`
+	Obits  []types.QLDBObit `json:"obits"`
 }
 
 type GetServerObitResponse struct {
@@ -60,23 +61,6 @@ func (c client) getServerObit(ctx context.Context, w http.ResponseWriter, r *htt
 
 	resp.BlockChainObit.RootHash = o.Checksum
 	resp.BlockChainObit.ObitDID = o.ObitDID
-
-	web.Respond(ctx, w, resp, http.StatusOK)
-
-	return nil
-}
-
-func (c client) getClientObits(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	obits, err := c.obitService.Search(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	resp := GetClientObitsResponse{
-		Status: 0,
-		Obits:  obits,
-	}
 
 	web.Respond(ctx, w, resp, http.StatusOK)
 

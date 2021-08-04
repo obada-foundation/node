@@ -3,14 +3,14 @@ FROM alpine:edge AS builder
 
 RUN apk update && apk upgrade
 
-RUN apk add --no-cache go gcc g++
+RUN apk add --no-cache go gcc g++ musl-dev
 
 WORKDIR /app
 
 COPY src/ .
 
 # Build the Go app
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags '-extldflags "-static"' -a -o main app/node/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags '-extldflags "-static"' --tags "json1 fts5 secure_delete" -a -o main app/node/main.go
 
 ######## Start a new stage from scratch #######
 FROM alpine:latest

@@ -23,6 +23,7 @@ import (
 	dbInitService "github.com/obada-foundation/node/business/database"
 	helperService "github.com/obada-foundation/node/business/helper"
 	obitService "github.com/obada-foundation/node/business/obit"
+	searchService "github.com/obada-foundation/node/business/search"
 	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
@@ -184,6 +185,9 @@ func run(logger *log.Logger) error {
 
 	ps := pubsub.NewClient(awsSession, cfg.PUBSUB.Timeout, cfg.PUBSUB.QueueURL, cfg.PUBSUB.TopicArn)
 
+	// Initialize SearchService
+	search := searchService.NewService(logger, db)
+
 	// Initialize ObitService
 	obit := obitService.NewObitService(sdk, logger, db, qldb, ps)
 
@@ -211,6 +215,7 @@ func run(logger *log.Logger) error {
 			Logger:        logger,
 			ObitService:   obit,
 			HelperService: helper,
+			SearchService: search,
 		}),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,

@@ -53,9 +53,8 @@ func (fe FieldErrors) Error() string {
 }
 
 // ErrorNotFoundResponse handles 404 http error
-type ErrorNotFoundResponse struct {}
+type ErrorNotFoundResponse struct{}
 
 func (err *ErrorNotFoundResponse) Error() string {
 	return "not found"
 }
-

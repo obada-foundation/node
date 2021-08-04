@@ -6,16 +6,19 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/obada-foundation/node/business/obit"
+	"github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/foundation/web"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/obada-foundation/sdkgo/properties"
 	"github.com/pkg/errors"
 	"net/http"
+	"strconv"
 )
 
 type obitGroup struct {
-	service *obit.Service
+	obitService *obit.Service
+	searchService *search.Service
 }
 
 type GenerateIDRequest struct {
@@ -83,7 +86,7 @@ func (og obitGroup) generateID(ctx context.Context, w http.ResponseWriter, r *ht
 		return err
 	}
 
-	ID, err := og.service.GenerateID(snh, requestData.Manufacturer, requestData.PartNumber)
+	ID, err := og.obitService.GenerateID(snh, requestData.Manufacturer, requestData.PartNumber)
 
 	if err != nil {
 		return err
@@ -99,7 +102,7 @@ func (og obitGroup) checksum(ctx context.Context, w http.ResponseWriter, r *http
 		return err
 	}
 
-	checksum, err := og.service.Checksum(ctx, dto)
+	checksum, err := og.obitService.Checksum(ctx, dto)
 
 	if err != nil {
 		return err
@@ -121,7 +124,7 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 		return err
 	}
 
-	ID, err := og.service.Create(ctx, dto)
+	ID, err := og.obitService.Create(ctx, dto)
 
 	if err != nil {
 		return err
@@ -137,7 +140,17 @@ func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.R
 }
 
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	obits, err := og.service.Search(ctx)
+	query := r.URL.Query()
+
+	offset, err := strconv.ParseUint(query.Get("offset"), 10, 32)
+
+	if err != nil {
+		offset = 0
+	}
+
+	offsetUint := uint(offset)
+
+	obits, err := og.searchService.Search(ctx, query.Get("q"), offsetUint)
 
 	if err != nil {
 		return err
@@ -152,7 +165,7 @@ func (og obitGroup) get(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return err
 	}
 
-	obit, err := og.service.Get(ctx, ID)
+	obit, err := og.obitService.Get(ctx, ID)
 
 	if err != nil {
 		return err
@@ -210,7 +223,7 @@ func (og obitGroup) update(ctx context.Context, w http.ResponseWriter, r *http.R
 		return err
 	}
 
-	if err := og.service.Update(ctx, ID, dto); err != nil {
+	if err := og.obitService.Update(ctx, ID, dto); err != nil {
 		return err
 	}
 
@@ -223,7 +236,7 @@ func (og obitGroup) history(ctx context.Context, w http.ResponseWriter, r *http.
 		return err
 	}
 
-	h, err := og.service.History(ctx, ID)
+	h, err := og.obitService.History(ctx, ID)
 
 	if err != nil {
 		return err
