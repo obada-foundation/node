@@ -34,7 +34,7 @@ jobs:
           ref: master
 
       - id: get-tag
-        run: echo ::set-output name=TAG::$(echo $GITHUB_REF | cut -d / -f 3)
+        run: echo "TAG=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
 
       - id: generate-php-client
         run: |
