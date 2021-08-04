@@ -1,32 +1,21 @@
-name: OpenAPI deployment
+name: Release
 
 on:
   push:
-    branches:
-      - develop
-      - master
-  pull_request:
-    branches:
-      - develop
-      - master
+    tags:
+      - 'v*'
 
 jobs:
-  generate-api-clients:
+  release-api-libraries:
     runs-on: ubuntu-latest
     steps:
-      - id: checkout-code
-        uses: actions/checkout@v2
-
-      - id: set-branch
-        run: |
-          echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
-
       - id: checkout-node-api-library
         uses: actions/checkout@v2
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-foundation/node-api-library
           path: node-api-library
+          ref: master
 
       - id: checkout-node-api-library-python
         uses: actions/checkout@v2
@@ -34,6 +23,7 @@ jobs:
           ssh-key: ${{ secrets.PYTHON_NODE_LIB_SSH_KEY }}
           repository: obada-foundation/node-api-library-python
           path: node-api-library-python
+          ref: master
 
       - id: checkout-node-api-library-csharp
         uses: actions/checkout@v2
@@ -41,22 +31,16 @@ jobs:
           ssh-key: ${{ secrets.CSHARP_NODE_LIB_SSH_KEY }}
           repository: obada-foundation/node-api-library-csharp
           path: node-api-library-csharp
+          ref: master
 
-      - id: checkout-branch
-        run: |
-          libraries="node-api-library node-api-library-python node-api-library-csharp"
-          for library in $libraries; do
-            cd $library
-            git pull --all
-            git checkout ${{ env.BRANCH }}
-            cd ..
-          done
-
-      - id: lint
-        run: make lint-openapi-spec
+      - id: get-tag
+        run: echo ::set-output name=TAG::$(echo $GITHUB_REF | cut -d / -f 3)
 
       - id: generate-php-client
         run: |
           git config --global user.name "OBADA TechOps Team"
           git config --global user.email "techops@obada.io"
-          make deploy-node-api-libraries
+
+          for library in "node-api-library-python node-api-library-csharp node-api-library"; do
+            git tag -a ${{ env.TAG }} -m "See release notes in https://github.com/obada-foundation/node/releases/tag/${{ env.TAG }}"
+          done
