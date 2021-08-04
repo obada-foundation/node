@@ -1,9 +1,16 @@
 name: Open API deployment
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - develop
 
 jobs:
-
   generate-api-clients:
     runs-on: ubuntu-latest
     steps:
