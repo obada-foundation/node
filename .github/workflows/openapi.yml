@@ -19,7 +19,8 @@ jobs:
         uses: actions/checkout@v2
 
       - id: set-branch
-        run: echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
+        run: |
+          echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
 
       - id: checkout-php-client
         uses: actions/checkout@v2
@@ -27,7 +28,11 @@ jobs:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-foundation/node-api-library
           path: node-api-library
-          ref: ${{ env.BRANCH }}
+
+      - id: checkout-branch
+        run:
+          cd node-api-library
+          git checkout ${{ env.BRANCH }}
 
       - id: lint
         run: make lint-openapi-spec
