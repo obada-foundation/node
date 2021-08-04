@@ -32,14 +32,14 @@ jobs:
       - id: checkout-node-api-library-python
         uses: actions/checkout@v2
         with:
-          ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
+          ssh-key: ${{ secrets.PYTHON_NODE_LIB_SSH_KEY }}
           repository: obada-foundation/node-api-library-python
           path: node-api-library-python
 
       - id: checkout-node-api-library-csharp
         uses: actions/checkout@v2
         with:
-          ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
+          ssh-key: ${{ secrets.CSHARP_NODE_LIB_SSH_KEY }}
           repository: obada-foundation/node-api-library-csharp
           path: node-api-library-csharp
 
