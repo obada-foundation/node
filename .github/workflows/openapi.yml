@@ -61,4 +61,4 @@ jobs:
         run: |
           git config --global user.name "OBADA TechOps Team"
           git config --global user.email "techops@obada.io"
-          make deploy-node-api-library
+          make deploy-node-api-libraries

@@ -32,7 +32,7 @@ deploy-staging:
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
-deploy-api-clients: deploy-node-api-library
+deploy-api-clients: deploy-node-api-libraries
 	@echo "Deployment of client libraries was done"
 
 clone-node-api-library:
