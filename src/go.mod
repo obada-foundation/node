@@ -16,6 +16,4 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.7
 	github.com/obada-foundation/sdkgo v0.0.0-20210727074552-1631df40550c
 	github.com/pkg/errors v0.9.1
-	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
-	gopkg.in/go-playground/validator.v9 v9.31.0
 )
