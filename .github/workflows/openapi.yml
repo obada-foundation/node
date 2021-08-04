@@ -31,8 +31,8 @@ jobs:
 
       - id: checkout-branch
         run: |
-          git pull --all
           cd node-api-library
+          git pull --all
           git checkout ${{ env.BRANCH }}
 
       - id: lint
