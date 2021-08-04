@@ -1,5 +1,6 @@
 package types
 
+// QLDBObit represent a node Obit
 type QLDBObit struct {
 	ObitDID          string            `ion:"ObitDID" db:"obit_id" json:"obit_did"`
 	Usn              string            `ion:"Usn" json:"usn"`
@@ -17,6 +18,7 @@ type QLDBObit struct {
 	Checksum         string            `ion:"Checksum" json:"checksum"`
 }
 
+// KV hosts key/value pairs for QLDBObit
 type KV struct {
 	Key   string `ion:"Key" json:"key"`
 	Value string `ion:"Value" json:"value"`

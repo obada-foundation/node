@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	//nolint:gosec // Need to find another workaround
 	_ "github.com/mattn/go-sqlite3"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	"io"
@@ -40,16 +41,22 @@ func NewUnit(t *testing.T) (*log.Logger, *sql.DB, func()) {
 
 	initService := dbInitService.NewService(db, nil, logger)
 
-	initService.Migrate()
+	if err := initService.Migrate(); err != nil {
+		t.Fatalf("Running migrations: %s", err)
+	}
 
 	// teardown is the function that should be invoked when the caller is done
 	// with the database.
 	teardown := func() {
 		t.Helper()
+		//nolint:gosec //Not handle this error because this is teardown
 		db.Close()
+		//nolint:gosec //Not handle this error because this is teardown
 		os.RemoveAll(dbPath)
+		//nolint:gosec //Not handle this error because this is teardown
 		w.Close()
 		var buf bytes.Buffer
+		//nolint:gosec //Not handle this error because this is teardown
 		io.Copy(&buf, r)
 		os.Stdout = old
 		fmt.Println("******************** LOGS ********************")
@@ -74,6 +81,7 @@ func NewIntegration(t *testing.T) *Test {
 	return &test
 }
 
+// CreateObit test helper for obit creation
 func CreateObit(t *testing.T, test *Test) {
 	const q = `
 		INSERT INTO 
@@ -124,6 +132,7 @@ func CreateObit(t *testing.T, test *Test) {
 	}
 }
 
+// CreateOwnerObits test helper that creates many obits for single owner
 func CreateOwnerObits(t *testing.T, test *Test) {
 
 	const q = `
@@ -155,9 +164,9 @@ func CreateOwnerObits(t *testing.T, test *Test) {
 		}
 
 		_, err = stmt.Exec(
-			"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ec" + fmt.Sprintf("%d", i),
-			"usn" + fmt.Sprintf("%d", i),
-			"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44" + fmt.Sprintf("%d", i),
+			"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ec"+fmt.Sprintf("%d", i),
+			"usn"+fmt.Sprintf("%d", i),
+			"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44"+fmt.Sprintf("%d", i),
 			"SONY",
 			"PN123456S",
 			"[]",

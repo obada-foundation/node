@@ -22,8 +22,8 @@ import (
 	"github.com/obada-foundation/node/app/node/handlers"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	obitService "github.com/obada-foundation/node/business/obit"
-	searchService "github.com/obada-foundation/node/business/search"
 	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
+	searchService "github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
 )
@@ -147,14 +147,18 @@ func run(logger *log.Logger) error {
 			return errors.Wrap(er, "Problem with creating sqlite db file")
 		}
 
-		file.Close()
+		if er := file.Close(); er != nil {
+			return errors.Wrap(er, "Problem with closing SQLite file")
+		}
 	}
 
 	// Initialize sqlite
 	db, err := sql.Open("sqlite3", cfg.SQL.SqlitePath)
 	defer func() {
 		logger.Println("main: SQLite closing database connection")
-		db.Close()
+		if er := db.Close(); er != nil {
+			logger.Printf("main: Cannot close SQLite database: %s", err)
+		}
 	}()
 
 	if err != nil {

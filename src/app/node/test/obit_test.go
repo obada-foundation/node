@@ -5,7 +5,6 @@ import (
 	"github.com/obada-foundation/node/app/node/handlers"
 	obitService "github.com/obada-foundation/node/business/obit"
 	searchService "github.com/obada-foundation/node/business/search"
-	"github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/business/tests"
 	"github.com/obada-foundation/node/business/types"
@@ -40,27 +39,27 @@ func TestAPI(t *testing.T) {
 		t.Fatalf("cannot initialize SDK: %s", err)
 	}
 
-	os := obitService.NewObitService(sdk, test.Logger, test.DB, nil, nil)
+	obs := obitService.NewObitService(sdk, test.Logger, test.DB, nil, nil)
 
 	ss := searchService.NewService(test.Logger, test.DB)
 
-	tests := ObitTests{
+	ts := ObitTests{
 		app: handlers.API(handlers.APIConfig{
-			Shutdown:    shutdown,
-			Logger:      test.Logger,
-			ObitService: os,
+			Shutdown:      shutdown,
+			Logger:        test.Logger,
+			ObitService:   obs,
 			SearchService: ss,
 		}),
 	}
 
-	t.Run("generateID200", tests.generateID200)
-	t.Run("generateID200", tests.generateID422)
-	t.Run("checksum200", tests.checksum200)
-	t.Run("checksum422", tests.checksum422)
-	t.Run("checksum500", tests.checksum500)
-	t.Run("get404", tests.get404)
-	t.Run("get200", tests.get200)
-	t.Run("search200", tests.search200)
+	t.Run("generateID200", ts.generateID200)
+	t.Run("generateID200", ts.generateID422)
+	t.Run("checksum200", ts.checksum200)
+	t.Run("checksum422", ts.checksum422)
+	t.Run("checksum500", ts.checksum500)
+	t.Run("get404", ts.get404)
+	t.Run("get200", ts.get200)
+	t.Run("search200", ts.search200)
 }
 
 func (obs ObitTests) generateID200(t *testing.T) {
@@ -374,17 +373,17 @@ func (obs ObitTests) search200(t *testing.T) {
 		want int
 	}{
 		{
-			arg: "usn1",
+			arg:  "usn1",
 			want: 1,
 		},
 		{
-			arg: "did:obada:owner:678910",
+			arg:  "did:obada:owner:678910",
 			want: 50,
 		},
 	}
 
 	for _, tc := range testCases {
-		r := httptest.NewRequest(http.MethodGet, "/obits?q=" + url.QueryEscape(tc.arg), nil)
+		r := httptest.NewRequest(http.MethodGet, "/obits?q="+url.QueryEscape(tc.arg), nil)
 		w := httptest.NewRecorder()
 
 		obs.app.ServeHTTP(w, r)
@@ -402,7 +401,7 @@ func (obs ObitTests) search200(t *testing.T) {
 			t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
 		}
 
-		var obits search.Obits
+		var obits searchService.Obits
 		if err := json.NewDecoder(resp.Body).Decode(&obits); err != nil {
 			t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &obits, err)
 		}

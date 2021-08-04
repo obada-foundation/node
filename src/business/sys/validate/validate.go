@@ -18,6 +18,7 @@ var validate *validator.Validate
 // translator is a cache of locale and translation information.
 var translator ut.Translator
 
+//nolint:gochecknoinits // Need to find another workaround
 func init() {
 
 	// Instantiate a validator.
@@ -28,6 +29,7 @@ func init() {
 	translator, _ = ut.New(en.New(), en.New()).GetTranslator("en")
 
 	// Register the english error messages for use.
+	//nolint:gosec // Need to find another workaround
 	en_translations.RegisterDefaultTranslations(validate, translator)
 
 	// Use JSON tag names for errors instead of Go struct names.

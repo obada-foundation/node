@@ -43,7 +43,7 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 	)
 
 	ob := obitGroup{
-		obitService: cfg.ObitService,
+		obitService:   cfg.ObitService,
 		searchService: cfg.SearchService,
 	}
 
@@ -70,8 +70,8 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 func parseObitIDFromRequest(r *http.Request) (string, error) {
 	ID := web.Param(r, "obitDID")
 
-	if len(ID) == 0 {
-		return "", errors.New("Cannot find obitDID in URI")
+	if ID == "" {
+		return "", errors.New("cannot find obitDID in URI")
 	}
 
 	return ID, nil

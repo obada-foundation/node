@@ -12,11 +12,13 @@ import (
 
 const perPage = 50
 
+// Obits represents the collection of obits with pagination
 type Obits struct {
 	Obits []types.QLDBObit `json:"data"`
-	Meta  ObitsMeta  `json:"meta"`
+	Meta  ObitsMeta        `json:"meta"`
 }
 
+// ObitsMeta contain pagination option, in future might have other options as well
 type ObitsMeta struct {
 	Total       uint `json:"total"`
 	PerPage     uint `json:"per_page"`
@@ -26,16 +28,15 @@ type ObitsMeta struct {
 
 // Service provider an API to manage obits
 type Service struct {
-	logger   *log.Logger
-	db       *sql.DB
-	isSynced bool
+	logger *log.Logger
+	db     *sql.DB
 }
 
 // NewService creates new version of Obit service
 func NewService(logger *log.Logger, db *sql.DB) *Service {
 	return &Service{
-		logger:   logger,
-		db:       db,
+		logger: logger,
+		db:     db,
 	}
 }
 
@@ -93,7 +94,7 @@ func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, e
 		var stctData []byte
 		var docs []byte
 
-		err := rows.Scan(
+		er := rows.Scan(
 			&o.ObitDID,
 			&o.Usn,
 			&o.SerialNumberHash,
@@ -110,24 +111,24 @@ func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, e
 			&o.Checksum,
 		)
 
-		json.Unmarshal(metadata, &o.Metadata)
-		if err != nil {
+		if er != nil {
 			return obits, err
 		}
 
-		json.Unmarshal(stctData, &o.StructuredData)
-		if err != nil {
-			return obits, err
+		if er := json.Unmarshal(metadata, &o.Metadata); er != nil {
+			return obits, er
 		}
 
-		json.Unmarshal(docs, &o.Documents)
-		if err != nil {
-			return obits, err
+		if er := json.Unmarshal(stctData, &o.StructuredData); er != nil {
+			return obits, er
 		}
 
-		json.Unmarshal(altIDS, &o.AlternateIDS)
-		if err != nil {
-			return obits, err
+		if er := json.Unmarshal(docs, &o.Documents); er != nil {
+			return obits, er
+		}
+
+		if er := json.Unmarshal(altIDS, &o.AlternateIDS); er != nil {
+			return obits, er
 		}
 
 		obits.Obits = append(obits.Obits, o)
@@ -170,7 +171,9 @@ func (s Service) GetObitsCountByTerm(ctx context.Context, term string) (uint, er
 	`
 
 	row := s.db.QueryRow(q, term)
-	row.Scan(&cnt)
+	if err := row.Scan(&cnt); err != nil {
+		return cnt, err
+	}
 
 	return cnt, nil
 }

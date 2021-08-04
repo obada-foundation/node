@@ -7,12 +7,14 @@ import (
 	"log"
 )
 
+// Service temp struct to handle dependencies
 type Service struct {
 	db     *sql.DB
 	qldb   *qldbdriver.QLDBDriver
 	logger *log.Logger
 }
 
+// NewService creates database service
 func NewService(db *sql.DB, qldb *qldbdriver.QLDBDriver, logger *log.Logger) Service {
 	return Service{
 		db:     db,
@@ -45,6 +47,7 @@ func (s Service) IsFirstRun() (bool, error) {
 
 // Migrate attempts to bring the schema for qldb up to date with the migrations
 // defined in this package.
+//nolint:unused // Need this code for a future use
 func (s Service) qldbMigrate() error {
 	s.logger.Println("Running QLDB migrations")
 

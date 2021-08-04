@@ -17,10 +17,11 @@ import (
 )
 
 type obitGroup struct {
-	obitService *obit.Service
+	obitService   *obit.Service
 	searchService *search.Service
 }
 
+// GenerateIDRequest host request for generateID method
 type GenerateIDRequest struct {
 	SerialNumber string `validate:"required" json:"serial_number"`
 	Manufacturer string `validate:"required" json:"manufacturer"`
@@ -43,20 +44,16 @@ type requestObit struct {
 	Status           string      `json:"status"`
 }
 
+// Doc host obit documents
 type Doc struct {
 	Name     string `json:"name"`
 	HashLink string `json:"hash_link"`
 }
 
+// KV host key/value pairs
 type KV struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
-}
-
-type ObitCreate struct {
-	Hash string `json:"hash"`
-	DID  string `json:"did"`
-	Usn  string `json:"usn"`
 }
 
 func hashStr(str string) (string, error) {
@@ -96,31 +93,33 @@ func (og obitGroup) generateID(ctx context.Context, w http.ResponseWriter, r *ht
 }
 
 func (og obitGroup) save(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	dto, err := requestBodyToDto(ctx, r)
+	dto, err := requestBodyToDto(r)
 
 	if err != nil {
 		return err
 	}
 
-	obit, err := og.obitService.Save(ctx, dto)
+	o, err := og.obitService.Save(ctx, dto)
 
 	if err != nil {
 		return err
 	}
 
-	web.Respond(ctx, w, obit, http.StatusOK)
+	if er := web.Respond(ctx, w, o, http.StatusOK); er != nil {
+		return er
+	}
 
 	return nil
 }
 
 func (og obitGroup) checksum(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	dto, err := requestBodyToDto(ctx, r)
+	dto, err := requestBodyToDto(r)
 
 	if err != nil {
 		return err
 	}
 
-	checksum, err := og.obitService.Checksum(ctx, dto)
+	checksum, err := og.obitService.Checksum(dto)
 
 	if err != nil {
 		return err
@@ -161,16 +160,16 @@ func (og obitGroup) get(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return err
 	}
 
-	obit, err := og.obitService.Get(ctx, ID)
+	o, err := og.obitService.Get(ctx, ID)
 
 	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, obit, http.StatusOK)
+	return web.Respond(ctx, w, o, http.StatusOK)
 }
 
-func requestBodyToDto(ctx context.Context, r *http.Request) (sdkgo.ObitDto, error) {
+func requestBodyToDto(r *http.Request) (sdkgo.ObitDto, error) {
 	var requestData requestObit
 	var dto sdkgo.ObitDto
 
@@ -199,7 +198,6 @@ func requestBodyToDto(ctx context.Context, r *http.Request) (sdkgo.ObitDto, erro
 	dto.ObdDid = requestData.ObdDid
 	dto.Matadata = kvs(requestData.Metadata)
 	dto.StructuredData = kvs(requestData.StructuredData)
-	//dto.Documents = requestData.Documents
 	dto.ModifiedOn = requestData.ModifiedOn
 	dto.AlternateIDS = requestData.AlternateIDS
 	dto.Status = requestData.Status

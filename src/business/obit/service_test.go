@@ -38,22 +38,21 @@ func TestService(t *testing.T) {
 
 	service := NewObitService(sdk, test.Logger, test.DB, nil, nil)
 
-	tests := ServiceTests{
+	ts := ServiceTests{
 		service: service,
 	}
 
-	t.Run("generateID", tests.generateID)
-	t.Run("checksum", tests.checksum)
-	t.Run("get", tests.get)
-	t.Run("get", tests.getNotFound)
-	//t.Run("save", tests.save)
+	t.Run("generateID", ts.generateID)
+	t.Run("checksum", ts.checksum)
+	t.Run("get", ts.get)
+	t.Run("get", ts.getNotFound)
 }
 
 func (st ServiceTests) generateID(t *testing.T) {
 	testCases := []testCase{
 		{
 			args: args{
-				serialNumberHash: "dc0fb8e9835790195bf4a8e5e122fe608e548f46f88410cc6792927bedbb6d55", // sha256("serial_number")
+				serialNumberHash: "dc0fb8e9835790195bf4a8e5e122fe608e548f46f88410cc6792927bedbb6d55", // sha256  of "serial_number"
 				manufacturer:     "manufacturer",
 				partNumber:       "part number",
 			},
@@ -64,7 +63,7 @@ func (st ServiceTests) generateID(t *testing.T) {
 		},
 		{
 			args: args{
-				serialNumberHash: "cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d", // sha256("SN123456X")
+				serialNumberHash: "cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d", // sha256 of "SN123456X"
 				manufacturer:     "SONY",
 				partNumber:       "PN123456S",
 			},
@@ -113,7 +112,7 @@ func (st ServiceTests) checksum(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		got, err := st.service.Checksum(context.Background(), tc.arg)
+		got, err := st.service.Checksum(tc.arg)
 
 		if err != nil {
 			t.Error(err.Error())

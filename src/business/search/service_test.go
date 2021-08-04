@@ -18,13 +18,12 @@ func TestService(t *testing.T) {
 
 	service := NewService(test.Logger, test.DB)
 
-	tests := ServiceTests{
+	ts := ServiceTests{
 		service: service,
 	}
 
-	t.Run("search", tests.search)
+	t.Run("search", ts.search)
 }
-
 
 type searchTestCases struct {
 	args searchTestCasesArgs
@@ -143,4 +142,3 @@ func (os ServiceTests) search(t *testing.T) {
 		}
 	}
 }
-
