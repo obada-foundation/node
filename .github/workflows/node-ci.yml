@@ -22,8 +22,6 @@ jobs:
           cd src
           curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $GITHUB_WORKSPACE v1.39.0
           go get -u github.com/mattn/goveralls
-          go mod tidy
-          go mod vendor
 
       - name: test and lint
         run: |
