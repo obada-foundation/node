@@ -7,12 +7,14 @@ import (
 	"log"
 )
 
+// Service temp struct to handle dependencies
 type Service struct {
 	db     *sql.DB
 	qldb   *qldbdriver.QLDBDriver
 	logger *log.Logger
 }
 
+// NewService creates database service
 func NewService(db *sql.DB, qldb *qldbdriver.QLDBDriver, logger *log.Logger) Service {
 	return Service{
 		db:     db,
@@ -45,6 +47,7 @@ func (s Service) IsFirstRun() (bool, error) {
 
 // Migrate attempts to bring the schema for qldb up to date with the migrations
 // defined in this package.
+//nolint:unused // Need this code for a future use
 func (s Service) qldbMigrate() error {
 	s.logger.Println("Running QLDB migrations")
 
@@ -72,6 +75,7 @@ func (s Service) qldbMigrate() error {
 func (s Service) sqliteMigrate() error {
 	queries := []string{
 		`create table gateway_view (
+			id                 integer      PRIMARY KEY AUTOINCREMENT not null,
 			obit_did           varchar(255) not null,
 			usn                varchar(255) not null,
 			serial_number_hash varchar(255) not null,
@@ -84,13 +88,85 @@ func (s Service) sqliteMigrate() error {
 			metadata           json         null,
 			structured_data    json         null,
 			documents          json         null,
-			modified_on        int          null,
-			root_hash          varchar(255) not null,
+			modified_on        integer      null,
+			checksum           varchar(64) not null,
 			constraint gateway_view_obit_did_usn_serial_number_hash_unique unique (obit_did, usn, serial_number_hash)
 		)`,
 		`create table config (
 			last_obit varchar(255) not null
 		)`,
+		`CREATE VIRTUAL TABLE IF NOT EXISTS 
+			gateway_view_fts 
+		USING 
+			fts5(
+				content=gateway_view, 
+				content_rowid=id,
+				obit_did, 
+				usn, 
+				serial_number_hash, 
+				manufacturer, 
+				part_number,
+				owner_did
+			)`,
+		`-- Triggers to keep the FTS index up to date.
+		CREATE TRIGGER gateway_view_ai AFTER INSERT ON gateway_view BEGIN
+		  INSERT INTO
+			gateway_view_fts(rowid, obit_did, usn, serial_number_hash, manufacturer, part_number, owner_did)
+			VALUES (
+				new.id, 
+				REPLACE(new.obit_did, ":", ""), 
+				new.usn,
+				new.serial_number_hash, 
+				new.manufacturer, 
+				new.part_number, 
+				REPLACE(new.owner_did, ":", "")
+			);
+		END;`,
+		`CREATE TRIGGER gateway_view_ad AFTER DELETE ON gateway_view BEGIN
+		  INSERT INTO 
+			gateway_view_fts(
+				gateway_view_fts, rowid, obit_did, usn, serial_number_hash, manufacturer, part_number, owner_did
+			) 
+			VALUES(
+				'delete', 
+				old.id, 
+				REPLACE(old.obit_did, ":", ""), 
+				old.usn, 
+				old.serial_number_hash, 
+				old.manufacturer, 
+				old.part_number,
+				REPLACE(old.owner_did, ":", "")
+			);
+		END;`,
+		`CREATE TRIGGER gateway_view_au AFTER UPDATE ON gateway_view BEGIN
+		  INSERT INTO 
+			gateway_view_fts(
+				gateway_view_fts, rowid, obit_did, usn, serial_number_hash, manufacturer, part_number, owner_did
+			) 
+			VALUES(
+				'delete', 
+				old.id, 
+				REPLACE(old.obit_did, ":", ""), 
+				old.usn, 
+				old.serial_number_hash, 
+				old.manufacturer, 
+				old.part_number,
+				REPLACE(old.owner_did, ":", "")
+			);
+		  INSERT INTO
+			gateway_view_fts(
+				rowid, obit_did, usn, serial_number_hash, manufacturer, part_number, owner_did
+			)
+			VALUES (
+				new.id, 
+				REPLACE(new.obit_did, ":", ""), 
+				new.usn, 
+				new.serial_number_hash, 
+				new.manufacturer, 
+				new.part_number,
+				REPLACE(new.owner_did, ":", "")
+			);
+		END`,
 	}
 
 	for _, q := range queries {
@@ -108,17 +184,13 @@ func (s Service) sqliteMigrate() error {
 	return nil
 }
 
-// Migrate attempts to bring the schema for qldb up to date with the migrations
+// Migrate attempts to bring the schema for QLDB up to date with the migrations
 // defined in this package.
 func (s Service) Migrate() error {
 
 	if err := s.sqliteMigrate(); err != nil {
 		return err
 	}
-
-	//if err := s.qldbMigrate(); err != nil {
-	//	return err
-	//}
 
 	return nil
 }

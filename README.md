@@ -14,7 +14,7 @@ Starting node requires to have AWS credentials and SQS ARN to subscribe from OBA
 
 Examples:
 
-- with a static provider: `node --aws-key=AKIA435245 --aws-secret=435453453466634 --pubsub-topic-arn=arn:aws:sns:us-east-1:271164744603:yourorg.fifo`
+- as a binary: `node --aws-key=AKIA435245 --aws-secret=435453453466634 --pubsub-topic-arn=arn:aws:sns:us-east-1:271164744603:yourorg.fifo`
 - as a docker container `docker up -p 80:3000 obada/node:develop --aws-secret=435453453466634 --pubsub-topic-arn=arn:aws:sns:us-east-1:271164744603:yourorg.fifo`
 
 ## Install

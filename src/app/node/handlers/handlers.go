@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/obada-foundation/node/business/helper"
+	"context"
 	"github.com/obada-foundation/node/business/obit"
+	"github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/business/web/mid"
 	"github.com/obada-foundation/node/foundation/web"
 
@@ -13,54 +14,64 @@ import (
 	"os"
 )
 
+// Options represent optional parameters.
+type Options struct {
+	corsOrigin string
+}
+
+// APIConfig represents API server dependencies
+type APIConfig struct {
+	Shutdown      chan os.Signal
+	Logger        *log.Logger
+	ObitService   *obit.Service
+	SearchService *search.Service
+}
+
 // API register REST api endpoints
-func API(build string, shutdown chan os.Signal, logger *log.Logger, os *obit.Service, hs *helper.Service) http.Handler {
-	app := web.NewApp(shutdown, mid.Logger(logger), mid.Errors(logger), mid.Metrics(), mid.Panics(logger))
+func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
+	var opts Options
+	for _, option := range options {
+		option(&opts)
+	}
+
+	app := web.NewApp(
+		cfg.Shutdown,
+		mid.Logger(cfg.Logger),
+		mid.Errors(cfg.Logger),
+		mid.Metrics(),
+		mid.Panics(cfg.Logger),
+	)
 
 	ob := obitGroup{
-		service: os,
+		obitService:   cfg.ObitService,
+		searchService: cfg.SearchService,
 	}
 
+	app.Handle(http.MethodPost, "/obit/id", ob.generateID)
+	app.Handle(http.MethodPost, "/obit/checksum", ob.checksum)
 	app.Handle(http.MethodGet, "/obits", ob.search)
-	app.Handle(http.MethodPost, "/obits", ob.create)
-	app.Handle(http.MethodGet, "/obits/:obitDID", ob.show)
-	app.Handle(http.MethodPut, "/obits/:obitDID", ob.update)
+	app.Handle(http.MethodPost, "/obits", ob.save)
+	app.Handle(http.MethodGet, "/obits/:obitDID", ob.get)
 	app.Handle(http.MethodGet, "/obits/:obitDID/history", ob.history)
 
-	od := obitDefinition{
-		service: hs,
+	// Accept CORS 'OPTIONS' preflight requests if config has been provided.
+	// Don't forget to apply the CORS middleware to the routes that need it.
+	// Example Config: `conf:"default:https://MY_DOMAIN.COM"`
+	if opts.corsOrigin != "" {
+		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+			return nil
+		}
+		app.Handle(http.MethodOptions, "/*", h)
 	}
-
-	app.Handle(http.MethodGet, "/api/obit/definition", od.generateObit)
-
-	rh := rootHash{
-		logger: logger,
-		service: hs,
-	}
-
-	app.Handle(http.MethodPost, "/api/obit/hash", rh.generateRootHash)
-
-	c := client{
-		logger: logger,
-		helperService: hs,
-		obitService: os,
-	}
-
-	app.Handle(http.MethodGet, "/api/client/obit/:obitDID", c.getClientObit)
-	app.Handle(http.MethodGet, "/api/client/obits", c.getClientObits)
-	app.Handle(http.MethodPost, "/api/client/obit", c.saveClientObit)
-	app.Handle(http.MethodGet, "/api/server/obit/:obitDID", c.getServerObit)
 
 	return app
 }
 
 func parseObitIDFromRequest(r *http.Request) (string, error) {
-	params := web.Params(r)
+	ID := web.Param(r, "obitDID")
 
-	ID, ok := params["obitDID"]
-
-	if !ok {
-		return "", errors.New("Cannot find obitDID in URI")
+	if ID == "" {
+		return "", errors.New("cannot find obitDID in URI")
 	}
 
 	return ID, nil

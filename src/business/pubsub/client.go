@@ -1,9 +1,10 @@
 package pubsub
 
 import (
-"context"
+	"context"
 )
 
+// Client PubSub interface
 type Client interface {
 	Publish(ctx context.Context, msg *Msg) (string, error)
 
