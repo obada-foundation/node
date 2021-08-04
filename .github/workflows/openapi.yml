@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - 45-114-api-changes
     tags:
       - "v*"
   pull_request:
