@@ -104,6 +104,9 @@ fmt:
 test:
 	cd src && go test --tags "json1 fts5 secure_delete" -v ./...
 
+test-race: ## Runs tests with race check
+	cd src && go test --tags "json1 fts5 secure_delete" -race -timeout=60s -covermode=atomic -v ./...
+
 coverage: ## Generates and shows code coverage in a browser
 	cd src && go test --tags "json1 fts5 secure_delete" ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 

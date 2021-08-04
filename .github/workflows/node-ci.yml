@@ -34,6 +34,7 @@ jobs:
         run: |
           cd src
           export GO_ENABLED=1
+          rm -f /tmp/nodetest
           go test --tags "json1 fts5 secure_delete" -race -timeout=60s -covermode=atomic -coverprofile=$GITHUB_WORKSPACE/profile.cov_tmp ./...
           cat $GITHUB_WORKSPACE/profile.cov_tmp | grep -v "_mock.go" > $GITHUB_WORKSPACE/profile.cov
           $GITHUB_WORKSPACE/golangci-lint --config ${GITHUB_WORKSPACE}/.golangci.yml run --print-issued-lines --out-format=github-actions ./...
