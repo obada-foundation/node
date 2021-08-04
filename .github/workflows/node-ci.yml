@@ -6,7 +6,7 @@ on:
     tags:
   pull_request:
 jobs:
-  sdk:
+  linting:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,8 +19,9 @@ jobs:
 
       - name: install golangci-lint and goveralls
         run: |
-          export GOPRIVATE=github.com/obada-foundation
+          git config --global --add url."git@github.com:".insteadOf "https://github.com/"
           cd src
+          export GOPRIVATE=github.com/obada-foundation
           curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $GITHUB_WORKSPACE v1.39.0
           go get -u github.com/mattn/goveralls
           go mod tidy
