@@ -29,9 +29,6 @@ jobs:
           path: node-api-library
           ref: ${{ env.BRANCH }}
 
-      - id: set-branch
-        run: cd node-api-library && git branch
-
       - id: lint
         run: make lint-openapi-spec
 
