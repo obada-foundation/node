@@ -39,10 +39,10 @@ clone-node-api-library:
 	if [ ! -d "./node-api-library" ]; then git clone git@github.com:obada-foundation/node-api-library ./node-api-library; fi
 
 clone-node-api-library-csharp: ## Clone github.com/obada-foundation/node-api-library-csharp if it does not exists
-	if [ ! -d "./node-api-library-csharp" ]; then git clone -b main git@github.com:obada-foundation/node-api-library-csharp ./node-api-library-csharp; fi
+	if [ ! -d "./node-api-library-csharp" ]; then git clone git@github.com:obada-foundation/node-api-library-csharp ./node-api-library-csharp; fi
 
 clone-node-api-library-python: ## Clone github.com/obada-foundation/node-api-library-python if it does not exists
-	if [ ! -d "./node-api-library-python" ]; then git clone -b main git@github.com:obada-foundation/node-api-library-python ./node-api-library-python; fi
+	if [ ! -d "./node-api-library-python" ]; then git clone git@github.com:obada-foundation/node-api-library-python ./node-api-library-python; fi
 
 generate-node-api-library-python: clone-node-api-library-python
 	rm -rf $$(pwd)/node-api-library-python/*

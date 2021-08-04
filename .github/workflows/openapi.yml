@@ -5,11 +5,11 @@ on:
     branches:
       - develop
       - 45-114-api-changes
-    tags:
-      - "v*"
+      - master
   pull_request:
     branches:
       - develop
+      - master
 
 jobs:
   generate-api-clients:

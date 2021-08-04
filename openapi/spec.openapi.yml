@@ -146,7 +146,7 @@ paths:
       parameters:
         - name: obit_did
           in: path
-          description: The given ObitDID argument
+          description: The given ObitDID or USN argument
           required: true
           schema:
             type: string
