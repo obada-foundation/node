@@ -85,9 +85,9 @@ build-release:
 build-tag:
 	docker tag $(RELEASE_IMAGE) $(TAG_IMAGE)
 
+export NODE_LIBRARIES="node-api-library node-api-library-python node-api-library-csharp"
 deploy-node-api-libraries: generate-node-api-library generate-node-api-library-csharp generate-node-api-library-python
-	libraries="node-api-library node-api-library-python node-api-library-csharp"
-	for library in $(libraries); do \
+	for library in $(NODE_LIBRARIES); do \
 		cd $(library) ; \
 		git add . ; \
 		HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
