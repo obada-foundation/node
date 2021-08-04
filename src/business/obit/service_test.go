@@ -46,6 +46,7 @@ func TestService(t *testing.T) {
 	t.Run("checksum", tests.checksum)
 	t.Run("get", tests.get)
 	t.Run("get", tests.getNotFound)
+	//t.Run("save", tests.save)
 }
 
 func (st ServiceTests) generateID(t *testing.T) {

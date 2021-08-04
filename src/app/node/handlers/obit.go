@@ -95,6 +95,24 @@ func (og obitGroup) generateID(ctx context.Context, w http.ResponseWriter, r *ht
 	return web.Respond(ctx, w, ID, http.StatusOK)
 }
 
+func (og obitGroup) save(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	dto, err := requestBodyToDto(ctx, r)
+
+	if err != nil {
+		return err
+	}
+
+	obit, err := og.obitService.Save(ctx, dto)
+
+	if err != nil {
+		return err
+	}
+
+	web.Respond(ctx, w, obit, http.StatusOK)
+
+	return nil
+}
+
 func (og obitGroup) checksum(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	dto, err := requestBodyToDto(ctx, r)
 
@@ -115,28 +133,6 @@ func (og obitGroup) checksum(ctx context.Context, w http.ResponseWriter, r *http
 	}
 
 	return web.Respond(ctx, w, resp, http.StatusOK)
-}
-
-func (og obitGroup) create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	dto, err := requestBodyToDto(ctx, r)
-
-	if err != nil {
-		return err
-	}
-
-	ID, err := og.obitService.Create(ctx, dto)
-
-	if err != nil {
-		return err
-	}
-
-	resp := ObitCreate{
-		DID:  ID.GetDid(),
-		Hash: ID.GetHash().GetHash(),
-		Usn:  ID.GetUsn(),
-	}
-
-	return web.Respond(ctx, w, resp, http.StatusCreated)
 }
 
 func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -209,25 +205,6 @@ func requestBodyToDto(ctx context.Context, r *http.Request) (sdkgo.ObitDto, erro
 	dto.Status = requestData.Status
 
 	return dto, nil
-}
-
-func (og obitGroup) update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	ID, err := parseObitIDFromRequest(r)
-	if err != nil {
-		return err
-	}
-
-	dto, err := requestBodyToDto(ctx, r)
-
-	if err != nil {
-		return err
-	}
-
-	if err := og.obitService.Update(ctx, ID, dto); err != nil {
-		return err
-	}
-
-	return web.Respond(ctx, w, "", http.StatusOK)
 }
 
 func (og obitGroup) history(ctx context.Context, w http.ResponseWriter, r *http.Request) error {

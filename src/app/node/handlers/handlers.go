@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"github.com/obada-foundation/node/business/helper"
 	"github.com/obada-foundation/node/business/obit"
 	"github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/business/web/mid"
@@ -25,7 +24,6 @@ type APIConfig struct {
 	Shutdown      chan os.Signal
 	Logger        *log.Logger
 	ObitService   *obit.Service
-	HelperService *helper.Service
 	SearchService *search.Service
 }
 
@@ -52,19 +50,9 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 	app.Handle(http.MethodPost, "/obit/id", ob.generateID)
 	app.Handle(http.MethodPost, "/obit/checksum", ob.checksum)
 	app.Handle(http.MethodGet, "/obits", ob.search)
-	app.Handle(http.MethodPost, "/obits", ob.create)
+	app.Handle(http.MethodPost, "/obits", ob.save)
 	app.Handle(http.MethodGet, "/obits/:obitDID", ob.get)
-	app.Handle(http.MethodPut, "/obits/:obitDID", ob.update)
 	app.Handle(http.MethodGet, "/obits/:obitDID/history", ob.history)
-
-	c := client{
-		logger:        cfg.Logger,
-		helperService: cfg.HelperService,
-		obitService:   cfg.ObitService,
-	}
-
-	app.Handle(http.MethodPost, "/api/client/obit", c.saveClientObit)
-	app.Handle(http.MethodGet, "/api/server/obit/:obitDID", c.getServerObit)
 
 	// Accept CORS 'OPTIONS' preflight requests if config has been provided.
 	// Don't forget to apply the CORS middleware to the routes that need it.

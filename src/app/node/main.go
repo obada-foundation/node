@@ -21,7 +21,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/obada-foundation/node/app/node/handlers"
 	dbInitService "github.com/obada-foundation/node/business/database"
-	helperService "github.com/obada-foundation/node/business/helper"
 	obitService "github.com/obada-foundation/node/business/obit"
 	searchService "github.com/obada-foundation/node/business/search"
 	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
@@ -191,9 +190,6 @@ func run(logger *log.Logger) error {
 	// Initialize ObitService
 	obit := obitService.NewObitService(sdk, logger, db, qldb, ps)
 
-	// Initialize HelperService
-	helper := helperService.NewService(sdk, logger)
-
 	// Start database sync
 	go func() {
 		for {
@@ -214,7 +210,6 @@ func run(logger *log.Logger) error {
 			Shutdown:      shutdown,
 			Logger:        logger,
 			ObitService:   obit,
-			HelperService: helper,
 			SearchService: search,
 		}),
 		ReadTimeout:  cfg.Web.ReadTimeout,
