@@ -21,7 +21,7 @@ jobs:
         run: |
           git config --global --add url."git@github.com:".insteadOf "https://github.com/"
           mkdir -p ~/.ssh
-          echo "${{ secrets.API_CLIENTS_SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SDKGO_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           cd src
           export GOPRIVATE=github.com/obada-foundation
