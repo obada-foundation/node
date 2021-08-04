@@ -42,7 +42,7 @@ func NewUnit(t *testing.T) (*log.Logger, *sql.DB, func()) {
 	initService := dbInitService.NewService(db, nil, logger)
 
 	if err := initService.Migrate(); err != nil {
-		t.Fatalf("Running migrations: %s", err)
+		t.Logf("Running migrations: %s", err)
 	}
 
 	// teardown is the function that should be invoked when the caller is done
