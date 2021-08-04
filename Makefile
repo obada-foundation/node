@@ -79,7 +79,7 @@ deploy-node-api-library: generate-node-api-library
 	HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
 	if [ "$$HAS_CHANGES_TO_COMMIT" -gt 0 ]; then \
 	  git commit -m 'OpenApi contract update'; \
-	  BRANCH=(`git branch`)
+	  BRANCH=(`git branch`) ; \
 	  git push origin $(BRANCH) ; \
 	fi
 
