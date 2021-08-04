@@ -42,5 +42,8 @@ jobs:
           git config --global user.email "techops@obada.io"
 
           for library in "node-api-library-python node-api-library-csharp node-api-library"; do
-            git tag -a ${{ env.TAG }} -m "See release notes in https://github.com/obada-foundation/node/releases/tag/${{ env.TAG }}"
+            cd $library
+            git tag -a ${{ env.TAG }} -m "See release notes in https://github.com/obada-foundation/node/releases/tag/"${{ env.TAG }}
+            git push --tags
+            cd ..
           done
