@@ -1,86 +1,194 @@
 package tests
 
 import (
-	"context"
-	"github.com/google/uuid"
-	"github.com/obada-foundation/node/foundation/web"
+	"bytes"
+	"database/sql"
+	"fmt"
+	//nolint:gosec // Need to find another workaround
+	_ "github.com/mattn/go-sqlite3"
+	dbInitService "github.com/obada-foundation/node/business/database"
+	"io"
 	"log"
 	"os"
 	"testing"
-	"time"
 )
 
-const (
-	// Success adds unicode symbol checkmark
-	Success = "\u2713"
+// Test owns state for running and shutting down tests.
+type Test struct {
+	DB       *sql.DB
+	Logger   *log.Logger
+	Teardown func()
 
-	// Failed adds unicode symbol cross
-	Failed = "\u2717"
-)
+	t *testing.T
+}
 
-var (
-	dbImage = "mysql:8"
-	dbPort  = "3306/tcp"
-	dbArgs  = []string{"-e", "MYSQL_ROOT_PASSWORD=secret"}
-)
+var dbPath = "/tmp/nodetest"
 
-// NewUnit creates new unit test
-func NewUnit(t *testing.T) (*log.Logger, func()) {
-	c := startContainer(t, dbImage, dbPort, dbArgs...)
+// NewUnit creates a test database. It creates the
+// required table structure but the database is otherwise empty. It returns
+// the database to use as well as a function to call at the end of the test.
+func NewUnit(t *testing.T) (*log.Logger, *sql.DB, func()) {
+	r, w, _ := os.Pipe()
+	old := os.Stdout
+	os.Stdout = w
 
-	t.Log("waiting for database to be ready ...")
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		t.Fatalf("Opening database connection: %v", err)
+	}
 
-	t.Log(c.Host)
+	logger := log.New(os.Stdout, "", 0)
 
-	var pingError error
-	maxAttempts := 20
+	initService := dbInitService.NewService(db, nil, logger)
 
-	for attempts := 1; attempts <= maxAttempts; attempts++ {
-		time.Sleep(time.Second * 5)
-		pingError = nil
-		if pingError == nil {
-			break
+	isFirst, err := initService.IsFirstRun()
+	if err != nil {
+		t.Fatalf("Cannot identify if can run migrations for tests: %s", err)
+	}
+
+	if isFirst {
+		if err := initService.Migrate(); err != nil {
+			t.Fatalf("Running migrations: %s", err)
 		}
-		time.Sleep(time.Duration(attempts) * 100 * time.Millisecond)
 	}
 
-	if pingError != nil {
-		dumpContainerLogs(t, c.ID)
-		stopContainer(t, c.ID)
-		t.Fatalf("database is never ready: %v", pingError)
-	}
-
-	// Schema migrate
-
+	// teardown is the function that should be invoked when the caller is done
+	// with the database.
 	teardown := func() {
 		t.Helper()
-
-		t.Logf("Stopping container")
-		// database close
-		stopContainer(t, c.ID)
+		//nolint:gosec //Not handle this error because this is teardown
+		db.Close()
+		//nolint:gosec //Not handle this error because this is teardown
+		os.RemoveAll(dbPath)
+		//nolint:gosec //Not handle this error because this is teardown
+		w.Close()
+		var buf bytes.Buffer
+		//nolint:gosec //Not handle this error because this is teardown
+		io.Copy(&buf, r)
+		os.Stdout = old
+		fmt.Println("******************** LOGS ********************")
+		fmt.Print(buf.String())
+		fmt.Println("******************** LOGS ********************")
 	}
 
-	logger := log.New(os.Stdout, "TEST :", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
-
-	return logger, teardown
+	return logger, db, teardown
 }
 
-// Context creates a context for a test
-func Context() context.Context {
-	values := web.Values{
-		TraceID: uuid.New().String(),
-		Now:     time.Now(),
+// NewIntegration creates a database, seeds it, constructs an authenticator.
+func NewIntegration(t *testing.T) *Test {
+	logger, db, teardown := NewUnit(t)
+
+	test := Test{
+		DB:       db,
+		Logger:   logger,
+		t:        t,
+		Teardown: teardown,
 	}
 
-	return context.WithValue(context.Background(), web.KeyValues, &values)
+	return &test
 }
 
-// StringPointer returns pointer to the string
-func StringPointer(s string) *string {
-	return &s
+// CreateObit test helper for obit creation
+func CreateObit(t *testing.T, test *Test) {
+	const q = `
+		INSERT INTO 
+		    gateway_view(
+				obit_did, 
+			 	usn, 
+		 		serial_number_hash, 
+		 		manufacturer, 
+			 	part_number, 
+			 	alternate_ids, 
+			 	owner_did,
+		 		obd_did,
+			 	status,
+		 		metadata,
+		 		structured_data,
+		 		documents,
+				modified_on,
+			 	checksum
+			) 
+		    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+
+	stmt, err := test.DB.Prepare(q)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = stmt.Exec(
+		"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+		"test",
+		"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d",
+		"SONY",
+		"PN123456S",
+		"[]",
+		`did:obada:owner:123456`,
+		"",
+		"FUNCTIONAL",
+		"[]",
+		"[]",
+		"{}",
+		1624387537,
+		"2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
+	)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
-// IntPointer returns pointer to the integer
-func IntPointer(i int) *int {
-	return &i
+// CreateOwnerObits test helper that creates many obits for single owner
+func CreateOwnerObits(t *testing.T, test *Test) {
+
+	const q = `
+		INSERT INTO 
+		    gateway_view(
+				obit_did, 
+			 	usn, 
+		 		serial_number_hash, 
+		 		manufacturer, 
+			 	part_number, 
+			 	alternate_ids, 
+			 	owner_did,
+		 		obd_did,
+			 	status,
+		 		metadata,
+		 		structured_data,
+		 		documents,
+				modified_on,
+			 	checksum
+			) 
+		    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`
+
+	stmt, err := test.DB.Prepare(q)
+
+	for i := 0; i < 150; i++ {
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = stmt.Exec(
+			"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ec"+fmt.Sprintf("%d", i),
+			"usn"+fmt.Sprintf("%d", i),
+			"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44"+fmt.Sprintf("%d", i),
+			"SONY",
+			"PN123456S",
+			"[]",
+			`did:obada:owner:678910`,
+			"",
+			"FUNCTIONAL",
+			"[]",
+			"[]",
+			"{}",
+			1624387537,
+			"2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
+		)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 }

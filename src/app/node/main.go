@@ -22,8 +22,8 @@ import (
 	"github.com/obada-foundation/node/app/node/handlers"
 	dbInitService "github.com/obada-foundation/node/business/database"
 	obitService "github.com/obada-foundation/node/business/obit"
-	helperService "github.com/obada-foundation/node/business/helper"
 	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
+	searchService "github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/sdkgo"
 	"github.com/pkg/errors"
 )
@@ -51,7 +51,7 @@ func run(logger *log.Logger) error {
 			WriteTimeout    time.Duration `conf:"default:5s"`
 			ShutdownTimeout time.Duration `conf:"default:5s"`
 		}
-		Sql struct {
+		SQL struct {
 			SqlitePath string `conf:"default:obada.db"`
 		}
 		Zipkin struct {
@@ -60,17 +60,17 @@ func run(logger *log.Logger) error {
 			Probability float64 `conf:"default:0.05"`
 		}
 		AWS struct {
-			Region   string `conf:"default:us-east-1"`
-			Key      string `conf:"noprint"`
-			Secret   string `conf:"noprint"`
+			Region string `conf:"default:us-east-1"`
+			Key    string `conf:"noprint"`
+			Secret string `conf:"noprint"`
 		}
 		QLDB struct {
 			Database string `conf:"default:obada"`
 		}
 		PUBSUB struct {
-			Timeout time.Duration `conf:"default:5s"`
-			QueueUrl     string   `conf:"default:https://sqs.us-east-1.amazonaws.com/271164744603/obada-tradeloop.fifo"`
-			TopicArn     string   `conf:"default:arn:aws:sns:us-east-1:271164744603:obada.fifo"`
+			Timeout  time.Duration `conf:"default:5s"`
+			QueueURL string        `conf:"default:https://sqs.us-east-1.amazonaws.com/271164744603/obada-tradeloop.fifo"`
+			TopicArn string        `conf:"default:arn:aws:sns:us-east-1:271164744603:obada.fifo"`
 		}
 	}
 	cfg.Version.SVN = build
@@ -140,21 +140,25 @@ func run(logger *log.Logger) error {
 		qldb.Shutdown(context.Background())
 	}()
 
-	if _, err := os.Stat(cfg.Sql.SqlitePath); os.IsNotExist(err) {
-		file, err := os.Create(cfg.Sql.SqlitePath)
+	if _, err = os.Stat(cfg.SQL.SqlitePath); os.IsNotExist(err) {
+		file, er := os.Create(cfg.SQL.SqlitePath)
 
-		if err != nil {
-			return errors.Wrap(err, "Problem with creating sqlite db file")
+		if er != nil {
+			return errors.Wrap(er, "Problem with creating sqlite db file")
 		}
 
-		file.Close()
+		if er := file.Close(); er != nil {
+			return errors.Wrap(er, "Problem with closing SQLite file")
+		}
 	}
 
 	// Initialize sqlite
-	db, err := sql.Open("sqlite3", cfg.Sql.SqlitePath)
+	db, err := sql.Open("sqlite3", cfg.SQL.SqlitePath)
 	defer func() {
 		logger.Println("main: SQLite closing database connection")
-		db.Close()
+		if er := db.Close(); er != nil {
+			logger.Printf("main: Cannot close SQLite database: %s", err)
+		}
 	}()
 
 	if err != nil {
@@ -169,9 +173,9 @@ func run(logger *log.Logger) error {
 		return err
 	}
 
-	if isFirstRun == true {
-		if err := initService.Migrate(); err != nil {
-			return errors.Wrap(err, "Problem with running migrations")
+	if isFirstRun {
+		if er := initService.Migrate(); er != nil {
+			return errors.Wrap(er, "Problem with running migrations")
 		}
 	}
 
@@ -182,13 +186,13 @@ func run(logger *log.Logger) error {
 		return errors.Wrap(err, "initializing OBADA SDK")
 	}
 
-	ps := pubsub.NewClient(awsSession, cfg.PUBSUB.Timeout, cfg.PUBSUB.QueueUrl, cfg.PUBSUB.TopicArn)
+	ps := pubsub.NewClient(awsSession, cfg.PUBSUB.Timeout, cfg.PUBSUB.QueueURL, cfg.PUBSUB.TopicArn)
+
+	// Initialize SearchService
+	search := searchService.NewService(logger, db)
 
 	// Initialize ObitService
 	obit := obitService.NewObitService(sdk, logger, db, qldb, ps)
-
-	// Initialize HelperService
-	helper := helperService.NewService(sdk, logger)
 
 	// Start database sync
 	go func() {
@@ -205,8 +209,13 @@ func run(logger *log.Logger) error {
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 	api := http.Server{
-		Addr:         cfg.Web.APIHost,
-		Handler:      handlers.API(build, shutdown, logger, obit, helper),
+		Addr: cfg.Web.APIHost,
+		Handler: handlers.API(handlers.APIConfig{
+			Shutdown:      shutdown,
+			Logger:        logger,
+			ObitService:   obit,
+			SearchService: search,
+		}),
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 	}

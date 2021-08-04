@@ -32,14 +32,26 @@ deploy-staging:
 deploy-local:
 	ansible-playbook deployment/playbook.yml --limit gateway.obada.local --connection=local
 
-deploy-api-clients: deploy-node-api-library
+deploy-api-clients: deploy-node-api-libraries
 	@echo "Deployment of client libraries was done"
 
 clone-node-api-library:
 	if [ ! -d "./node-api-library" ]; then git clone git@github.com:obada-foundation/node-api-library ./node-api-library; fi
 
 clone-node-api-library-csharp: ## Clone github.com/obada-foundation/node-api-library-csharp if it does not exists
-	if [ ! -d "./node-api-library-csharp" ]; then git clone -b main git@github.com:obada-foundation/node-api-library-csharp ./node-api-library-csharp; fi
+	if [ ! -d "./node-api-library-csharp" ]; then git clone git@github.com:obada-foundation/node-api-library-csharp ./node-api-library-csharp; fi
+
+clone-node-api-library-python: ## Clone github.com/obada-foundation/node-api-library-python if it does not exists
+	if [ ! -d "./node-api-library-python" ]; then git clone git@github.com:obada-foundation/node-api-library-python ./node-api-library-python; fi
+
+generate-node-api-library-python: clone-node-api-library-python
+	rm -rf $$(pwd)/node-api-library-python/*
+	docker run --rm \
+		-v $$(pwd)/openapi:/local -v $$(pwd)/node-api-library-python:/src openapitools/openapi-generator-cli generate \
+		-i /local/spec.openapi.yml \
+		-g python \
+		-o /src \
+		-c /local/clients/python/config.yml
 
 generate-node-api-library-csharp: clone-node-api-library-csharp
 	rm -rf $$(pwd)/node-api-library-csharp/*
@@ -73,14 +85,17 @@ build-release:
 build-tag:
 	docker tag $(RELEASE_IMAGE) $(TAG_IMAGE)
 
-deploy-node-api-library: generate-node-api-library
-	cd node-api-library ; \
-	git add . ; \
-	HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
-	if [ "$$HAS_CHANGES_TO_COMMIT" -gt 0 ]; then \
-	  git commit -m 'OpenApi contract update'; \
-	  git push origin master ; \
-	fi
+deploy-node-api-libraries: generate-node-api-library generate-node-api-library-csharp generate-node-api-library-python
+	for library in "node-api-library node-api-library-python node-api-library-csharp"; do \
+		cd $(library) ; \
+		git add . ; \
+		HAS_CHANGES_TO_COMMIT=(`git status -s|wc -c|tr -d ' '`) ; \
+		if [ "$$HAS_CHANGES_TO_COMMIT" -gt 0 ]; then \
+			git commit -m 'OpenApi contract update'; \
+			BRANCH=(`git branch`) ; \
+			git push origin $(BRANCH) ; \
+		fi \
+	done
 
 bpd: build-branch publish-branch-image deploy
 
@@ -97,6 +112,18 @@ run-node:
 export GOPRIVATE=github.com/obada-foundation
 vendor:
 	cd src && go mod tidy && go mod vendor
+
+fmt:
+	cd src && go fmt ./...
+
+test:
+	cd src && go test --tags "json1 fts5 secure_delete" -v ./...
+
+test-race: ## Runs tests with race check
+	cd src && go test --tags "json1 fts5 secure_delete" -race -timeout=60s -covermode=atomic -v ./...
+
+coverage: ## Generates and shows code coverage in a browser
+	cd src && go test --tags "json1 fts5 secure_delete" ./... -coverprofile=coverage.out && go tool cover -html=coverage.out
 
 help: ## Show this help.
 	 @IFS=$$'\n' ; \

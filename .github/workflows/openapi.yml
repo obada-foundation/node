@@ -1,21 +1,58 @@
 name: Open API deployment
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - develop
+      - master
+      - main
+  pull_request:
+    branches:
+      - develop
+      - master
+      - main
 
 jobs:
-
   generate-api-clients:
     runs-on: ubuntu-latest
     steps:
       - id: checkout-code
         uses: actions/checkout@v2
 
-      - id: checkout-php-client
+      - id: set-branch
+        run: |
+          echo "BRANCH=$(echo $GITHUB_REF | cut -d'/' -f 3)" >> $GITHUB_ENV
+
+      - id: checkout-node-api-library
         uses: actions/checkout@v2
         with:
           ssh-key: ${{ secrets.API_CLIENTS_SSH_KEY }}
           repository: obada-foundation/node-api-library
           path: node-api-library
+
+      - id: checkout-node-api-library-python
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.PYTHON_NODE_LIB_SSH_KEY }}
+          repository: obada-foundation/node-api-library-python
+          path: node-api-library-python
+
+      - id: checkout-node-api-library-csharp
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.CSHARP_NODE_LIB_SSH_KEY }}
+          repository: obada-foundation/node-api-library-csharp
+          path: node-api-library-csharp
+
+      - id: checkout-branch
+        run: |
+          libraries="node-api-library node-api-library-python node-api-library-csharp"
+          for library in $libraries; do
+            cd $library
+            git pull --all
+            git checkout ${{ env.BRANCH }}
+            cd ..
+          done
 
       - id: lint
         run: make lint-openapi-spec
@@ -24,4 +61,4 @@ jobs:
         run: |
           git config --global user.name "OBADA TechOps Team"
           git config --global user.email "techops@obada.io"
-          make deploy-node-api-library
+          make deploy-node-api-libraries
