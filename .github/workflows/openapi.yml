@@ -30,7 +30,7 @@ jobs:
           path: node-api-library
 
       - id: checkout-branch
-        run:
+        run: |
           cd node-api-library
           git checkout ${{ env.BRANCH }}
 
