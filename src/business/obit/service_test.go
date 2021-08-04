@@ -134,7 +134,14 @@ func (st ServiceTests) get(t *testing.T) {
 		want types.QLDBObit
 	}{
 		{
-			arg: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+			arg: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd", // Get by DID
+			want: types.QLDBObit{
+				ObitDID:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+				Checksum: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
+			},
+		},
+		{
+			arg: "test", // Get by USN
 			want: types.QLDBObit{
 				ObitDID:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 				Checksum: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",

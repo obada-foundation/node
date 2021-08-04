@@ -545,7 +545,13 @@ func (s Service) Get(ctx context.Context, id string) (types.QLDBObit, error) {
 func (s Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
 	var history []QldbMeta
 
-	m, err := s.getObitQLDBMeta(ctx, id)
+	obit, err := s.Get(ctx, id)
+
+	if err != nil {
+		return history, err
+	}
+
+	m, err := s.getObitQLDBMeta(ctx, obit.ObitDID)
 
 	if err != nil {
 		return history, err
