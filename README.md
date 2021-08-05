@@ -1,5 +1,5 @@
 <div align="center">
-  <img class="logo" src="link to logo" alt="OBADA | Blockchain Node"/>
+  <img class="logo" src="https://www.obada.io/assets/images/obada-logo.svg" alt="OBADA | Blockchain Node"/>
 </div>
 
 The “blockchain node”. Connects the OBADA API to a synchronized server copy of the “real” node, currently hosted in Amazon QLDB. It’s middleware, designed to abstract blockchain protocols from the client and API. It is distributed as a single binary or as a docker container.
