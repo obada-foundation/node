@@ -145,7 +145,7 @@ func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.R
 
 	offsetUint := uint(offset)
 
-	obits, err := og.searchService.Search(ctx, query.Get("q"), offsetUint)
+	obits, err := og.searchService.Search(query.Get("q"), offsetUint)
 
 	if err != nil {
 		return err
