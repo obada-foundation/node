@@ -65,7 +65,7 @@ func TestAPI(t *testing.T) {
 func (obs ObitTests) generateID200(t *testing.T) {
 	body := `{"serial_number": "SN123456X", "manufacturer": "SONY", "part_number": "PN123456S"}`
 
-	r := httptest.NewRequest(http.MethodPost, "/obit/id", strings.NewReader(body))
+	r := httptest.NewRequest(http.MethodPost, "/obit/did", strings.NewReader(body))
 	w := httptest.NewRecorder()
 
 	obs.app.ServeHTTP(w, r)
@@ -84,19 +84,16 @@ func (obs ObitTests) generateID200(t *testing.T) {
 		t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
 	}
 
-	var ID obitService.ID
-	if err := json.NewDecoder(resp.Body).Decode(&ID); err != nil {
-		t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &ID, err)
+	var DID struct{
+		DID string `json:"did"`
 	}
-
-	wantID := "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd"
-	if ID.ID != wantID {
-		t.Errorf("Handler() Body.ID = %q; want %q", ID.ID, wantID)
+	if err := json.NewDecoder(resp.Body).Decode(&DID); err != nil {
+		t.Fatalf("json.NewDecoder(%v+).Decode(%v+) err = %s", resp.Body, &DID, err)
 	}
 
 	wantDID := "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd"
-	if ID.DID != wantDID {
-		t.Errorf("Handler() Body.DID = %q; want %q", ID.DID, wantDID)
+	if DID.DID != wantDID {
+		t.Errorf("Handler() Body.DID = %q; want %q", DID.DID, wantDID)
 	}
 
 }
@@ -129,7 +126,7 @@ func (obs ObitTests) generateID422(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		r := httptest.NewRequest(http.MethodPost, "/obit/id", strings.NewReader(tc.arg))
+		r := httptest.NewRequest(http.MethodPost, "/obit/did", strings.NewReader(tc.arg))
 		w := httptest.NewRecorder()
 
 		obs.app.ServeHTTP(w, r)
@@ -332,7 +329,7 @@ func (obs ObitTests) get200(t *testing.T) {
 		want string
 	}{
 		{
-			arg: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+			arg: "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 		},
 	}
 

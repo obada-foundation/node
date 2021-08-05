@@ -45,6 +45,18 @@ func (os ServiceTests) search(t *testing.T) {
 	testCases := []searchTestCases{
 		{
 			args: searchTestCasesArgs{
+				term:   "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ec0",
+				offset: 0,
+			},
+			want: searchTestCasesWant{
+				count:       1,
+				total:       1,
+				lastPage:    1,
+				currentPage: 1,
+			},
+		},
+		{
+			args: searchTestCasesArgs{
 				term:   "usn1",
 				offset: 0,
 			},

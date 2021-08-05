@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/amzn/ion-go/ion"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/node/business/pubsub"
@@ -240,7 +239,7 @@ func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
 	obitID := obit.GetObitID()
-	o.ObitDID = obitID.GetHash().GetHash()
+	o.ObitDID = obitID.GetDid()
 	o.Usn = obitID.GetUsn()
 	o.SerialNumberHash = obit.GetSerialNumberHash().GetValue()
 	o.Manufacturer = obit.GetManufacturer().GetValue()
@@ -376,7 +375,7 @@ func (s Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	return err
 }
 
-// Save creates or updates obit
+// Save create or update Obit
 func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
@@ -387,7 +386,7 @@ func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, e
 	}
 
 	ID := obit.GetObitID()
-	DID := ID.GetHash().GetHash()
+	DID := ID.GetDid()
 
 	o, err = s.Get(ctx, DID)
 
@@ -396,11 +395,11 @@ func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, e
 			return o, err
 		}
 
-		if _, er := s.create(ctx, dto); er != nil {
-			return o, er
+		if er := s.createQLDB(ctx, obit); er != nil {
+			return o, errors.Wrap(er, "creating obit")
 		}
-	} else if er := s.update(ctx, DID, dto); er != nil {
-		return o, er
+	} else if er := s.updateQLDB(ctx, obit); er != nil {
+		return o, errors.Wrap(er, "updating obit")
 	}
 
 	o, err = s.Get(ctx, DID)
@@ -412,47 +411,8 @@ func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, e
 	return o, nil
 }
 
-func (s Service) create(ctx context.Context, dto sdkgo.ObitDto) (properties.ObitID, error) {
-	obit, err := s.sdk.NewObit(dto)
-
-	var ID properties.ObitID
-
-	if err != nil {
-		return ID, err
-	}
-
-	if err = s.createQLDB(ctx, obit); err != nil {
-		return ID, errors.Wrap(err, "creating obit")
-	}
-
-	ID = obit.GetObitID()
-
-	return ID, nil
-}
-
-func (s Service) update(ctx context.Context, id string, dto sdkgo.ObitDto) error {
-	obit, err := s.sdk.NewObit(dto)
-
-	if err != nil {
-		return err
-	}
-
-	obitID := obit.GetObitID()
-	hash := obitID.GetHash().GetHash()
-
-	if hash != id {
-		return errors.New(fmt.Sprintf("Obit integrity issue. Expect to have id: %s, %s given", id, hash))
-	}
-
-	if err := s.updateQLDB(ctx, obit); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // Get returns obit by given DID or USN
-func (s Service) Get(ctx context.Context, id string) (types.QLDBObit, error) {
+func (s Service) Get(ctx context.Context, did string) (types.QLDBObit, error) {
 	var obit types.QLDBObit
 	var altIDS []byte
 	var metadata []byte
@@ -482,7 +442,7 @@ func (s Service) Get(ctx context.Context, id string) (types.QLDBObit, error) {
 			gv.usn = ?
 	`
 
-	row := s.db.QueryRow(q, id, id)
+	row := s.db.QueryRow(q, did, did)
 
 	err := row.Scan(
 		&obit.ObitDID,
@@ -529,10 +489,10 @@ func (s Service) Get(ctx context.Context, id string) (types.QLDBObit, error) {
 }
 
 // History the history of Obit changes
-func (s Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
-	var history []QldbMeta
+func (s Service) History(ctx context.Context, did string) ([]QLDBMeta, error) {
+	var history []QLDBMeta
 
-	obit, err := s.Get(ctx, id)
+	obit, err := s.Get(ctx, did)
 
 	if err != nil {
 		return history, err
@@ -562,7 +522,7 @@ func (s Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
 		for result.Next(txn) {
 			ionBinary := result.GetCurrentData()
 
-			var m QldbMeta
+			var m QLDBMeta
 
 			if er := ion.Unmarshal(ionBinary, &m); er != nil {
 				return nil, er
@@ -581,9 +541,9 @@ func (s Service) History(ctx context.Context, id string) ([]QldbMeta, error) {
 	return history, nil
 }
 
-func (s Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, error) {
+func (s Service) getObitQLDBMeta(ctx context.Context, id string) (QLDBMeta, error) {
 	m, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		var m QldbMeta
+		var m QLDBMeta
 
 		const q = `
 			SELECT 
@@ -616,10 +576,10 @@ func (s Service) getObitQLDBMeta(ctx context.Context, id string) (QldbMeta, erro
 	})
 
 	if err != nil {
-		return m.(QldbMeta), err
+		return m.(QLDBMeta), err
 	}
 
-	return m.(QldbMeta), nil
+	return m.(QLDBMeta), nil
 }
 
 // Sync should be deprecated once we agree about real distributed protocol
@@ -672,10 +632,8 @@ func (s Service) Sync(ctx context.Context) error {
 	}
 }
 
-// GenerateID generates obit ID
-func (s Service) GenerateID(serialNumberHash, manufacturer, partNumber string) (ID, error) {
-	var id ID
-
+// GenerateDID generates obit DID
+func (s Service) GenerateDID(serialNumberHash, manufacturer, partNumber string) (string, error) {
 	dto := sdkgo.ObitIDDto{
 		SerialNumberHash: serialNumberHash,
 		Manufacturer:     manufacturer,
@@ -685,13 +643,10 @@ func (s Service) GenerateID(serialNumberHash, manufacturer, partNumber string) (
 	sdkID, err := s.sdk.NewObitID(dto)
 
 	if err != nil {
-		return id, err
+		return "", err
 	}
 
-	id.ID = sdkID.GetHash().GetHash()
-	id.DID = sdkID.GetDid()
-
-	return id, nil
+	return sdkID.GetDid(), nil
 }
 
 // Checksum generates obit checksum

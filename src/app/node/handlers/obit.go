@@ -21,8 +21,8 @@ type obitGroup struct {
 	searchService *search.Service
 }
 
-// GenerateIDRequest host request for generateID method
-type GenerateIDRequest struct {
+// GenerateDIDRequest host request for generateID method
+type GenerateDIDRequest struct {
 	SerialNumber string `validate:"required" json:"serial_number"`
 	Manufacturer string `validate:"required" json:"manufacturer"`
 	PartNumber   string `validate:"required" json:"part_number"`
@@ -66,8 +66,8 @@ func hashStr(str string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func (og obitGroup) generateID(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	var requestData GenerateIDRequest
+func (og obitGroup) generateDID(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	var requestData GenerateDIDRequest
 
 	if err := web.Decode(r, &requestData); err != nil {
 		return err
@@ -83,13 +83,19 @@ func (og obitGroup) generateID(ctx context.Context, w http.ResponseWriter, r *ht
 		return err
 	}
 
-	ID, err := og.obitService.GenerateID(snh, requestData.Manufacturer, requestData.PartNumber)
+	DID, err := og.obitService.GenerateDID(snh, requestData.Manufacturer, requestData.PartNumber)
 
 	if err != nil {
 		return err
 	}
 
-	return web.Respond(ctx, w, ID, http.StatusOK)
+	resp := struct {
+		DID string `json:"did"`
+	}{
+		DID: DID,
+	}
+
+	return web.Respond(ctx, w, resp, http.StatusOK)
 }
 
 func (og obitGroup) save(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -155,7 +161,7 @@ func (og obitGroup) search(ctx context.Context, w http.ResponseWriter, r *http.R
 }
 
 func (og obitGroup) get(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	ID, err := parseObitIDFromRequest(r)
+	ID, err := parseDIDFromRequest(r)
 	if err != nil {
 		return err
 	}
@@ -206,12 +212,12 @@ func requestBodyToDto(r *http.Request) (sdkgo.ObitDto, error) {
 }
 
 func (og obitGroup) history(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	ID, err := parseObitIDFromRequest(r)
+	DID, err := parseDIDFromRequest(r)
 	if err != nil {
 		return err
 	}
 
-	h, err := og.obitService.History(ctx, ID)
+	h, err := og.obitService.History(ctx, DID)
 
 	if err != nil {
 		return err

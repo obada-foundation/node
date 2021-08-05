@@ -172,8 +172,8 @@ ObitHistory:
       format: date-time
       example: "2020-01-01T13:24:35Z"
 
-RequestObitId:
-  description: Request Obit Id payload
+RequestObitDID:
+  description: Request Obit DID payload
   type: object
   required:
     - serial_number
@@ -187,18 +187,16 @@ RequestObitId:
     part_number:
       description: Part Number (Required)
       type: string
-      example: "123456789"
+      example: "PN123456789"
     serial_number:
       description: Serial Number (Required)
       type: string
-      example: "123456789"
+      example: "SN123456789"
 
-ObitId:
-  description: New Obit Id
+ObitDID:
+  description: New Obit DID
   type: object
   properties:
-    id:
-      type: string
     did:
       type: string
 

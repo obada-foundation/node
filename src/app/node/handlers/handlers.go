@@ -47,7 +47,7 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 		searchService: cfg.SearchService,
 	}
 
-	app.Handle(http.MethodPost, "/obit/id", ob.generateID)
+	app.Handle(http.MethodPost, "/obit/did", ob.generateDID)
 	app.Handle(http.MethodPost, "/obit/checksum", ob.checksum)
 	app.Handle(http.MethodGet, "/obits", ob.search)
 	app.Handle(http.MethodPost, "/obits", ob.save)
@@ -67,12 +67,12 @@ func API(cfg APIConfig, options ...func(opts *Options)) http.Handler {
 	return app
 }
 
-func parseObitIDFromRequest(r *http.Request) (string, error) {
-	ID := web.Param(r, "obitDID")
+func parseDIDFromRequest(r *http.Request) (string, error) {
+	DID := web.Param(r, "obitDID")
 
-	if ID == "" {
+	if DID == "" {
 		return "", errors.New("cannot find obitDID in URI")
 	}
 
-	return ID, nil
+	return DID, nil
 }
