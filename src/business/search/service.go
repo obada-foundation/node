@@ -1,12 +1,12 @@
 package search
 
 import (
-	"context"
 	"database/sql"
 	"encoding/json"
 	"github.com/obada-foundation/node/business/types"
 	"log"
 	"math"
+	"regexp"
 	"strings"
 )
 
@@ -40,12 +40,47 @@ func NewService(logger *log.Logger, db *sql.DB) *Service {
 	}
 }
 
-// Search looking for obits by given term
-func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, error) {
-	var obits Obits
+// GetAll returns all paginated obits from node without filtering
+func (s Service) GetAll(offset uint) (*sql.Rows, error) {
+	const q = `
+		SELECT 
+		    obit_did,
+		    usn,
+		    serial_number_hash,
+			manufacturer,
+		    part_number,
+		    alternate_ids,
+		    owner_did,
+		    obd_did,
+		    status,
+		   	metadata,
+		    structured_data,
+		    documents,
+		    modified_on,
+		    checksum
+		FROM 
+			gateway_view
+		ORDER BY 
+			modified_on
+		LIMIT ? OFFSET ?
+	`
 
-	term = strings.ReplaceAll(term, ":", "")
+	stmt, err := s.db.Prepare(q)
 
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := stmt.Query(perPage, offset)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func (s Service) searchFullText(term string, offset uint) (*sql.Rows, error) {
 	const q = `
 		SELECT 
 		    gv.obit_did,
@@ -76,14 +111,48 @@ func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, e
 	stmt, err := s.db.Prepare(q)
 
 	if err != nil {
-		return obits, err
+		return nil, err
 	}
 
 	rows, err := stmt.Query(term, perPage, offset)
 
 	if err != nil {
-		return obits, err
+		return nil, err
 	}
+
+	return rows, nil
+}
+
+// Search looking for obits by given term
+func (s Service) Search(term string, offset uint) (Obits, error) {
+	var obits Obits
+
+	var rows *sql.Rows
+
+	regexp, err := regexp.Compile("[^A-Za-z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	newTerm := regexp.ReplaceAllString(term, "")
+
+	if len(newTerm) > 0 {
+		ftsRows, err := s.searchFullText(newTerm, offset)
+
+		if err != nil {
+			return obits, err
+		}
+
+		rows = ftsRows
+	} else {
+		genRows, err := s.GetAll(offset)
+
+		if err != nil {
+			return obits, err
+		}
+
+		rows = genRows
+	}
+
 	defer rows.Close()
 
 	for rows.Next() {
@@ -112,7 +181,7 @@ func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, e
 		)
 
 		if er != nil {
-			return obits, err
+			return obits, er
 		}
 
 		if er := json.Unmarshal(metadata, &o.Metadata); er != nil {
@@ -134,7 +203,7 @@ func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, e
 		obits.Obits = append(obits.Obits, o)
 	}
 
-	obitsCount, err := s.GetObitsCountByTerm(ctx, term)
+	obitsCount, err := s.GetObitsCountByTerm(newTerm)
 	if err != nil {
 		return obits, err
 	}
@@ -154,23 +223,36 @@ func (s Service) Search(ctx context.Context, term string, offset uint) (Obits, e
 }
 
 // GetObitsCountByTerm returns total number of obits in database by given term
-func (s Service) GetObitsCountByTerm(ctx context.Context, term string) (uint, error) {
+func (s Service) GetObitsCountByTerm(term string) (uint, error) {
 	var cnt uint
+	var row *sql.Row
 
 	term = strings.ReplaceAll(term, ":", "")
 
-	const q = `
-		SELECT 
-			COUNT(*) AS cnt
-		FROM 
-		    gateway_view_fts AS gvf
-		JOIN 
-			gateway_view as gv ON gvf.rowid = gv.id
-		WHERE 
-		      gateway_view_fts MATCH ?
-	`
+	if term == "" {
+		const q = `
+			SELECT 
+				COUNT(*) AS cnt
+			FROM 
+				gateway_view
+		`
 
-	row := s.db.QueryRow(q, term)
+		row = s.db.QueryRow(q, term)
+	} else {
+		const q = `
+			SELECT 
+				COUNT(*) AS cnt
+			FROM 
+				gateway_view_fts AS gvf
+			JOIN 
+				gateway_view as gv ON gvf.rowid = gv.id
+			WHERE 
+				  gateway_view_fts MATCH ?
+		`
+
+		row = s.db.QueryRow(q, term)
+	}
+
 	if err := row.Scan(&cnt); err != nil {
 		return cnt, err
 	}

@@ -1,7 +1,6 @@
 package search
 
 import (
-	"context"
 	"github.com/obada-foundation/node/business/tests"
 	"testing"
 )
@@ -104,10 +103,46 @@ func (os ServiceTests) search(t *testing.T) {
 				currentPage: 2,
 			},
 		},
+		{
+			args: searchTestCasesArgs{
+				term:   "",
+				offset: 0,
+			},
+			want: searchTestCasesWant{
+				count:       50,
+				total:       150,
+				lastPage:    3,
+				currentPage: 1,
+			},
+		},
+		{
+			args: searchTestCasesArgs{
+				term:   ";",
+				offset: 0,
+			},
+			want: searchTestCasesWant{
+				count:       50,
+				total:       150,
+				lastPage:    3,
+				currentPage: 1,
+			},
+		},
+		{
+			args: searchTestCasesArgs{
+				term:   "'",
+				offset: 0,
+			},
+			want: searchTestCasesWant{
+				count:       50,
+				total:       150,
+				lastPage:    3,
+				currentPage: 1,
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		got, err := os.service.Search(context.Background(), tc.args.term, tc.args.offset)
+		got, err := os.service.Search(tc.args.term, tc.args.offset)
 
 		if err != nil {
 			t.Fatalf("service.Search(%q, %d) Error = %s", tc.args.term, tc.args.offset, err)

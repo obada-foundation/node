@@ -101,6 +101,7 @@ func (s Service) sqliteMigrate() error {
 			fts5(
 				content=gateway_view, 
 				content_rowid=id,
+				tokenize="unicode61 tokenchars ';'",
 				obit_did, 
 				usn, 
 				serial_number_hash, 
