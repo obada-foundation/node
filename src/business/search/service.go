@@ -122,17 +122,15 @@ func (s Service) searchFullText(term string, offset uint) (*sql.Rows, error) {
 	return rows, nil
 }
 
-// Search looking for obits by given term
+// Search obits by given search term
 func (s Service) Search(term string, offset uint) (Obits, error) {
 	var obits Obits
 
 	var rows *sql.Rows
 
-	regexp, err := regexp.Compile("[^A-Za-z0-9]+")
-	if err != nil {
-		log.Fatal(err)
-	}
-	newTerm := regexp.ReplaceAllString(term, "")
+	re := regexp.MustCompile("[^A-Za-z0-9]+")
+
+	newTerm := re.ReplaceAllString(term, "")
 
 	if len(newTerm) > 0 {
 		ftsRows, err := s.searchFullText(newTerm, offset)
