@@ -96,7 +96,6 @@ deploy-node-api-libraries: generate-node-api-library generate-node-api-library-c
 			BRANCH=(`git branch`) ; \
 			git push origin $(BRANCH) ; \
 		fi ; \
-
 		cd .. ; \
 	done
 
