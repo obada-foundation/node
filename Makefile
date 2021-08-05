@@ -95,7 +95,7 @@ deploy-node-api-libraries: generate-node-api-library generate-node-api-library-c
 			git commit -m 'OpenApi contract update'; \
 			BRANCH=(`git branch`) ; \
 			git push origin $(BRANCH) ; \
-		fi
+		fi \
 
 		cd .. ; \
 	done
