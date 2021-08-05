@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"regexp"
-	"strings"
 )
 
 const perPage = 50
@@ -226,8 +225,6 @@ func (s Service) Search(term string, offset uint) (Obits, error) {
 func (s Service) GetObitsCountByTerm(term string) (uint, error) {
 	var cnt uint
 	var row *sql.Row
-
-	term = strings.ReplaceAll(term, ":", "")
 
 	if term == "" {
 		const q = `
