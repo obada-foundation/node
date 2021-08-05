@@ -31,6 +31,6 @@ UnprocessableEntity:
             default: serial_number
           error:
             type: string
-            default: serial_number is a required field
+            default: serial_number is required field
 
 

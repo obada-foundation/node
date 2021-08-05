@@ -21,7 +21,7 @@ tags:
 paths:
   /obit/checksum:
     post:
-      summary: Generates the obit checksum.
+      summary: Generates obit checksum.
       description: ''
       operationId: checksum
       tags:
