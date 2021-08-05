@@ -150,6 +150,39 @@ func (s Service) Search(term string, offset uint) (Obits, error) {
 		rows = genRows
 	}
 
+	return rows, nil
+}
+
+// Search looking for obits by given term
+func (s Service) Search(term string, offset uint) (Obits, error) {
+	var obits Obits
+
+	var rows *sql.Rows
+
+	regexp, err := regexp.Compile("[^A-Za-z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	newTerm := regexp.ReplaceAllString(term, "")
+
+	if len(newTerm) > 0 {
+		ftsRows, err := s.searchFullText(newTerm, offset)
+
+		if err != nil {
+			return obits, err
+		}
+
+		rows = ftsRows
+	} else {
+		genRows, err := s.GetAll(offset)
+
+		if err != nil {
+			return obits, err
+		}
+
+		rows = genRows
+	}
+
 	defer rows.Close()
 
 	for rows.Next() {
