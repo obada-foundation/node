@@ -84,7 +84,7 @@ github.com/leodido/go-urn
 # github.com/mattn/go-sqlite3 v1.14.7
 ## explicit
 github.com/mattn/go-sqlite3
-# github.com/obada-foundation/sdkgo v0.0.0-20210727074552-1631df40550c
+# github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231
 ## explicit
 github.com/obada-foundation/sdkgo
 github.com/obada-foundation/sdkgo/base58

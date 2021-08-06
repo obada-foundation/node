@@ -44,8 +44,8 @@ github.com/mattn/go-sqlite3 v1.14.7 h1:fxWBnXkxfM6sRiuH3bqJ4CfzZojMOLVc0UTsTglEg
 github.com/mattn/go-sqlite3 v1.14.7/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/obada-foundation/sdkgo v0.0.0-20210727074552-1631df40550c h1:+BCgSTPLWwbubDvTAkux+zseRPiQX7T+3GYpalGH+H0=
-github.com/obada-foundation/sdkgo v0.0.0-20210727074552-1631df40550c/go.mod h1:fI8afjsA9m4GP3N8+tFeKKPXGgw/d5mj0rUUPAUzpv8=
+github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231 h1:dkI6bT9nKvVmSa8yzRrlj8NkcwuYLnpw4LJNKYUVLfo=
+github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231/go.mod h1:fI8afjsA9m4GP3N8+tFeKKPXGgw/d5mj0rUUPAUzpv8=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

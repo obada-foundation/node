@@ -280,7 +280,10 @@ func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
 	o.ModifiedOn = obit.GetModifiedOn().GetValue()
 
 	o.Status = obit.GetStatus().GetValue()
-	checksum, err := obit.GetRootHash(nil)
+
+	// Parent Obit lookup...
+
+	checksum, err := obit.GetChecksum(nil)
 
 	if err != nil {
 		return o, err
@@ -657,7 +660,7 @@ func (s Service) Checksum(dto sdkgo.ObitDto) (string, error) {
 		return "", err
 	}
 
-	h, err := o.GetRootHash(nil)
+	h, err := o.GetChecksum(nil)
 
 	if err != nil {
 		return "", err

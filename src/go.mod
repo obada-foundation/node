@@ -14,6 +14,6 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
-	github.com/obada-foundation/sdkgo v0.0.0-20210727074552-1631df40550c
+	github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231
 	github.com/pkg/errors v0.9.1
 )
