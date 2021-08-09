@@ -10,6 +10,7 @@ import (
 	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/business/types"
 	"github.com/obada-foundation/sdkgo"
+	"github.com/obada-foundation/sdkgo/hash"
 	"github.com/obada-foundation/sdkgo/properties"
 	"github.com/pkg/errors"
 	"log"
@@ -173,7 +174,10 @@ func (s Service) createSQL(obit types.QLDBObit) error {
 
 func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		o, err := NewQLDBObit(obit)
+
+		h, _ := hash.NewHash([]byte(""), nil, false)
+
+		o, err := NewQLDBObit(obit, &h)
 
 		if err != nil {
 			return nil, err
@@ -235,7 +239,7 @@ func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 }
 
 // NewQLDBObit creates a new QLDB obit
-func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
+func NewQLDBObit(obit sdkgo.Obit, parentChecksum *hash.Hash) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
 	obitID := obit.GetObitID()
@@ -278,12 +282,9 @@ func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
 
 	o.Documents = docs
 	o.ModifiedOn = obit.GetModifiedOn().GetValue()
-
 	o.Status = obit.GetStatus().GetValue()
 
-	// Parent Obit lookup...
-
-	checksum, err := obit.GetChecksum(nil)
+	checksum, err := obit.GetChecksum(parentChecksum)
 
 	if err != nil {
 		return o, err
@@ -292,6 +293,18 @@ func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
 	o.Checksum = checksum.GetHash()
 
 	return o, nil
+}
+
+func (s Service) getParentObit(ctx context.Context, ObitDID string) (*sdkgo.Obit, *types.QLDBObit, error) {
+	_, err := s.Get(ctx, ObitDID)
+
+	_, err = s.History(ctx, ObitDID)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return nil, nil, err
 }
 
 func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
@@ -307,6 +320,41 @@ func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
 	s.logger.Printf("obit :: Published update to the network received corresponding id %q", id)
 
 	return nil
+}
+
+func (s Service) findByDID(ctx context.Context, DID string) (*types.QLDBObit, error) {
+	var o types.QLDBObit
+
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+
+		const q = "SELECT * FROM Obits WHERE DID = ?"
+
+		res, err := txn.Execute(q, DID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		hasNext := res.Next(txn)
+		if !hasNext && res.Err() != nil {
+			return nil, res.Err()
+		}
+
+		ionBinary := res.GetCurrentData()
+
+		err = ion.Unmarshal(ionBinary, &o)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
+
+	if err != nil {
+		return &o, err
+	}
+
+	return &o, nil
 }
 
 func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLDBObit, error) {
@@ -346,7 +394,7 @@ func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLD
 
 func (s Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		o, err := NewQLDBObit(obit)
+		o, err := NewQLDBObit(obit, nil)
 
 		if err != nil {
 			return nil, err

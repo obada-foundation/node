@@ -3,8 +3,6 @@ package web
 import (
 	"context"
 	"net/http"
-	"os"
-	"syscall"
 	"time"
 
 	"github.com/dimfeld/httptreemux/v5"
@@ -29,15 +27,13 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 // App web application
 type App struct {
 	mux      *httptreemux.ContextMux
-	shutdown chan os.Signal
 	mw       []Middleware
 }
 
 // NewApp creates a new application
-func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
+func NewApp(mw ...Middleware) *App {
 	app := App{
 		mux:      httptreemux.NewContextMux(),
-		shutdown: shutdown,
 		mw:       mw,
 	}
 
@@ -69,19 +65,12 @@ func (a *App) Handle(method, path string, handler Handler, mw ...Middleware) {
 
 		// Call the wrapped handler functions.
 		if err := handler(ctx, w, r); err != nil {
-			a.SignalShutdown()
 			return
 		}
 	}
 
 	// Add this handler for the specified verb and route.
 	a.mux.Handle(method, path, h)
-}
-
-// SignalShutdown is used to gracefully shutdown the app when an integrity
-// issue is identified.
-func (a *App) SignalShutdown() {
-	a.shutdown <- syscall.SIGTERM
 }
 
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {

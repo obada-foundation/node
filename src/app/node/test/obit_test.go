@@ -84,7 +84,7 @@ func (obs ObitTests) generateID200(t *testing.T) {
 		t.Errorf("Handler() Content-Type = %q; want %q", contentType, wantContentType)
 	}
 
-	var DID struct{
+	var DID struct {
 		DID string `json:"did"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&DID); err != nil {
