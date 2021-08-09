@@ -2,18 +2,18 @@ package rest
 
 import (
 	"encoding/json"
-	"github.com/obada-foundation/node/app/node/handlers"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+	"testing"
+
 	obitService "github.com/obada-foundation/node/business/obit"
 	searchService "github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/business/tests"
 	"github.com/obada-foundation/node/business/types"
 	"github.com/obada-foundation/sdkgo"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strings"
-	"testing"
 )
 
 // ObitTests holds methods for each obit subtest. This type allows
@@ -42,6 +42,8 @@ func TestAPI(t *testing.T) {
 
 	r := Rest{
 		Logger: test.Logger,
+		SearchService: ss,
+		ObitService: obs,
 	}
 
 	ts := ObitTests{

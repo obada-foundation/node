@@ -72,7 +72,6 @@ func prepServerApp(t *testing.T, fn func(o RunCommand) RunCommand) (*serverApp, 
 	logger := log.New(os.Stdout, "NODE-TEST ", 0)
 	cmd.SetCommon(CommonOpts{Logger: logger})
 
-
 	// prepare options
 	p := flags.NewParser(&cmd, flags.Default)
 	_, err := p.ParseArgs([]string{})

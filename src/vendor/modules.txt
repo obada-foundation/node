@@ -1,13 +1,10 @@
-# github.com/amzn/ion-go v1.1.2
+# github.com/amzn/ion-go v1.1.3
 ## explicit
 github.com/amzn/ion-go/ion
 # github.com/amzn/ion-hash-go v1.1.1
 github.com/amzn/ion-hash-go
 github.com/amzn/ion-hash-go/internal
-# github.com/ardanlabs/conf v1.4.0
-## explicit
-github.com/ardanlabs/conf
-# github.com/aws/aws-sdk-go v1.39.0
+# github.com/aws/aws-sdk-go v1.40.18
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/awserr
@@ -61,22 +58,19 @@ github.com/davecgh/go-spew/spew
 # github.com/dimfeld/httptreemux/v5 v5.3.0
 ## explicit
 github.com/dimfeld/httptreemux/v5
-# github.com/go-chi/chi/v5 v5.0.3
-## explicit
-github.com/go-chi/chi/v5
-# github.com/go-playground/locales v0.13.0
+# github.com/go-playground/locales v0.14.0
 ## explicit
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
 github.com/go-playground/locales/en
-# github.com/go-playground/universal-translator v0.17.0
+# github.com/go-playground/universal-translator v0.18.0
 ## explicit
 github.com/go-playground/universal-translator
-# github.com/go-playground/validator/v10 v10.6.1
+# github.com/go-playground/validator/v10 v10.9.0
 ## explicit
 github.com/go-playground/validator/v10
 github.com/go-playground/validator/v10/translations/en
-# github.com/google/uuid v1.2.0
+# github.com/google/uuid v1.3.0
 ## explicit
 github.com/google/uuid
 # github.com/jessevdk/go-flags v1.5.0
@@ -85,9 +79,8 @@ github.com/jessevdk/go-flags
 # github.com/jmespath/go-jmespath v0.4.0
 github.com/jmespath/go-jmespath
 # github.com/leodido/go-urn v1.2.1
-## explicit
 github.com/leodido/go-urn
-# github.com/mattn/go-sqlite3 v1.14.7
+# github.com/mattn/go-sqlite3 v1.14.8
 ## explicit
 github.com/mattn/go-sqlite3
 # github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231
@@ -101,24 +94,24 @@ github.com/obada-foundation/sdkgo/properties
 github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/stretchr/testify v1.6.1
+# github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de
+# golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 golang.org/x/crypto/blake2b
 golang.org/x/crypto/blake2s
 golang.org/x/crypto/md4
 golang.org/x/crypto/ripemd160
 golang.org/x/crypto/sha3
-# golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4
+# golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.3
+# golang.org/x/text v0.3.6
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
 golang.org/x/text/language
-# gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
+# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
