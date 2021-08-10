@@ -363,6 +363,7 @@ func (s Service) findByDID(ctx context.Context, did string) (types.QLDBObit, err
 	return o, nil
 }
 
+//nolint:unused // Needs to be implemented
 func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
