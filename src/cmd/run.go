@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -17,6 +18,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 
+	pubsub "github.com/obada-foundation/node/business/pubsub/aws"
 	"github.com/obada-foundation/node/business/obit"
 	searchService "github.com/obada-foundation/node/business/search"
 	"github.com/obada-foundation/node/rest"
@@ -31,12 +33,14 @@ type RunCommand struct {
 	SSL  SSLGroup     `group:"ssl" namespace:"ssl" env-namespace:"SSL"`
 	SQL  SQL          `group:"sql" namespace:"sql" env-namespace:"SQL"`
 
+	PubSub PubSubGroup `group:"pubsub" namespace:"pubsub" env-namespace:"PUBSUB"`
+
 	CommonOpts
 }
 
 // SQL defines options for SQLite
 type SQL struct {
-	SqlitePath string `long:"sql-path " default:"obada.db" description:"path to SQLite database"`
+	SqlitePath string `long:"path" default:"obada.db" description:"path to SQLite database"`
 }
 
 // RestAPIGroup defines options group for REST API params
@@ -65,6 +69,13 @@ type AWSGroup struct {
 // QLDBGroup defines options for QLDB database
 type QLDBGroup struct {
 	Database string `long:"database" description:"QLDB database name" default:"obada"`
+}
+
+// PubSubGroup defines options sync changes over AWS SNS/SQS
+type PubSubGroup struct {
+	Timeout  time.Duration `long:"timeout" description:"pubsub timeout" default:"5s"`
+	QueueURL string        `long:"queue-url" default:"https://sqs.us-east-1.amazonaws.com/271164744603/obada-tradeloop.fifo"`
+	TopicArn string        `long:"topic-arn" default:"arn:aws:sns:us-east-1:271164744603:obada.fifo"`
 }
 
 type serverApp struct {
@@ -100,8 +111,6 @@ func (rc *RunCommand) Execute(_ []string) error {
 }
 
 func (rc *RunCommand) newServerApp() (*serverApp, error) {
-	rc.Logger.Printf("BBBBB %s", rc.NodeURL)
-
 	if !strings.HasPrefix(rc.NodeURL, "http://") && !strings.HasPrefix(rc.NodeURL, "https://") {
 		return nil, errors.Errorf("invalid Node API url %s", rc.NodeURL)
 	}
@@ -147,8 +156,10 @@ func (rc *RunCommand) newServerApp() (*serverApp, error) {
 	// Initialize SearchService
 	search := searchService.NewService(rc.Logger, db)
 
+	ps := pubsub.NewClient(awsSession, rc.PubSub.Timeout, rc.PubSub.QueueURL, rc.PubSub.TopicArn)
+
 	// Initialize ObitService
-	obitService := obit.NewObitService(sdk, rc.Logger, db, qldb, nil)
+	obitService := obit.NewObitService(sdk, rc.Logger, db, qldb, ps)
 
 	srv := &rest.Rest{
 		Version:   rc.Version,
@@ -209,6 +220,15 @@ func (a *serverApp) run(ctx context.Context) error {
 		a.qldb.Shutdown(ctx)
 
 		a.restSrv.Shutdown()
+	}()
+
+	// Start database sync
+	go func() {
+		for {
+			if err := a.restSrv.ObitService.Sync(ctx); err != nil {
+				a.Logger.Println(err)
+			}
+		}
 	}()
 
 	a.restSrv.Run(a.API.Address, a.API.Port)

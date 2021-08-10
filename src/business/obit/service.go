@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/amzn/ion-go/ion"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/node/business/pubsub"
@@ -327,12 +328,12 @@ func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
 }
 
 //nolint:unused // Required for future use
-func (s Service) findByDID(ctx context.Context, did string) (*types.QLDBObit, error) {
+func (s Service) findByDID(ctx context.Context, did string) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 
-		const q = "SELECT * FROM Obits WHERE DID = ?"
+		const q = "SELECT * FROM Obits WHERE ObitDID = ?"
 
 		res, err := txn.Execute(q, did)
 
@@ -356,10 +357,10 @@ func (s Service) findByDID(ctx context.Context, did string) (*types.QLDBObit, er
 	})
 
 	if err != nil {
-		return &o, err
+		return o, err
 	}
 
-	return &o, nil
+	return o, nil
 }
 
 func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLDBObit, error) {
@@ -384,7 +385,7 @@ func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLD
 
 		err = ion.Unmarshal(ionBinary, &o)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, fmt.Sprintf("cannot unmarshal ion data given by checksum %s", checksum))
 		}
 
 		return nil, nil
@@ -447,7 +448,8 @@ func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, e
 	o, err = s.Get(ctx, DID)
 
 	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
+		// factor this!
+		if err.Error() != "not found" {
 			return o, err
 		}
 
@@ -668,7 +670,9 @@ func (s Service) Sync(ctx context.Context) error {
 		return er
 	}
 
-	o, err := s.findByChecksum(ctx, msg.Checksum)
+	s.logger.Printf("incoming msg %+v", msg)
+
+	o, err := s.findByDID(ctx, msg.DID)
 
 	if err != nil {
 		return err

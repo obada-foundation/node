@@ -74,6 +74,8 @@ func (r *Rest) makeHTTPSAutocertServer(address string, port int, router http.Han
 }
 
 func (r *Rest) makeAutocertManager() *autocert.Manager {
+	r.Logger.Printf("ACME Host %+v", r.getNodeHost())
+
 	return &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		Cache:      autocert.DirCache(r.SSLConfig.ACMELocation),

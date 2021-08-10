@@ -69,7 +69,6 @@ func (r *Rest) Run(address string, port int) {
 		m := r.makeAutocertManager()
 		r.lock.Lock()
 		r.httpsServer = r.makeHTTPSAutocertServer(address, r.SSLConfig.Port, r.router(), m)
-
 		r.httpServer = r.makeHTTPServer(address, port, r.httpChallengeRouter(m))
 
 		r.lock.Unlock()
