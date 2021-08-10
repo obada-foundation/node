@@ -295,10 +295,14 @@ func NewQLDBObit(obit sdkgo.Obit, parentChecksum *hash.Hash) (types.QLDBObit, er
 	return o, nil
 }
 
-func (s Service) getParentObit(ctx context.Context, ObitDID string) (*sdkgo.Obit, *types.QLDBObit, error) {
-	_, err := s.Get(ctx, ObitDID)
+//nolint:unused,unparam // Needs to be implemented
+func (s Service) getParentObit(ctx context.Context, obitDID string) (*sdkgo.Obit, *types.QLDBObit, error) {
+	_, err := s.Get(ctx, obitDID)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	_, err = s.History(ctx, ObitDID)
+	_, err = s.History(ctx, obitDID)
 
 	if err != nil {
 		return nil, nil, err
@@ -322,14 +326,15 @@ func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
 	return nil
 }
 
-func (s Service) findByDID(ctx context.Context, DID string) (*types.QLDBObit, error) {
+//nolint:unused // Required for future use
+func (s Service) findByDID(ctx context.Context, did string) (*types.QLDBObit, error) {
 	var o types.QLDBObit
 
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 
 		const q = "SELECT * FROM Obits WHERE DID = ?"
 
-		res, err := txn.Execute(q, DID)
+		res, err := txn.Execute(q, did)
 
 		if err != nil {
 			return nil, err

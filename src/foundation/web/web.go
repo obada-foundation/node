@@ -26,15 +26,15 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 
 // App web application
 type App struct {
-	mux      *httptreemux.ContextMux
-	mw       []Middleware
+	mux *httptreemux.ContextMux
+	mw  []Middleware
 }
 
 // NewApp creates a new application
 func NewApp(mw ...Middleware) *App {
 	app := App{
-		mux:      httptreemux.NewContextMux(),
-		mw:       mw,
+		mux: httptreemux.NewContextMux(),
+		mw:  mw,
 	}
 
 	return &app

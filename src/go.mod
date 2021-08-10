@@ -16,4 +16,5 @@ require (
 	github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
+	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 )

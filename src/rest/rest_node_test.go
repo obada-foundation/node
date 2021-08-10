@@ -41,9 +41,9 @@ func TestAPI(t *testing.T) {
 	ss := searchService.NewService(test.Logger, test.DB)
 
 	r := Rest{
-		Logger: test.Logger,
+		Logger:        test.Logger,
 		SearchService: ss,
-		ObitService: obs,
+		ObitService:   obs,
 	}
 
 	ts := ObitTests{

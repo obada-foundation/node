@@ -5,8 +5,7 @@ import (
 	"net/http"
 )
 
-type util struct {}
-
+type util struct{}
 
 func (u *util) ping(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "text/plain")

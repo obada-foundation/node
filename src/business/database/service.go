@@ -1,24 +1,20 @@
 package database
 
 import (
-	"context"
 	"database/sql"
-	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"log"
 )
 
 // Service temp struct to handle dependencies
 type Service struct {
 	db     *sql.DB
-	qldb   *qldbdriver.QLDBDriver
 	logger *log.Logger
 }
 
 // NewService creates database service
-func NewService(db *sql.DB, qldb *qldbdriver.QLDBDriver, logger *log.Logger) Service {
+func NewService(db *sql.DB, logger *log.Logger) Service {
 	return Service{
 		db:     db,
-		qldb:   qldb,
 		logger: logger,
 	}
 }
@@ -43,31 +39,6 @@ func (s Service) IsFirstRun() (bool, error) {
 	}
 
 	return cnt == 0, nil
-}
-
-// Migrate attempts to bring the schema for qldb up to date with the migrations
-// defined in this package.
-//nolint:unused // Need this code for a future use
-func (s Service) qldbMigrate() error {
-	s.logger.Println("Running QLDB migrations")
-
-	_, err := s.qldb.Execute(context.Background(), func(txn qldbdriver.Transaction) (interface{}, error) {
-		_, err := txn.Execute("CREATE TABLE Obits")
-		if err != nil {
-			return nil, err
-		}
-
-		// When working with QLDB, it's recommended to create an index on fields we're filtering on.
-		// This reduces the chance of OCC conflicts exceptions with large datasets.
-		_, err = txn.Execute("CREATE INDEX ON Obits (ObitDID)")
-		if err != nil {
-			return nil, err
-		}
-
-		return nil, nil
-	})
-
-	return err
 }
 
 // Migrate attempts to bring the schema for sqlite up to date with the migrations

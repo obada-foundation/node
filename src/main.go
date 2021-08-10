@@ -11,7 +11,10 @@ import (
 
 // Opts with all cli commands and flags
 type Opts struct {
-	RunCommand cmd.RunCommand `command:"run"`
+	InitCommand cmd.InitCommand `command:"init"`
+	RunCommand  cmd.RunCommand  `command:"run"`
+
+	NodeURL    string `long:"url" env:"NODE_URL" required:"true" description:"url to OBADA API Node"`
 }
 
 var version = "undefined"
@@ -28,7 +31,8 @@ func main() {
 
 		c.SetCommon(cmd.CommonOpts{
 			Version: version,
-			Logger: logger,
+			Logger:  logger,
+			NodeURL: opts.NodeURL,
 		})
 
 		err := c.Execute(args)
