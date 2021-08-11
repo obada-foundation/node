@@ -1,7 +1,7 @@
 PROJECT = obada/node
 COMMIT_BRANCH ?= develop
 IMAGE = $(PROJECT):$(COMMIT_BRANCH)
-RELEASE_IMAGE = $(PROJECT):master
+RELEASE_IMAGE = $(PROJECT):latest
 TAG_IMAGE = $(PROJECT):$(COMMIT_TAG)
 
 SHELL := /bin/bash

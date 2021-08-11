@@ -18,7 +18,7 @@ RUN \
     version="${ref}"-$(git log -1 --format=%h)-$(date +%Y%m%dT%H:%M:%S) && \
     export GOFLAGS="-mod=vendor" && \
     export CGO_ENABLED=1 && \
-    GOOS=linux GOARCH=amd64 go build -o node.linux-amd64 -ldflags '-X main.version=${version} -s -w -extldflags "-static"' . && \
+    GOOS=linux GOARCH=amd64 go build -o node.linux-amd64 -ldflags "-X main.version=${version} -s -w -extldflags \"-static\"" . && \
     CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o node.windows-amd64.exe -ldflags '-X main.version=${version} -s -w -extldflags "-static"' .
 
 RUN \
