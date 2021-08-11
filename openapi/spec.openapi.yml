@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 servers:
   - description: OBADA Production API
-    url: http://obs.node.obada.io
+    url: https://obs.node.obada.io
   - description: OBADA Staging API
     url: https://dev.node.obada.io
 
@@ -169,6 +169,12 @@ components:
       $ref: "definitions/Obit.yml#/ObitHistory"
 
   responses:
+    SaveObitResponse:
+      description: Save Obit response
+      content:
+        application/json:
+          schema:
+            $ref: "definitions/Obit.yml#/ObitDID"
     ObitDIDResponse:
       description: Obit DID response
       content:
