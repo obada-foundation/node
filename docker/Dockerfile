@@ -19,6 +19,7 @@ ENV QLDB_DATABASE="obada"
 ENV AWS_REGION="us-east-1"
 ENV AWS_KEY=""
 ENV AWS_SECRET=""
+ENV NODE_URL="http://localhost"
 
 RUN apk --no-cache add ca-certificates
 
@@ -31,4 +32,4 @@ COPY --from=builder /app/node .
 EXPOSE 3000
 
 # Command to run the executable
-CMD ["./node run --url"]
+CMD ["./node", "run"]
