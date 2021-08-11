@@ -26,7 +26,7 @@ OBADA Node distributed as a small self-contained binary as well as a docker imag
 - for a binary distribution download the proper file in the [release section](https://github.com/obada-foundation/node/releases)
 - docker container available on [Docker Hub](https://hub.docker.com/r/obada/node). I.e. `docker pull obada/node`.
 
-See more details about installation options in [INSTALL.md](https://github.com/obada-foundation/node/INSTALL.md)
+See more details about installation options in [INSTALL.md](https://github.com/obada-foundation/node/blob/master/INSTALL.md)
 
 ## Default ports
 
