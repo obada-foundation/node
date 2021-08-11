@@ -71,6 +71,7 @@ Obit:
       description: Client generated things. First hash + last hash
       items:
         type: string
+        example: "did:obada:owner:123456"
     owner_did:
       type: string
       description: Owner is the person/entity that owns the obit and the physical asset it represents. Format is a DID like did:obada:owner:1234. However in the current version only test numbers will be used.
@@ -105,12 +106,6 @@ Obit:
       description: Get description from Rohi
       items:
         $ref: '#/MetaDataRecord'
-    documents:
-      description: >
-        To generate this link, take an SHA-256 hash of the document, and link to it as https://www.some-website.com?h1=hash-of-document. Note this does not yet adhere to the hashlink standard.
-      type: array
-      items:
-        $ref: '#/DocumentLink'
     structured_data:
       type: array
       description: Same as metadata but bigger. Key (string) => Value (string) (hash per line sha256(key + value))

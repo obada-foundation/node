@@ -73,7 +73,7 @@ paths:
               $ref: '#/components/schemas/Obit'
       responses:
         "200":
-          $ref: "#/components/schemas/Obit"
+          $ref: "#/components/responses/SaveObitResponse"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
@@ -174,7 +174,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "definitions/Obit.yml#/ObitDID"
+            $ref: "definitions/Obit.yml#/Obit"
     ObitDIDResponse:
       description: Obit DID response
       content:
