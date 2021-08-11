@@ -10,7 +10,7 @@ WORKDIR /app
 COPY src/ .
 
 # Build the Go app
-RUN CGO_ENABLED=1 GOOS=linux go build -ldflags '-extldflags "-static"' --tags "json1 fts5 secure_delete" -a -o main app/node/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -ldflags '-extldflags "-static"' --tags "json1 fts5 secure_delete" -a -o node main.go
 
 ######## Start a new stage from scratch #######
 FROM alpine:latest
@@ -19,16 +19,17 @@ ENV QLDB_DATABASE="obada"
 ENV AWS_REGION="us-east-1"
 ENV AWS_KEY=""
 ENV AWS_SECRET=""
+ENV NODE_URL="http://localhost"
 
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
-COPY --from=builder /app/main .
+COPY --from=builder /app/node .
 
 # Expose port 3000 to the outside world
 EXPOSE 3000
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["./node", "run"]

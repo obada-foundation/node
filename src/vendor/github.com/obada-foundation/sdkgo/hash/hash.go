@@ -45,6 +45,24 @@ func NewHash(value []byte, logger *log.Logger, debug bool) (Hash, error) {
 	return hash, nil
 }
 
+// NewHashFromString creates Hash type from the hash string
+func NewHashFromString(strHash string, logger *log.Logger, debug bool) (Hash, error) {
+	var hash Hash
+	var debugStr string
+
+	hashDec, err := hashToDec(strHash, logger, debug)
+
+	if err != nil {
+		logger.Println(debugStr)
+		return hash, err
+	}
+
+	hash.hash = strHash
+	hash.dec = hashDec
+
+	return hash, nil
+}
+
 // hashToDec convert hash which is hex string into decimal
 func hashToDec(hash string, logger *log.Logger, debug bool) (uint64, error) {
 	match, err := regexp.MatchString(`^[0-9a-fA-F]+$`, hash)

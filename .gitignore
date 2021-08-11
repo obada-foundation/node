@@ -3,7 +3,7 @@ php-api-client
 javascript-api-client
 docker-compose.yml
 *.db
-src/app/node/node
+src/node
 node-api-library
 node-api-library*
 coverage.out

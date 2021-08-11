@@ -11,7 +11,7 @@ import (
 
 type testCase struct {
 	args args
-	want ID
+	want string
 }
 
 type args struct {
@@ -56,10 +56,7 @@ func (st ServiceTests) generateID(t *testing.T) {
 				manufacturer:     "manufacturer",
 				partNumber:       "part number",
 			},
-			want: ID{
-				ID:  "bb00c8da8424d0af25cbef87968f3784bc829671ff208c5dc9505ab2976a369f",
-				DID: "did:obada:bb00c8da8424d0af25cbef87968f3784bc829671ff208c5dc9505ab2976a369f",
-			},
+			want: "did:obada:bb00c8da8424d0af25cbef87968f3784bc829671ff208c5dc9505ab2976a369f",
 		},
 		{
 			args: args{
@@ -67,17 +64,14 @@ func (st ServiceTests) generateID(t *testing.T) {
 				manufacturer:     "SONY",
 				partNumber:       "PN123456S",
 			},
-			want: ID{
-				ID:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
-				DID: "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
-			},
+			want: "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 		},
 	}
 
 	for _, tc := range testCases {
 		args := tc.args
 
-		got, err := st.service.GenerateID(args.serialNumberHash, args.manufacturer, args.partNumber)
+		got, err := st.service.GenerateDID(args.serialNumberHash, args.manufacturer, args.partNumber)
 
 		if err != nil {
 			t.Error(err.Error())
@@ -85,7 +79,7 @@ func (st ServiceTests) generateID(t *testing.T) {
 
 		if got != tc.want {
 			t.Errorf(
-				"service.GenerateID(%q, %q, %q) = %v+ want %v+",
+				"service.GenerateID(%q, %q, %q) = %s+ want %s+",
 				args.serialNumberHash, args.manufacturer, args.partNumber, got, tc.want,
 			)
 		}
@@ -133,16 +127,16 @@ func (st ServiceTests) get(t *testing.T) {
 		want types.QLDBObit
 	}{
 		{
-			arg: "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd", // Get by DID
+			arg: "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd", // Get by DID
 			want: types.QLDBObit{
-				ObitDID:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+				ObitDID:  "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 				Checksum: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
 			},
 		},
 		{
 			arg: "test", // Get by USN
 			want: types.QLDBObit{
-				ObitDID:  "d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+				ObitDID:  "did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 				Checksum: "2eb12c48ad2f073c49b95fcf2190cec40548c69fdc6f49135dee0753020f1624",
 			},
 		},

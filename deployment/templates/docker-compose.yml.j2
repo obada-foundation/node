@@ -1,43 +1,23 @@
 version: "3.7"
 
 services:
-  nginx:
-    image: umputun/nginx-le:latest
-    hostname: nginx
-    restart: always
-    container_name: nginx
-
-    logging:
-      driver: json-file
-      options:
-          max-size: "10m"
-          max-file: "5"
-
-    volumes:
-        - ./etc/ssl:/etc/nginx/ssl
-        - ./etc/nginx/service.conf:/etc/nginx/service.conf
-    ports:
-      - "80:80"
-      - "443:443"
-    networks:
-      - frontend
-
-    environment:
-      - TZ=America/Chicago
-      - LETSENCRYPT=true
-      - LE_EMAIL=techops@obada.io
-      - LE_FQDN={{ obada_member }}.node.obada.io
-
   node:
     image: obada/node:develop
     container_name: node
     restart: always
+    ports:
+      - "80:80"
+      - "443:443"
     environment:
-      - AWS_KEY={{ aws_key }}
-      - AWS_SECRET={{ aws_secret }}
+      - NODE_URL=https://{{ obada_member }}.node.obada.io
       - PUBSUB_QUEUE_URL={{ sqs_queue_url }}
+      - SSL_TYPE=auto
+      - SSL_ACME_EMAIL=techops@obada.io
+      - SSL_PORT=443
+    command: ./node run --aws.key={{ aws_key }} --aws.secret={{ aws_secret }} --api.port=80 --api.address=0.0.0.0
     volumes:
       - ./db/obada.db:/root/obada.db
+      - ./acme:/root/var/acme
     networks:
       - backend
       - frontend

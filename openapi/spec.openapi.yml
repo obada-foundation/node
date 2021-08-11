@@ -21,7 +21,7 @@ tags:
 paths:
   /obit/checksum:
     post:
-      summary: Generates obit checksum.
+      summary: Generates Obit checksum
       description: ''
       operationId: checksum
       tags:
@@ -39,21 +39,21 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
-  /obit/id:
+  /obit/did:
     post:
-      summary: Generate Obit ID
-      description: 'Returns the Obit ID for a given device_id, part_number and serial_number input.'
-      operationId: generateId
+      summary: Generate Obit DID
+      description: 'Returns the Obit DID for a given device_id, part_number and serial_number input.'
+      operationId: generateDID
       tags:
         - Obit
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestObitId'
+              $ref: '#/components/schemas/RequestObitDID'
       responses:
         "200":
-          $ref: "#/components/responses/ObitIdResponse"
+          $ref: "#/components/responses/ObitDIDResponse"
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         "500":
@@ -112,7 +112,7 @@ paths:
     parameters:
       - name: obit_did
         in: path
-        description: The given ObitDID argument
+        description: The given ObitDID or USN argument
         required: true
         schema:
           type: string
@@ -159,8 +159,8 @@ paths:
 
 components:
   schemas:
-    RequestObitId:
-      $ref: "definitions/Obit.yml#/RequestObitId"
+    RequestObitDID:
+      $ref: "definitions/Obit.yml#/RequestObitDID"
     Obits:
       $ref: "definitions/Obit.yml#/Obits"
     Obit:
@@ -169,12 +169,12 @@ components:
       $ref: "definitions/Obit.yml#/ObitHistory"
 
   responses:
-    ObitIdResponse:
-      description: Obit ID response
+    ObitDIDResponse:
+      description: Obit DID response
       content:
         application/json:
           schema:
-            $ref: "definitions/Obit.yml#/ObitId"
+            $ref: "definitions/Obit.yml#/ObitDID"
 
     ChecksumResponse:
       description: Obit checksum response

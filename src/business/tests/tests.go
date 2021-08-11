@@ -39,7 +39,7 @@ func NewUnit(t *testing.T) (*log.Logger, *sql.DB, func()) {
 
 	logger := log.New(os.Stdout, "", 0)
 
-	initService := dbInitService.NewService(db, nil, logger)
+	initService := dbInitService.NewService(db, logger)
 
 	isFirst, err := initService.IsFirstRun()
 	if err != nil {
@@ -118,7 +118,7 @@ func CreateObit(t *testing.T, test *Test) {
 	}
 
 	_, err = stmt.Exec(
-		"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
+		"did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ecd",
 		"test",
 		"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44d",
 		"SONY",
@@ -171,7 +171,7 @@ func CreateOwnerObits(t *testing.T, test *Test) {
 		}
 
 		_, err = stmt.Exec(
-			"d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ec"+fmt.Sprintf("%d", i),
+			"did:obada:d7cf869423d12f623f5611e48d6f6665bbc4a270b6e09da2f4c32bcb1b949ec"+fmt.Sprintf("%d", i),
 			"usn"+fmt.Sprintf("%d", i),
 			"cae6b797ae2627d96689fed03adc28311d5f2175253c3a0e375301e225ddf44"+fmt.Sprintf("%d", i),
 			"SONY",
