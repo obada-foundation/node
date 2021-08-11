@@ -109,7 +109,7 @@ lint-openapi-spec:
       wework/speccy lint /openapi/spec.openapi.yml
 
 run-node:
-	cd src/app/node && go run main.go
+	cd src && go run main.go
 
 export GOPRIVATE=github.com/obada-foundation
 vendor:

@@ -138,10 +138,11 @@ type Documents struct {
 	hash      hash.Hash
 }
 
-// NewDocumentCollection creates the collection of documents
-func NewDocumentCollection(description string, docs []Doc, logger *log.Logger, debug bool) (Documents, error) {
+// NewDocumentsCollection creates the collection of documents
+func NewDocumentsCollection(docs []Doc, logger *log.Logger, debug bool) (Documents, error) {
 	var ds Documents
 	var docDec uint64
+	description := "Making documents hash"
 
 	if debug {
 		logger.Printf("\n <|%s|> => NewDocumentCollection(%v)", description, docs)

@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/amzn/ion-go/ion"
 	"github.com/awslabs/amazon-qldb-driver-go/qldbdriver"
 	"github.com/obada-foundation/node/business/pubsub"
 	"github.com/obada-foundation/node/business/sys/validate"
 	"github.com/obada-foundation/node/business/types"
 	"github.com/obada-foundation/sdkgo"
+	"github.com/obada-foundation/sdkgo/hash"
 	"github.com/obada-foundation/sdkgo/properties"
 	"github.com/pkg/errors"
 	"log"
@@ -173,7 +175,8 @@ func (s Service) createSQL(obit types.QLDBObit) error {
 
 func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		o, err := NewQLDBObit(obit)
+
+		o, err := NewQLDBObit(obit, nil)
 
 		if err != nil {
 			return nil, err
@@ -235,7 +238,7 @@ func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 }
 
 // NewQLDBObit creates a new QLDB obit
-func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
+func NewQLDBObit(obit sdkgo.Obit, parentChecksum *hash.Hash) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
 	obitID := obit.GetObitID()
@@ -278,9 +281,9 @@ func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
 
 	o.Documents = docs
 	o.ModifiedOn = obit.GetModifiedOn().GetValue()
-
 	o.Status = obit.GetStatus().GetValue()
-	checksum, err := obit.GetRootHash(nil)
+
+	checksum, err := obit.GetChecksum(parentChecksum)
 
 	if err != nil {
 		return o, err
@@ -289,6 +292,22 @@ func NewQLDBObit(obit sdkgo.Obit) (types.QLDBObit, error) {
 	o.Checksum = checksum.GetHash()
 
 	return o, nil
+}
+
+//nolint:unused,unparam // Needs to be implemented
+func (s Service) getParentObit(ctx context.Context, obitDID string) (*sdkgo.Obit, *types.QLDBObit, error) {
+	_, err := s.Get(ctx, obitDID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	_, err = s.History(ctx, obitDID)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return nil, nil, err
 }
 
 func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
@@ -306,14 +325,15 @@ func (s Service) notify(ctx context.Context, obit types.QLDBObit) error {
 	return nil
 }
 
-func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLDBObit, error) {
+//nolint:unused // Required for future use
+func (s Service) findByDID(ctx context.Context, did string) (types.QLDBObit, error) {
 	var o types.QLDBObit
 
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 
-		const q = "SELECT * FROM Obits WHERE Checksum = ?"
+		const q = "SELECT * FROM Obits WHERE ObitDID = ?"
 
-		res, err := txn.Execute(q, checksum)
+		res, err := txn.Execute(q, did)
 
 		if err != nil {
 			return nil, err
@@ -341,9 +361,45 @@ func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLD
 	return o, nil
 }
 
+//nolint:unused // Needs to be implemented
+func (s Service) findByChecksum(ctx context.Context, checksum string) (types.QLDBObit, error) {
+	var o types.QLDBObit
+
+	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
+
+		const q = "SELECT * FROM Obits WHERE Checksum = ?"
+
+		res, err := txn.Execute(q, checksum)
+
+		if err != nil {
+			return nil, err
+		}
+
+		hasNext := res.Next(txn)
+		if !hasNext && res.Err() != nil {
+			return nil, res.Err()
+		}
+
+		ionBinary := res.GetCurrentData()
+
+		err = ion.Unmarshal(ionBinary, &o)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("cannot unmarshal ion data given by checksum %s", checksum))
+		}
+
+		return nil, nil
+	})
+
+	if err != nil {
+		return o, err
+	}
+
+	return o, nil
+}
+
 func (s Service) createQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
-		o, err := NewQLDBObit(obit)
+		o, err := NewQLDBObit(obit, nil)
 
 		if err != nil {
 			return nil, err
@@ -391,7 +447,8 @@ func (s Service) Save(ctx context.Context, dto sdkgo.ObitDto) (types.QLDBObit, e
 	o, err = s.Get(ctx, DID)
 
 	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
+		// factor this!
+		if err.Error() != "not found" {
 			return o, err
 		}
 
@@ -612,7 +669,9 @@ func (s Service) Sync(ctx context.Context) error {
 		return er
 	}
 
-	o, err := s.findByChecksum(ctx, msg.Checksum)
+	s.logger.Printf("incoming msg %+v", msg)
+
+	o, err := s.findByDID(ctx, msg.DID)
 
 	if err != nil {
 		return err
@@ -657,7 +716,7 @@ func (s Service) Checksum(dto sdkgo.ObitDto) (string, error) {
 		return "", err
 	}
 
-	h, err := o.GetRootHash(nil)
+	h, err := o.GetChecksum(nil)
 
 	if err != nil {
 		return "", err

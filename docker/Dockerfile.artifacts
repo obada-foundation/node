@@ -15,8 +15,8 @@ ADD .git/ /build/src/.git/
 RUN \
     export GOFLAGS="-mod=vendor" && \
     export CGO_ENABLED=1 && \
-    GOOS=linux GOARCH=amd64 go build -o node.linux-amd64 -ldflags '-X main.revision=develop -s -w -extldflags "-static"' ./app/node && \
-    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o node.windows-amd64.exe -ldflags '-X main.revision=develop -s -w -extldflags "-static"' ./app/node
+    GOOS=linux GOARCH=amd64 go build -o node.linux-amd64 -ldflags '-X main.revision=develop -s -w -extldflags "-static"' . && \
+    CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ GOOS=windows GOARCH=amd64 go build -o node.windows-amd64.exe -ldflags '-X main.revision=develop -s -w -extldflags "-static"' .
 
 RUN \
     apk add --no-cache --update zip && \

@@ -39,7 +39,7 @@ func NewUnit(t *testing.T) (*log.Logger, *sql.DB, func()) {
 
 	logger := log.New(os.Stdout, "", 0)
 
-	initService := dbInitService.NewService(db, nil, logger)
+	initService := dbInitService.NewService(db, logger)
 
 	isFirst, err := initService.IsFirstRun()
 	if err != nil {
