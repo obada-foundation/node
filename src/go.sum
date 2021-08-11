@@ -50,8 +50,8 @@ github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ic
 github.com/mattn/go-sqlite3 v1.14.8 h1:gDp86IdQsN/xWjIEmr9MF6o9mpksUgh0fu+9ByFxzIU=
 github.com/mattn/go-sqlite3 v1.14.8/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231 h1:dkI6bT9nKvVmSa8yzRrlj8NkcwuYLnpw4LJNKYUVLfo=
-github.com/obada-foundation/sdkgo v0.0.0-20210806134350-52114fd65231/go.mod h1:fI8afjsA9m4GP3N8+tFeKKPXGgw/d5mj0rUUPAUzpv8=
+github.com/obada-foundation/sdkgo v0.0.0-20210811083722-0010b037e351 h1:/WvDEW1kMq+x4mWUogDKKUeEOz+OBaB3eU7Q4shrH2E=
+github.com/obada-foundation/sdkgo v0.0.0-20210811083722-0010b037e351/go.mod h1:fI8afjsA9m4GP3N8+tFeKKPXGgw/d5mj0rUUPAUzpv8=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

@@ -176,9 +176,7 @@ func (s Service) createSQL(obit types.QLDBObit) error {
 func (s Service) updateQLDB(ctx context.Context, obit sdkgo.Obit) error {
 	_, err := s.qldb.Execute(ctx, func(txn qldbdriver.Transaction) (interface{}, error) {
 
-		h, _ := hash.NewHash([]byte(""), nil, false)
-
-		o, err := NewQLDBObit(obit, &h)
+		o, err := NewQLDBObit(obit, nil)
 
 		if err != nil {
 			return nil, err
